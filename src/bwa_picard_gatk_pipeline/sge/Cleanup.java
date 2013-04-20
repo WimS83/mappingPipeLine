@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwa_picard_gatk_pipeline;
+package bwa_picard_gatk_pipeline.sge;
 
 import java.io.IOException;
 import java.util.Arrays;

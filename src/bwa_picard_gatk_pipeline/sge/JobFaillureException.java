@@ -1,4 +1,4 @@
-package bwa_picard_gatk_pipeline;
+package bwa_picard_gatk_pipeline.sge;
 
 public class JobFaillureException extends Exception{
 	private static final long serialVersionUID = 1L;

@@ -2,8 +2,9 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwa_picard_gatk_pipeline;
+package bwa_picard_gatk_pipeline.sge;
 
+import bwa_picard_gatk_pipeline.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.FileTypeEnum;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
 import java.io.File;

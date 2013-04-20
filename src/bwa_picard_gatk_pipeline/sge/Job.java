@@ -1,4 +1,4 @@
-package bwa_picard_gatk_pipeline;
+package bwa_picard_gatk_pipeline.sge;
 
 import org.ggf.drmaa.DrmaaException;
 
