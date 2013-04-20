@@ -8,6 +8,7 @@ import java.io.File;
 import java.util.List;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -19,11 +20,16 @@ import static org.junit.Assert.*;
  */
 public class FastQFileTest {
     
+    private static final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
+    private static File outputDir;
+    
     public FastQFileTest() {
     }
     
     @BeforeClass
     public static void setUpClass() {
+        
+        Assert.assertTrue("Unable to create " + tmpDir.getAbsolutePath(), tmpDir.exists() || tmpDir.mkdirs());
     }
     
     @AfterClass
@@ -36,6 +42,11 @@ public class FastQFileTest {
     
     @After
     public void tearDown() {
+        
+        if(outputDir != null)
+        {
+            outputDir.delete();
+        }
     }   
 
    
@@ -62,11 +73,26 @@ public class FastQFileTest {
        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());  
        FastQFile fastQFileWrapper = new FastQFile(fastqFile);
        
-       fastQFileWrapper.splitFastQFile(new Long(500));
+       outputDir = new File(tmpDir, "tmpOutputDir");
+       outputDir.mkdir();
        
-       List<File> splitFastQfiles = fastQFileWrapper.getSplitFastQFiles();
+       fastQFileWrapper.countNumberOfrecords();          
        
-       assertTrue(splitFastQfiles.size() == 4)
+       fastQFileWrapper.splitFastQFile(new Long(500), outputDir);
+       
+       List<FastQFile> splitFastQfiles = fastQFileWrapper.getSplitFastQFiles();
+       
+       assertTrue(splitFastQfiles.size() == 4);
+       
+       long splitRecordsNr = new Long(0);
+       for(FastQFile fastQFile: splitFastQfiles)
+       {
+           splitRecordsNr = splitRecordsNr + fastQFile.countNumberOfrecords();
+       }
+       
+       assertTrue(fastQFileWrapper.getRecordNr() == splitRecordsNr);
+       
+       
         
     }
 

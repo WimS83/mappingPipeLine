@@ -91,10 +91,11 @@ public class CsFastaFilePairTest {
         CsFastaFilePair csFastaFilePair = new CsFastaFilePair();
         
         File csFastaFile = new File(getClass().getResource("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.csfasta").getFile());
-        csFastaFilePair.SetFilesBasedOnCsFastaFilePath(csFastaFile.getPath());
+        File converter = new File(getClass().getResource("csfastaToFastq").getFile());
+        csFastaFilePair.setCsFastaFile(csFastaFile);
+        csFastaFilePair.lookupQualFile();        
         
-        csFastaFilePair.setOutputdir(tmpDir);
-        fastqFile = csFastaFilePair.convertToFastQFile();
+        fastqFile = csFastaFilePair.convertToFastQFile(tmpDir, converter);
         
         
         

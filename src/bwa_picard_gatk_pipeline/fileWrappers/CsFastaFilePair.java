@@ -18,30 +18,24 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class CsFastaFilePair {
 
-    File csFastaFile;
-    File qualFile;
+    private File csFastaFile;
+    private File qualFile;
+      
+    private String baseName;
     
-    File outputDir;
-    
-    String baseName;
-    
-    long recordNr;
+    private long recordNr;
 
-    public void SetFilesBasedOnCsFastaFilePath(String csFastaFilePath) throws IOException {
-
-        csFastaFile = new File(csFastaFilePath);
+    public void lookupQualFile() throws IOException {
 
         if (!csFastaFile.exists()) {
-            throw new IOException("csFastaFile does not exist " + csFastaFilePath);
+            throw new IOException("csFastaFile does not exist " + csFastaFile.getPath());
         }
 
         File parentDir = csFastaFile.getParentFile();
-        baseName = FilenameUtils.getBaseName(csFastaFilePath);
+        baseName = FilenameUtils.getBaseName(csFastaFile.getPath());
         File baseNamePlusQual = new File(parentDir, baseName + ".qual");
         File baseNamePlus_QVQual = new File(parentDir, baseName + "_QV.qual");
         
-        outputDir = parentDir;
-
         if (baseNamePlusQual.exists()) {
             qualFile = baseNamePlusQual;
         }
@@ -54,6 +48,12 @@ public class CsFastaFilePair {
             throw new IOException("qual file does not exit in the location " + baseNamePlusQual.getPath() + " or " + baseNamePlus_QVQual.getPath());
         }
     }
+
+    public void setCsFastaFile(File csFastaFile) {
+        this.csFastaFile = csFastaFile;
+    }
+    
+    
 
     public void checkCsFastaAndQualContainEqualAmountOfRecords() throws IOException {
         
@@ -92,29 +92,13 @@ public class CsFastaFilePair {
     }
     
     
-    public FastQFile convertToFastQFile() throws IOException, InterruptedException
+    public FastQFile convertToFastQFile(File outputDir, File csFastaToFastqConverter) throws IOException, InterruptedException
     {
         checkCsFastaAndQualContainEqualAmountOfRecords();
         
-        String baseName = FilenameUtils.getBaseName(csFastaFile.getName());
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append("/home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq");
-        sb.append(" ");
-        sb.append("-f");
-        sb.append(" ");
-        sb.append(csFastaFile.getPath());
-        sb.append(" ");
-        sb.append("-q");
-        sb.append(" ");
-        sb.append(qualFile.getPath());
-        sb.append(" ");
-        sb.append("-e");
-        sb.append(" ");
-        sb.append(baseName);  
         
         List<String> commands = new ArrayList<String>();
-        commands.add("/home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq");
+        commands.add(csFastaToFastqConverter.getPath());
         commands.add("-f");
         commands.add(csFastaFile.getPath());        
         commands.add("-q");
@@ -132,8 +116,7 @@ public class CsFastaFilePair {
         
         if(!fastqFile.exists()){ throw new IOException("Cannot find fastq file " + fastqFile.getPath());} 
         
-        FastQFile fastQFileWrapper = new FastQFile(fastqFile);
-        fastQFileWrapper.setOutputDir(outputDir);
+        FastQFile fastQFileWrapper = new FastQFile(fastqFile);        
         fastQFileWrapper.countNumberOfrecords();
         
         if(fastQFileWrapper.getRecordNr() != recordNr)
@@ -145,14 +128,9 @@ public class CsFastaFilePair {
         return fastQFileWrapper; 
     }
     
-    public void setOutputdir(File outputDir)
-    {
-        this.outputDir = outputDir;
-    }
+    
 
-    public String getBaseName() {
-        return baseName;
-    }
+    
 
     public long getRecordNr() {
         return recordNr;

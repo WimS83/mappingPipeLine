@@ -22,12 +22,13 @@ public class FastQFile {
     long recordNr;
     File fastqFile;
     
-    File outputDir;
-    
+        
     List<FastQFile> splitFastQFiles;
 
     public FastQFile(File fastqFile) {
         this.fastqFile = fastqFile;
+        splitFastQFiles = new ArrayList<FastQFile>();
+        
     }    
     
 
@@ -43,9 +44,7 @@ public class FastQFile {
         return fastqFile;
     }
 
-    public void setFastqFile(File fastqFile) {
-        this.fastqFile = fastqFile;
-    }
+   
 
     public long countNumberOfrecords() {
         
@@ -69,7 +68,7 @@ public class FastQFile {
         return recordNr;               
     }
     
-    public void splitFastQFile(Long chunkSize)
+    public void splitFastQFile(Long chunkSize, File outputDir)
     {
         long lineCounter = new Long(0);    
         long chunkCounter = 1;
@@ -95,6 +94,7 @@ public class FastQFile {
                 if(lineCounter % chunkSize == 0 && lineCounter != 0)
                 {
                     chunkCounter++;
+                    out.close();
                     File newOutputFile = new File(outputDir, baseName + "_"+chunkCounter+".fastq");
                     splitFiles.add(newOutputFile);
                     FileWriter fstreamNew = new FileWriter(newOutputFile);
@@ -102,10 +102,12 @@ public class FastQFile {
                 }                
                 
                 out.write(line);
+                out.write("\n");
                 lineCounter++; 
                 
             }
             br.close();
+            out.close();
         } catch (Exception e) {//Catch exception if any
             System.err.println("Error: " + e.getMessage());
         }
@@ -120,9 +122,7 @@ public class FastQFile {
     
     }
 
-    public void setOutputDir(File outputDir) {
-        this.outputDir = outputDir;
-    }
+    
 
     public List<FastQFile> getSplitFastQFiles() {
         return splitFastQFiles;

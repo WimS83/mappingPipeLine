@@ -1,0 +1,13 @@
+#readgroups
+readGroup=RG1
+RG1.id=solid0042_20110504_PE_M520newPEkit_Nico_M520
+RG1.library=M520
+RG1.sample=M520
+#Files
+File=F1
+F1.path=solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.csfasta
+F1.type=CSFASTA
+F1.tag=F3
+F1.readGroup=RG1
+
+
