@@ -35,6 +35,9 @@ import org.apache.commons.configuration.PropertiesConfiguration;
 public class CommandLineClass {
 
     static File outputDir;
+    
+    static Configuration  config;
+    
         
     /**
      * @param args the command line arguments
@@ -68,15 +71,20 @@ public class CommandLineClass {
         try {            
             Map<String, ReadGroup> readGroups = readReadGroupsFile(readGroupFile);
             
+                        
+            //split the fastqFiles
             for(ReadGroup readGroup : readGroups.values())
             {
-                //readGroup.convertCSFastaToFastQ();
-                readGroup.splitFastQFiles();
-                
-                
-                
-                
+               readGroup.splitFastQFiles(); 
             }
+            //map the fastq files
+            for(ReadGroup readGroup : readGroups.values())
+            {
+               readGroup.mapFastqFiles(); 
+            }
+            
+            
+            
             
             
             
@@ -84,34 +92,8 @@ public class CommandLineClass {
             System.out.println(ex.getMessage());
             System.exit(-1);
         }         
-    }
-   
-    
-    
-    
-    
-    
-    
-    
+    }     
   
-//   
-//   private List<File> splitFastQFile(File fastqFile)
-//   {
-//       
-//   
-//   }
-//    
-//    
-//    
-//    
-//   private List<File> mapFastQFilesUsingBWA(List<File> fastFiles)
-//   {  
-//       
-//       
-//       
-//       
-//   }
-
     
     
    
@@ -122,7 +104,7 @@ public class CommandLineClass {
         if(!readGroupFile.canRead()){ throw new IOException("Cannot read read group file "+ readGroupFile.getPath());}
         
       
-        Configuration  config = new PropertiesConfiguration(readGroupFile);          
+        config = new PropertiesConfiguration(readGroupFile);          
         
         Map<String, ReadGroup> readGroupMap = new HashMap<String, ReadGroup>();
         
@@ -134,6 +116,7 @@ public class CommandLineClass {
             readGroup.setSample(config.getString(readGroupId+".sample"));
             
             readGroup.setOutputDir(new File(outputDir, readGroup.getReadGroupId()));
+            readGroup.setReferenceFile(new File(config.getString("referenceFile")));
             readGroupMap.put(readGroupId, readGroup);
         }
         
@@ -160,22 +143,7 @@ public class CommandLineClass {
        return picardBamMerger.mergeBamFilesUsingPicard(bamFiles);
    }
    
-   
-   
-   
-   
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+       
     
     private static void printHelp(Options options)
     {

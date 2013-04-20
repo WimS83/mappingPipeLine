@@ -13,7 +13,7 @@ import org.apache.commons.io.FilenameUtils;
 
 /**
  *
- * @author root
+ * @author Wim Spee
  */
 public class PicardBamMerger {
     

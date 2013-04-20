@@ -40,46 +40,47 @@ public class BwaMappingJob extends Job{
         StringBuilder sb = new StringBuilder();
         
         //add sge hostname and date information to log
-        sb.append("uname -n > "+logFile.getPath());
-        sb.append("\n");
-        sb.append("date -n > "+logFile.getPath());
-        sb.append("\n");
+        sb.append("uname -n >> "+logFile.getPath());
+        sb.append("\n\n");
+        sb.append("date -n >> "+logFile.getPath());
+        sb.append("\n\n");
         //create a tmp dir
-        sb.append("mkdir"+ tmpDir);
-        sb.append("\n");
+        sb.append("mkdir "+ tmpDir);
+        sb.append("\n\n");
         //copy the fastQFile to the tmp dir
         sb.append("echo starting copying of fastq file >> "+logFile.getPath()+"\n");
         sb.append("cp " +fastqFile.getPath()+ " "+tmpDir.getPath() );
-        sb.append("\n");
+        sb.append("\n\n");
         //map using bwa
         sb.append("echo starting mapping of fastq file >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         sb.append(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getPath() + " "+ copiedFastqFile.getPath() + " > "+ bwaOutputFile.getPath() +" 2>> "+logFile.getPath());
-        sb.append("\n");
+        sb.append("\n\n");
         //create sam file from output
         sb.append("echo starting converting to sam >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         sb.append(bwaFile.getPath() + " samse -r \"@RG\tID:"+readGroup.getReadGroupId()+"\tLB:"+readGroup.getLibrary()+"\tSM:"+readGroup.getSample()+"\" "+bwaOutputFile.getPath()+" "+copiedFastqFile.getPath()+" > "+samFile.getPath() +" 2>> "+logFile.getPath());
-        sb.append("\n");
+        sb.append("\n\n");
         //create bam file from sam file
         sb.append("echo starting converting to bam >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         sb.append(samtoolsFile.getPath() +" import "+referenceIndex.getPath() + " " + samFile.getPath() + " " + bamFile.getPath()+" 2>> " +logFile.getPath());
-        sb.append("\n");
+        sb.append("\n\n");
         //sort the bam file
         sb.append("echo starting sorting of bam >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         sb.append(samtoolsFile.getPath() + " sort "+bamFile.getPath() + " " + bamFileSorted.getPath()+" 2>> " +logFile.getPath());
-        sb.append("\n");
+        sb.append("\n\n");
         //copy the bamFile back to the server
         sb.append("echo starting copying of bam back to the server >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         sb.append("cp " + bamFileSorted.getPath() + " " + fastqFile.getParentFile().getPath() );
-        sb.append("\n");
+        sb.append("\n\n");
         //remove the tmp dir from the sge host
         sb.append("rm -rf " +tmpDir.getPath()+" 2>> " +logFile.getPath() );
+        sb.append("\n\n");
         sb.append("finished >> "+logFile.getPath()+"\n");
-        sb.append("date -n > "+logFile.getPath());
+        sb.append("date -n > "+logFile.getPath()+"\n");
         
         
         command = sb.toString();

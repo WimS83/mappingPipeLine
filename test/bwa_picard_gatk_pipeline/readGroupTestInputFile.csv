@@ -9,5 +9,6 @@ F1.path=solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.csfasta
 F1.type=CSFASTA
 F1.tag=F3
 F1.readGroup=RG1
+referenceFile=/home/fedor/GENOMES//R_norvegicus/RGSC3.4/R_norvegicus_RGSC3.4.fa
 
 

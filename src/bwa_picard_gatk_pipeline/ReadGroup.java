@@ -9,11 +9,15 @@ import static bwa_picard_gatk_pipeline.enums.FileTypeEnum.CSFASTA;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
+import bwa_picard_gatk_pipeline.sge.BwaMappingJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.ggf.drmaa.DrmaaException;
 
 
 /**
@@ -28,6 +32,8 @@ public class ReadGroup {
     
     File outputDir;
     File logFile;
+    
+    File referenceFile;
     
     EnumMap<TagEnum, ArrayList<CsFastaFilePair>> CsFastaFilePairsPerTagMap;
     EnumMap<TagEnum, ArrayList<FastQFile>> fastQFilesPerTagMap;
@@ -123,6 +129,40 @@ public class ReadGroup {
        }        
    }
    
+   public void mapFastqFiles() {
+        
+       
+       List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
+       
+       for(TagEnum tagEnum : fastQFilesPerTagMap.keySet())
+       {
+           for(FastQFile fastQFile : fastQFilesPerTagMap.get(tagEnum))
+           {
+               for(FastQFile splitFastQFile :fastQFile.getSplitFastQFiles())
+               {
+                   BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), referenceFile, this);
+                   bwaMappingJobs.add(bwaMappingJob);
+               }
+           
+           }
+       }
+       
+       for(BwaMappingJob bwaMappingJob : bwaMappingJobs)
+       {
+           try {
+               bwaMappingJob.submit();
+           } catch (DrmaaException ex) {
+               System.out.println("Cannot submit job "+ bwaMappingJob.getSGEName() +" : "+ ex.getMessage());
+           }
+       
+       }
+       
+       String blaat = "blaat";
+       
+       
+    }
+   
+   
    
    
    
@@ -146,6 +186,12 @@ public class ReadGroup {
     public String getSample() {
         return sample;
     }
+
+    public void setReferenceFile(File referenceFile) {
+        this.referenceFile = referenceFile;
+    }
+
+    
 
     
     
