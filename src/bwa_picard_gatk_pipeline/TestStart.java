@@ -4,7 +4,6 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import bwa_picard_gatk_pipeline.sge.CommandLineClass;
 import java.util.ArrayList;
 import java.util.List;
 

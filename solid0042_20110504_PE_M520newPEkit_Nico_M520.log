@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE log SYSTEM "logger.dtd">
+<log>
+<record>
+  <date>2013-04-21T11:04:00</date>
+  <millis>1366535040322</millis>
+  <sequence>0</sequence>
+  <logger>solid0042_20110504_PE_M520newPEkit_Nico_M520</logger>
+  <level>INFO</level>
+  <class>bwa_picard_gatk_pipeline.ReadGroupProcecesser</class>
+  <method>&lt;init&gt;</method>
+  <thread>10</thread>
+  <message>Hello Logger!</message>
+</record>
+</log>

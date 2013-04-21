@@ -1,5 +1,6 @@
 package bwa_picard_gatk_pipeline.sge;
 
+import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import org.ggf.drmaa.DrmaaException;
 
 /**
@@ -69,4 +70,10 @@ public abstract class Job{
 		}
 		return false;
 	}
+        
+        public void deleleteJob() throws DrmaaException
+        {            
+            JobController.getInstance().deleteJob(sgeID);
+        
+        }
 }

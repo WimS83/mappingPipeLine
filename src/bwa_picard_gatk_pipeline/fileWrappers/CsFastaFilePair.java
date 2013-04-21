@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline.fileWrappers;
 
+import bwa_picard_gatk_pipeline.enums.TagEnum;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -23,7 +24,9 @@ public class CsFastaFilePair {
       
     private String baseName;
     
-    private long recordNr;
+    private Long recordNr;
+    
+    private TagEnum tag;
 
     public void lookupQualFile() throws IOException {
 
@@ -121,20 +124,67 @@ public class CsFastaFilePair {
         
         if(fastQFileWrapper.getRecordNr() != recordNr)
         {
-            throw new IOException("Not same amount of records in csfasta and fastq file. Csfasta = "+recordNr +" fastq = "+fastQFileWrapper.getRecordNr());
+            throw new IOException("Not same amount of records in csfasta and fastq file. Csfasta = "+recordNr +" fastq = "+ fastQFileWrapper.getFastqFile().getPath()+  " = "+ fastQFileWrapper.getRecordNr());
         }
         
         
         return fastQFileWrapper; 
     }
-    
-    
 
     
 
     public long getRecordNr() {
         return recordNr;
     }
+
+    public File getCsFastaFile() {
+        return csFastaFile;
+    }
+
+    public File getQualFile() {
+        return qualFile;
+    }
+
+    public TagEnum getTag() {
+        return tag;
+    }
+    
+    
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        
+        sb.append("csFasta: "+csFastaFile.getPath());
+        sb.append("\n");
+        sb.append("qual: "+qualFile.getPath());
+        sb.append("\n");
+        sb.append("tag: "+tag);
+        sb.append("\n");
+        
+        if(recordNr == null)
+        {
+            sb.append("recordNr: unknown");        
+        }
+        else
+        {
+            sb.append("recordNr: "+recordNr);        
+        }
+        sb.append("\n");        
+        
+        return sb.toString();
+        
+    }
+
+    public void setTag(TagEnum tag) {
+        this.tag = tag;
+    }
+    
+    
+    
+    
+    
+    
     
     
     

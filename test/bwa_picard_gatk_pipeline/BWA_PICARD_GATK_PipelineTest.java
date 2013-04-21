@@ -4,7 +4,6 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import bwa_picard_gatk_pipeline.sge.CommandLineClass;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -50,7 +49,7 @@ public class BWA_PICARD_GATK_PipelineTest {
     public void testReadReadGroup() {
        
        File readGroupFile = new File(getClass().getResource("readGroupTestInputFile.csv").getFile());
-       Map<String, ReadGroup> readGroups = null;
+       Map<String, ReadGroupProcecesser> readGroups = null;
        
         try {       
             readGroups = CommandLineClass.readReadGroupsFile(readGroupFile);

@@ -18,7 +18,7 @@ public class BwaMappingJob extends Job{
     String command;
     String sgeName;
     
-    public BwaMappingJob(File fastqFile, File referenceFile, ReadGroup readGroup) {
+    public BwaMappingJob(File fastqFile, ReadGroup readGroup) {
         
         String baseName = FilenameUtils.getBaseName(fastqFile.getPath());
         File tmpDir = new File("/tmp/"+baseName);
@@ -28,7 +28,7 @@ public class BwaMappingJob extends Job{
         File bamFile = new File(tmpDir, baseName+".bam");
         File bamFileSorted = new File(tmpDir, baseName+ "_sorted.bam");
         
-        File referenceIndex = new File(referenceFile.getPath()+".fai");
+        File referenceIndex = new File(readGroup.getReferenceFile().getPath()+".fai");
         
         File parentDir = fastqFile.getParentFile();        
         File logFile = new File(parentDir, baseName+".log");
@@ -54,12 +54,12 @@ public class BwaMappingJob extends Job{
         //map using bwa
         sb.append("echo starting mapping of fastq file >> "+logFile.getPath()+"\n");
         sb.append("date -n > "+logFile.getPath()+"\n");
-        sb.append(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getPath() + " "+ copiedFastqFile.getPath() + " > "+ bwaOutputFile.getPath() +" 2>> "+logFile.getPath());
+        sb.append(bwaFile.getPath() + " " + bwaOptions + " " + readGroup.getReferenceFile().getPath() + " "+ copiedFastqFile.getPath() + " > "+ bwaOutputFile.getPath() +" 2>> "+logFile.getPath());
         sb.append("\n\n");
         //create sam file from output
         sb.append("echo starting converting to sam >> "+logFile.getPath()+"\n");
         sb.append("date -n > "+logFile.getPath()+"\n");
-        sb.append(bwaFile.getPath() + " samse -r \"@RG\tID:"+readGroup.getReadGroupId()+"\tLB:"+readGroup.getLibrary()+"\tSM:"+readGroup.getSample()+"\" "+bwaOutputFile.getPath()+" "+copiedFastqFile.getPath()+" > "+samFile.getPath() +" 2>> "+logFile.getPath());
+        sb.append(bwaFile.getPath() + " samse -r \"@RG\tID:"+readGroup.getId()+"\tLB:"+readGroup.getLibrary()+"\tSM:"+readGroup.getSample()+"\" "+bwaOutputFile.getPath()+" "+copiedFastqFile.getPath()+" > "+samFile.getPath() +" 2>> "+logFile.getPath());
         sb.append("\n\n");
         //create bam file from sam file
         sb.append("echo starting converting to bam >> "+logFile.getPath()+"\n");

@@ -4,8 +4,13 @@
  */
 package bwa_picard_gatk_pipeline.fileWrappers;
 
+import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -77,8 +82,15 @@ public class FastQFileTest {
        outputDir.mkdir();
        
        fastQFileWrapper.countNumberOfrecords();          
-       
-       fastQFileWrapper.splitFastQFile(new Long(500), outputDir);
+        try {
+            fastQFileWrapper.splitFastQFile(new Long(500), outputDir);
+        } catch (FileNotFoundException ex) {
+            System.out.println(ex.getMessage());
+        } catch (IOException ex) {
+            System.out.println(ex.getMessage());
+        } catch (SplitFastQException ex) {
+            System.out.println(ex.getMessage());
+        }
        
        List<FastQFile> splitFastQfiles = fastQFileWrapper.getSplitFastQFiles();
        

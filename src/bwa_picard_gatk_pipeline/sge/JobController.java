@@ -1,6 +1,7 @@
 
 package bwa_picard_gatk_pipeline.sge;
 
+import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import org.ggf.drmaa.DrmaaException;
 import org.ggf.drmaa.JobTemplate;
 import org.ggf.drmaa.Session;
@@ -111,4 +112,10 @@ public class JobController{
 		String ID = session.runJob(sgeJob);
 		return ID;		
 	}
+        
+        protected void deleteJob(String sgeID) throws DrmaaException
+        {
+            session.control(sgeID, Session.TERMINATE);
+        
+        }
 }
