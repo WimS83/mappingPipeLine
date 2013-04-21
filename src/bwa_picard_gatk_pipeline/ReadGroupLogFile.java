@@ -37,6 +37,7 @@ public class ReadGroupLogFile {
         try {
             logOut.write(string);
             logOut.write("\n");
+            logOut.flush();
         } catch (IOException ex) {
             System.out.println("Canont write log file for read group " + readGroupId + " : " + ex.getMessage());
         }

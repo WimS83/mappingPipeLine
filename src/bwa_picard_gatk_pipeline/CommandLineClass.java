@@ -115,8 +115,9 @@ public class CommandLineClass {
             readGroup.setReferenceFile(new File(config.getString("referenceFile")));            
 
             File readGroupOutputDir = new File(outputDir, config.getString(readGroupId + ".id"));
+            File csFastaToFastqConverterFile = new File(config.getString("csFastaToFastQConverter"));
 
-            ReadGroupProcecesser readGroupProcesser = new ReadGroupProcecesser(readGroup, readGroupOutputDir);
+            ReadGroupProcecesser readGroupProcesser = new ReadGroupProcecesser(readGroup, readGroupOutputDir, csFastaToFastqConverterFile);
             readGroupProcesser.setChunkSize(new Long(config.getString("chunkSize")));
 
             readGroupMap.put(readGroupId, readGroupProcesser);
@@ -145,7 +146,7 @@ public class CommandLineClass {
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
-        formatter.printHelp("Lifescope bam reheader. For all bam files in the given directory and it's subdirectories, create a copy of the bam where the Read Group Sample is set to the same as the Read Group Library. This to make the lifescope bam files compatible with multisample processing in GATK. ", options);
+        formatter.printHelp("BWA Picard GATK pipeline.  ", options);
         System.exit(1);
     }
 }

@@ -50,6 +50,11 @@ public class CsFastaFilePair {
         if (qualFile == null) {
             throw new IOException("qual file does not exit in the location " + baseNamePlusQual.getPath() + " or " + baseNamePlus_QVQual.getPath());
         }
+        else
+        {
+            System.out.println("Found qual file "+ qualFile.getPath());
+        }
+        
     }
 
     public void setCsFastaFile(File csFastaFile) {
@@ -60,6 +65,7 @@ public class CsFastaFilePair {
 
     public void checkCsFastaAndQualContainEqualAmountOfRecords() throws IOException {
         
+        System.out.println("Checking csFasta and qual contain equal amount of records");
         long csFastaRecords = countRecordOpeningsInFile(csFastaFile);
         long qualRecords = countRecordOpeningsInFile(qualFile);
         
@@ -67,6 +73,7 @@ public class CsFastaFilePair {
         {
             throw new IOException("csFasta file " + csFastaFile.getPath() + " and qual " + qualFile.getPath() +" file do not contain same amount of records. Csfasta contains " +csFastaRecords +  " and qual file contains  "+ qualRecords );
         }
+        System.out.println("Contains same amount of records "+ toString());
         
         recordNr = csFastaRecords;
        
@@ -114,6 +121,11 @@ public class CsFastaFilePair {
         processBuilder.directory(outputDir);   
         Process proces = processBuilder.start();
         proces.waitFor();
+        
+        System.out.println("working directory = " + outputDir.getPath());
+        System.out.println("Converting csFasta file "+ csFastaFile.getPath());
+        
+        
         
         File fastqFile = new File(outputDir, "p1."+baseName+ ".fastq");
         

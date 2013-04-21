@@ -30,15 +30,14 @@ public class ReadGroupProcecesser {
 
     private ReadGroup readGroup;
     private ReadGroupFileCollection readGroupFileCollection;
-    
-    
     private File outputDir;
-    
     private ReadGroupLogFile log;
     private Long chunkSize = new Long(1000000);
+    private File csFastaToFastQFile;
+    
     
 
-    public ReadGroupProcecesser(ReadGroup readGroup, File outputDir) {
+    public ReadGroupProcecesser(ReadGroup readGroup, File outputDir, File csFastaToFastQFile) {
 
         this.readGroup = readGroup;
         this.outputDir = outputDir;
@@ -51,6 +50,8 @@ public class ReadGroupProcecesser {
         readGroupFileCollection = new ReadGroupFileCollection(log, readGroup.getId());
 
         log.append("Started read group processer " + readGroup.getId());
+        
+       this.csFastaToFastQFile = csFastaToFastQFile;
 
     }
 
@@ -58,14 +59,12 @@ public class ReadGroupProcecesser {
 
         try {
 
+            System.out.println("Started processing of read group "+readGroup.getId());
             deleteFastQChunks();
-            
-            
-            
             
             //process the csfasta files if there are any
             if (!readGroupFileCollection.getCsFastaFilePairs().isEmpty()) {
-                convertCSFastaToFastQ(null);
+                convertCSFastaToFastQ(csFastaToFastQFile);
             }
             //process the fastq files if there any (given in the properties file or converted from csfasta)
             if (!readGroupFileCollection.getFastQFiles().isEmpty()) {
@@ -75,60 +74,48 @@ public class ReadGroupProcecesser {
         } catch (csFastaToFastqException ex) {
             System.out.println(ex.getMessage());
         } catch (SplitFastQException ex) {
-           
+
             String blaat = "blaat";
             log.append("Deleting fastq chunks");
             deleteFastQChunks();
-        }
-        finally
-        {
-           
+        } finally {
+
             log.close();
         }
-        
+
         String blaat = "bkaat";
 
 
 
     }
 
-    
-
-    
-
-   
-
     public void convertCSFastaToFastQ(File csFastaToFastqConverter) throws csFastaToFastqException {
-       
-            for (CsFastaFilePair csFastaFilePair : readGroupFileCollection.getCsFastaFilePairs()) {
-                FastQFile fastqFile;
-                try {
-                    fastqFile = csFastaFilePair.convertToFastQFile(outputDir, csFastaToFastqConverter);
-                    readGroupFileCollection.
-                    
-                    
-                    log.append("Converted csFastaFilePair to Fastq");
-                    log.append(csFastaFilePair.toString());
-                    log.append(fastqFile.toString());
+
+        System.out.println("Converting csFasta to fastq ");
+        for (CsFastaFilePair csFastaFilePair : readGroupFileCollection.getCsFastaFilePairs()) {
+            FastQFile fastqFile;
+            try {
+                fastqFile = csFastaFilePair.convertToFastQFile(outputDir, csFastaToFastqConverter);
+                readGroupFileCollection.addFastQFile(fastqFile, csFastaFilePair.getTag());
+
+                log.append("Converted csFastaFilePair to Fastq");
+                log.append(csFastaFilePair.toString());
+                log.append(fastqFile.toString());
 
 
-                } catch (IOException ex) {
-                    log.append("Could not convert csFastaFilePair to Fastq");
-                    log.append(csFastaFilePair.toString());
-                    log.append("error: " + ex.getMessage());
-                    throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
+            } catch (IOException ex) {
+                log.append("Could not convert csFastaFilePair to Fastq");
+                log.append(csFastaFilePair.toString());
+                log.append("error: " + ex.getMessage());
+                throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
 
-                } catch (InterruptedException ex) {
-                    log.append("Could not convert csFastaFilePair to Fastq");
-                    log.append(csFastaFilePair.toString());
-                    log.append("error: " + ex.getMessage());
-                    throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
-                }
-
-
+            } catch (InterruptedException ex) {
+                log.append("Could not convert csFastaFilePair to Fastq");
+                log.append(csFastaFilePair.toString());
+                log.append("error: " + ex.getMessage());
+                throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
             }
         }
-
     }
 
     public void splitFastQFiles() throws SplitFastQException {
@@ -136,15 +123,12 @@ public class ReadGroupProcecesser {
 
         try {
 
-            for (TagEnum tagEnum : fastQFilesPerTagMap.keySet()) {
-                for (FastQFile fastQFile : fastQFilesPerTagMap.get(tagEnum)) {
+            for (FastQFile fastQFile : readGroupFileCollection.getFastQFiles()) {
 
-                    fastQFile.splitFastQFile(new Long(500), outputDir);
-                    log.append("Splitted fastQFile:");
-                    log.append(fastQFile.toString());
-                }
+                fastQFile.splitFastQFile(chunkSize, outputDir);
+                log.append("Splitted fastQFile:");
+                log.append(fastQFile.toString());
             }
-
         } catch (FileNotFoundException ex) {
             log.append("Could not split fastq file");
             log.append("error: " + ex.getMessage());
@@ -153,18 +137,12 @@ public class ReadGroupProcecesser {
             log.append("Could not split fastq file");
             log.append("error: " + ex.getMessage());
             throw new SplitFastQException("Could not split fastq file: " + ex.getMessage());
-        }
-        catch (SplitFastQException ex)
-        {
+        } catch (SplitFastQException ex) {
             log.append("Could not split fastq file");
             log.append("error: " + ex.getMessage());
             throw ex;
-            
-        }
-        
 
-            
-        
+        }
     }
 
     public void mapFastqFiles() {
@@ -172,14 +150,9 @@ public class ReadGroupProcecesser {
 
         List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
 
-        for (TagEnum tagEnum : fastQFilesPerTagMap.keySet()) {
-            for (FastQFile fastQFile : fastQFilesPerTagMap.get(tagEnum)) {
-                for (FastQFile splitFastQFile : fastQFile.getSplitFastQFiles()) {
-                    BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), readGroup);
-                    bwaMappingJobs.add(bwaMappingJob);
-                }
-
-            }
+        for (FastQFile splitFastQFile : readGroupFileCollection.getFastQFiles()) {
+            BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), readGroup);
+            bwaMappingJobs.add(bwaMappingJob);
         }
 
         for (BwaMappingJob bwaMappingJob : bwaMappingJobs) {
@@ -228,12 +201,12 @@ public class ReadGroupProcecesser {
     }
 
     private void deleteFastQChunks() {
-        
+
         FileFilter fileFilter = new WildcardFileFilter("*_chunk*.fastq");
         File[] files = outputDir.listFiles(fileFilter);
         for (int i = 0; i < files.length; i++) {
             files[i].delete();
-        }        
+        }
     }
 
     public void setChunkSize(Long chunkSize) {
@@ -243,10 +216,6 @@ public class ReadGroupProcecesser {
     public ReadGroupFileCollection getReadGroupFileCollection() {
         return readGroupFileCollection;
     }
-    
-    
-    
-    
     
     
 }

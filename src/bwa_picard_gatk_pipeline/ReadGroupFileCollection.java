@@ -36,6 +36,13 @@ public class ReadGroupFileCollection {
         CsFastaFilePairsPerTagMap = new EnumMap<TagEnum, ArrayList<CsFastaFilePair>>(TagEnum.class);
         fastQFilesPerTagMap = new EnumMap<TagEnum, ArrayList<FastQFile>>(TagEnum.class);
         
+        for(TagEnum tagEnum: TagEnum.values())
+        {
+            CsFastaFilePairsPerTagMap.put(tagEnum, new ArrayList<CsFastaFilePair>());
+            fastQFilesPerTagMap.put(tagEnum, new ArrayList<FastQFile>());        
+        }               
+       
+        
     }
     
     public void addCSFastaFile(String csFastaFilePath, TagEnum tag) {
@@ -43,11 +50,9 @@ public class ReadGroupFileCollection {
         csFastaFilePair.setCsFastaFile(new File(csFastaFilePath));
         csFastaFilePair.setTag(tag);
         try {
-            csFastaFilePair.lookupQualFile();
-            if (!CsFastaFilePairsPerTagMap.containsKey(tag)) {
-                CsFastaFilePairsPerTagMap.put(tag, new ArrayList<CsFastaFilePair>());
-            }
+            csFastaFilePair.lookupQualFile();            
             CsFastaFilePairsPerTagMap.get(tag).add(csFastaFilePair);
+            
             log.append("Added csFastaFilePair to read group " + readGroupId);
             log.append(csFastaFilePair.toString());
 
@@ -66,14 +71,25 @@ public class ReadGroupFileCollection {
             FastQFile fastQFile = new FastQFile(new File(filePath));
             fastQFile.setTag(tag);
 
-            if (!fastQFilesPerTagMap.containsKey(tag)) {
-                fastQFilesPerTagMap.put(tag, new ArrayList<FastQFile>());
-            }
             fastQFilesPerTagMap.get(tag).add(fastQFile);
             log.append("Added FastQ file to read group " + readGroupId);
             log.append(fastQFile.toString());
         }
     }
+    
+    public void addFastQFile(FastQFile fastQFile, TagEnum tag) {
+
+       fastQFile.setTag(tag);
+
+       fastQFilesPerTagMap.get(tag).add(fastQFile);
+       log.append("Added FastQ file to read group " + readGroupId);
+       log.append(fastQFile.toString());
+        
+    }
+    
+    
+    
+    
     
     public List<CsFastaFilePair> getCsFastaFilePairs()
     {
@@ -113,6 +129,22 @@ public class ReadGroupFileCollection {
 
         }
     }
+      
+      public List<FastQFile> getSplitFastQFiles()
+      {
+          List<FastQFile> splitFastQFiles = new ArrayList<FastQFile>();
+          
+          for(FastQFile fastQFile : getFastQFiles())
+          {
+              splitFastQFiles.addAll(fastQFile.getSplitFastQFiles());
+          }
+          
+          return splitFastQFiles;
+          
+      
+      }
+      
+      
     
     
     
