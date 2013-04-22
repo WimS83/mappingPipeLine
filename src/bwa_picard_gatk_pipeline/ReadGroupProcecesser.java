@@ -4,8 +4,6 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import bwa_picard_gatk_pipeline.enums.FileTypeEnum;
-import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.BwaMappingJob;
@@ -70,6 +68,12 @@ public class ReadGroupProcecesser {
             if (!readGroupFileCollection.getFastQFiles().isEmpty()) {
                 splitFastQFiles();
             }
+            //map the fastqChunks if there are any
+            if(!readGroupFileCollection.getSplitFastQFiles().isEmpty())
+            {
+                 mapFastqFiles();       
+            }
+            
 
         } catch (csFastaToFastqException ex) {
             System.out.println(ex.getMessage());
@@ -144,16 +148,28 @@ public class ReadGroupProcecesser {
 
         }
     }
+    
+    public List<BwaMappingJob> createMappingJobs()
+    {
+         List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
+
+         for (FastQFile splitFastQFile : readGroupFileCollection.getFastQFiles()) {
+            BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), readGroup);
+            bwaMappingJobs.add(bwaMappingJob);
+         }
+         return bwaMappingJobs;
+    }
+    
+    
+    
+    
+    
+    
 
     public void mapFastqFiles() {
 
-
-        List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
-
-        for (FastQFile splitFastQFile : readGroupFileCollection.getFastQFiles()) {
-            BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), readGroup);
-            bwaMappingJobs.add(bwaMappingJob);
-        }
+        System.out.println("Starting submitting of mapping jobs");
+       
 
         for (BwaMappingJob bwaMappingJob : bwaMappingJobs) {
             try {
@@ -174,7 +190,7 @@ public class ReadGroupProcecesser {
                     break;
                 } else {
                     try {
-                        TimeUnit.MINUTES.MINUTES.sleep(1);
+                        TimeUnit.MINUTES.MINUTES.sleep(5);
                     } catch (InterruptedException ex) {
                         System.out.println(ex.getMessage());
                     }

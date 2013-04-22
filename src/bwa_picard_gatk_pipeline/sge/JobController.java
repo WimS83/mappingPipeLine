@@ -110,6 +110,8 @@ public class JobController{
 		sgeJob.setJobName(jobToSubmit.getSGEName());
 		sgeJob.setRemoteCommand(jobToSubmit.getCommand());
 		String ID = session.runJob(sgeJob);
+                System.out.println("Submitted job with id "+ID);
+                
 		return ID;		
 	}
         

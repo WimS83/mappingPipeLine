@@ -7,8 +7,6 @@ package bwa_picard_gatk_pipeline;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.After;
 import org.junit.AfterClass;
