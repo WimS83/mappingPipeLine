@@ -8,6 +8,9 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  *
@@ -24,7 +27,13 @@ public class ReadGroupLogFile {
         this.readGroupId = readGroupId; 
         
         try {
-            File outputFile = new File(outputDir, readGroupId + ".log");
+            
+            DateFormat dateFormat = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
+            Date date = new Date();
+            String dateString= (dateFormat.format(date));
+            
+            
+            File outputFile = new File(outputDir, readGroupId + dateString+".log");
             FileWriter fstream = new FileWriter(outputFile);
             logOut = new BufferedWriter(fstream);
         } catch (IOException ex) {

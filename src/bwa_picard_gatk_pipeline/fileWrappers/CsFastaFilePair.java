@@ -73,9 +73,11 @@ public class CsFastaFilePair {
         {
             throw new IOException("csFasta file " + csFastaFile.getPath() + " and qual " + qualFile.getPath() +" file do not contain same amount of records. Csfasta contains " +csFastaRecords +  " and qual file contains  "+ qualRecords );
         }
-        System.out.println("Contains same amount of records "+ toString());
         
         recordNr = csFastaRecords;
+        System.out.println("Contains same amount of records "+ toString());
+        
+        
        
     }
     
