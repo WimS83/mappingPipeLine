@@ -29,10 +29,19 @@ public class FastQFile {
     private TagEnum tag;
             
     private List<FastQFile> splitFastQFiles;
+    
+    private BufferedWriter splitFastQout = null;  
+    private long chunkCounter = new Long(0);
+    private String baseName;
+    
+    
 
     public FastQFile(File fastqFile) {
         this.fastqFile = fastqFile;
+        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());                
+        
         splitFastQFiles = new ArrayList<FastQFile>();
+        
         
     }    
     
@@ -76,14 +85,9 @@ public class FastQFile {
     public void splitFastQFile(Long chunkSize, File outputDir) throws FileNotFoundException, IOException, SplitFastQException
     {
         long lineCounterIn = new Long(0);    
-        long lineCounterOut = new Long(0); 
-        long chunkCounter = new Long(1);
+        long lineCounterOut = new Long(0);   
         
-        String baseName = FilenameUtils.getBaseName(fastqFile.getPath());
-        
-        File outputChunkFile = new File(outputDir, baseName + "_chunk"+chunkCounter+".fastq");        
-        FileWriter fstream = new FileWriter(outputChunkFile);
-        BufferedWriter out = new BufferedWriter(fstream);        
+        openNextChunk(outputDir);  
         
         BufferedReader br = new BufferedReader(new FileReader(fastqFile));
         String line;  
@@ -93,33 +97,21 @@ public class FastQFile {
             //if linecounter is multiple of chunksize
             if(lineCounterIn % chunkSize == 0 && lineCounterIn > 0)
             {
-                out.close();
-                FastQFile fastqFileWrapper = new FastQFile(outputChunkFile);
-                fastqFileWrapper.setRecordNr(lineCounterOut / new Long(4));
-                splitFastQFiles.add(fastqFileWrapper);
-
-                chunkCounter++;
-                File newOutputChunkFile = new File(outputDir, baseName + "_chunk"+chunkCounter+".fastq");
-                FileWriter fstreamNew = new FileWriter(newOutputChunkFile);
-                out = new BufferedWriter(fstreamNew);
-                lineCounterOut = new Long(0);  
-                
-                                
+                //close the current chunk      
+                closeCurrentChunk(lineCounterOut);
+                lineCounterOut = new Long(0);
+                openNextChunk(outputDir);
                 
             }                
 
-            out.write(line);
-            out.write("\n");
+            splitFastQout.write(line);
+            splitFastQout.write("\n");
             lineCounterOut++;
             lineCounterIn++; 
 
         }
         br.close();
-        out.close();
-        //ad the last chunk to the list
-        FastQFile fastqFileWrapper = new FastQFile(outputChunkFile);
-        fastqFileWrapper.setRecordNr(lineCounterOut / new Long(4));
-        splitFastQFiles.add(fastqFileWrapper);
+        closeCurrentChunk(lineCounterOut);       
         
         recordNr = lineCounterIn / new Long(4); 
         Long recordsInChunks = getRecordNrInChunks();
@@ -132,7 +124,24 @@ public class FastQFile {
         
         
     }
-
+    
+    private void openNextChunk(File outputDir) throws IOException
+    {
+        chunkCounter++;
+        File outputChunkFile = new File(outputDir, baseName + "_chunk"+chunkCounter+".fastq");
+        FastQFile fastQChunk = new FastQFile(outputChunkFile);
+        splitFastQFiles.add(fastQChunk);
+        
+        FileWriter fstream = new FileWriter(outputChunkFile);
+        splitFastQout = new BufferedWriter(fstream);        
+    
+    }
+    
+    private void closeCurrentChunk(Long lineCounterOut) throws IOException {
+        splitFastQFiles.get(splitFastQFiles.size() -1).setRecordNr(lineCounterOut / new Long(4));
+        splitFastQout.close();
+        
+    }   
     
 
     public List<FastQFile> getSplitFastQFiles() {
@@ -184,6 +193,8 @@ public class FastQFile {
         return recordInChunks;
     
     }
+
+    
 
     
         

@@ -1,22 +1,29 @@
 package bwa_picard_gatk_pipeline.sge;
 
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+
 import org.ggf.drmaa.DrmaaException;
 
 /**
  * This abstract class represents a job, which can be executed on the Sun Grid Engine.
  * @author Jetse
  */
-public abstract class Job{
+public abstract class Job extends File{
+	
+	private static final long serialVersionUID = 1L;
 	private String sgeID = null;
 	private int timesSubmitted = 0;
 	private int maxSubmits = 5;
+	private BufferedWriter out;
 
-	/**
-	 * The method getCommand is different for every job, this is the actual command which has to be executed on the node
-	 * @return the command to execute on the node.
-	 */
-	public abstract String getCommand();
+	public Job(String filePath) throws IOException{
+		super(filePath);
+		createShellJobFile();
+	}
 
 	/**
 	 * The method getSGEName gets an unique name of the job, mostly this name contains the name of the executed program. 
@@ -40,16 +47,17 @@ public abstract class Job{
 	 */
 	public final void submit() throws DrmaaException{
 		sgeID = JobController.getInstance().submitJob(this);
-		
+		System.out.println("Submitted job " + getSGEName() + "ID: " + sgeID);
 	}
 	
 	/**
-	 * The method reSubmit submits a failed job again.
+	 * The method reSubmit submits a failed job again, till maxSubmits times.
 	 * @throws DrmaaException
 	 * @throws JobFaillureException
 	 */
-	public final void reSubmit() throws DrmaaException,  JobFaillureException{
+	private final void reSubmit() throws DrmaaException,  JobFaillureException{
 		if(timesSubmitted < maxSubmits){
+			System.err.println("resubmitted " + timesSubmitted + " times: " + getSGEName());
 			submit();
 			timesSubmitted++;
 		}
@@ -57,23 +65,38 @@ public abstract class Job{
 	}
 
 	/**
-	 * The method isFinished returns whether the job is finished or not.
+	 * The method waitFor waits till this job is finished, when the job fails, the job is resubmitted
 	 * @return whether the job is finished or not
 	 * @throws DrmaaException when retrieving the status of the jobs fails
 	 * @throws JobFaillureException When the job failed {maxSubmits} times
 	 */
-	public boolean isFinished() throws DrmaaException, JobFaillureException{
+	public void waitFor() throws DrmaaException, JobFaillureException{
 		try{
-			return JobController.getInstance().isFinished(sgeID);
+			JobController.getInstance().waitFor(sgeID);
 		}catch(JobFaillureException e){
 			reSubmit();
 		}
-		return false;
 	}
-        
-        public void deleleteJob() throws DrmaaException
-        {            
-            JobController.getInstance().deleteJob(sgeID);
-        
-        }
+	
+	/**
+	 * This method puts the default commands in the job file.
+	 * @throws IOException When writing to the shell job file fails.
+	 */
+	private void createShellJobFile() throws IOException{
+		FileWriter fstream = new FileWriter(getAbsolutePath());
+		out = new BufferedWriter(fstream);
+		out.write("#!/bin/sh");
+		out.newLine();
+		out.write("#$ -S /bin/sh");
+		out.newLine();
+	}
+	
+	protected void addCommand(String command) throws IOException{
+		out.write(command);
+		out.newLine();
+	}
+	
+	protected void close() throws IOException{
+		out.close();
+	}
 }

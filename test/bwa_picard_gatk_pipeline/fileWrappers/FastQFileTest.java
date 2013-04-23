@@ -96,13 +96,11 @@ public class FastQFileTest {
        
        assertTrue(splitFastQfiles.size() == 4);
        
-       long splitRecordsNr = new Long(0);
-       for(FastQFile fastQFile: splitFastQfiles)
-       {
-           splitRecordsNr = splitRecordsNr + fastQFile.countNumberOfrecords();
-       }
+       long fastQrecords = fastQFileWrapper.getRecordNr();
+       long splitRecordsNr = fastQFileWrapper.getRecordNrInChunks();
+      
        
-       assertTrue(fastQFileWrapper.getRecordNr() == splitRecordsNr);
+       assertTrue(fastQrecords == splitRecordsNr);
        
        
         

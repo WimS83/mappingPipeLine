@@ -46,20 +46,20 @@ public class BWA_PICARD_GATK_PipelineTest {
     @Test
     public void testReadReadGroup() {
        
-       File readGroupFile = new File(getClass().getResource("readGroupTestInputFile.csv").getFile());
-       Map<String, ReadGroupProcecesser> readGroups = null;
-       
-        try {       
-            readGroups = CommandLineClass.readReadGroupsFile(readGroupFile);
-            
-            String blaat = "blaat";
-            
-        } catch (IOException ex) {
-            System.out.println(ex.getMessage());
-        } catch (ConfigurationException ex) {
-            System.out.println(ex.getMessage());
-        }
-        
+//       File readGroupFile = new File(getClass().getResource("readGroupTestInputFile.csv").getFile());
+//       Map<String, ReadGroupProcecesser> readGroups = null;
+//       
+//        try {       
+//            readGroups = CommandLineClass.readPropertiesFile(readGroupFile);
+//            
+//            String blaat = "blaat";
+//            
+//        } catch (IOException ex) {
+//            System.out.println(ex.getMessage());
+//        } catch (ConfigurationException ex) {
+//            System.out.println(ex.getMessage());
+//        }
+//        
         
       
                           

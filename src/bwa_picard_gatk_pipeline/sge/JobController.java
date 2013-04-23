@@ -1,8 +1,10 @@
-
 package bwa_picard_gatk_pipeline.sge;
+
+
 
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import org.ggf.drmaa.DrmaaException;
+import org.ggf.drmaa.JobInfo;
 import org.ggf.drmaa.JobTemplate;
 import org.ggf.drmaa.Session;
 import org.ggf.drmaa.SessionFactory;
@@ -37,13 +39,12 @@ public class JobController{
 		session = SessionFactory.getFactory().getSession();
 		session.init("");
 		sgeJob = session.createJobTemplate();
-		
 		Runtime.getRuntime().addShutdownHook(new Thread() {
 			@Override
 			public void run() {
 				try {
-					session.exit();
 					session.deleteJobTemplate(sgeJob);
+					session.exit();
 				} catch (DrmaaException e) {
 					e.printStackTrace();
 				}
@@ -52,52 +53,22 @@ public class JobController{
 	}
 	
 	/**
-	 * The method submitJobs submits an array of jobs
-	 * @param jobsToSubmit the jobs to submit to the cluster
-	 * @throws DrmaaException When submitting to the cluster fails
-	 */
-//	public void submitJobs(Job[] jobsToSubmit) throws DrmaaException{
-//		ArrayList<String> ids = new ArrayList<String>();
-//		for(Job jobToSubmit: jobsToSubmit){
-//			String ID = submitJob(jobToSubmit);
-//			jobToSubmit.setSgeID(ID);
-//			ids.add(ID);
-//		}
-//	}
-	
-	/**
-	 * The method isFinished checks whether a job is finished, returns true if finished, false if not. 
+	 * The method waitFor waits till a job is finished.
 	 * This method is protected so it can only called from a Job, which will call this always with his newest ID, even after resubmit.
 	 * @param id The id of the job
 	 * @return Whether the job is finished or not
 	 * @throws DrmaaException When retrieving the status fails
 	 * @throws JobFaillureException When a job is failed.
 	 */
-	protected boolean isFinished(String id) throws DrmaaException, JobFaillureException{
-		int status = session.getJobProgramStatus(id);
-		switch(status){
-		case Session.UNDETERMINED:
-			throw new JobFaillureException("Job status cannot be determined");
-		case Session.QUEUED_ACTIVE:
-			return false;
-		case Session.SYSTEM_ON_HOLD:
-			return false;
-		case Session.USER_ON_HOLD:
-			return false;
-		case Session.USER_SYSTEM_ON_HOLD:
-			return false;
-		case Session.RUNNING:
-			return false;
-		case Session.SYSTEM_SUSPENDED:
-			return false;
-		case Session.USER_SUSPENDED:
-			return false;
-		case Session.USER_SYSTEM_SUSPENDED:
-			return false;
-		case Session.FAILED:
+	protected void waitFor(String id) throws DrmaaException, JobFaillureException{
+		JobInfo info = session.wait(id, Session.TIMEOUT_WAIT_FOREVER);
+		if (info.wasAborted()) {
 			throw new JobFaillureException("Job finished, but failed");
-		}
-		return true;
+	    } else if (info.hasExited()) {
+	    	//optional, easy to implement: print job information, stored in info object.
+	    	return;
+	    }
+		throw new JobFaillureException("Job not aborted either exited...");
 	}
 
 	/**
@@ -108,16 +79,11 @@ public class JobController{
 	 */
 	protected String submitJob(Job jobToSubmit) throws DrmaaException {
 		sgeJob.setJobName(jobToSubmit.getSGEName());
-		sgeJob.setRemoteCommand(jobToSubmit.getCommand());
+		sgeJob.setNativeSpecification("-b no");
+		sgeJob.setRemoteCommand(jobToSubmit.getAbsolutePath());
+		//sgeJob.setErrorPath("fedor12:" + ((TophatJob)jobToSubmit).getFastaFile().getOpts().get(Opts.OUTPUTDIR));
+		
 		String ID = session.runJob(sgeJob);
-                System.out.println("Submitted job with id "+ID);
-                
 		return ID;		
 	}
-        
-        protected void deleteJob(String sgeID) throws DrmaaException
-        {
-            session.control(sgeID, Session.TERMINATE);
-        
-        }
 }
