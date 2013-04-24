@@ -12,15 +12,13 @@ import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import bwa_picard_gatk_pipeline.exceptions.csFastaToFastqException;
 import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
-import bwa_picard_gatk_pipeline.sge.BwaMappingJob;
+import bwa_picard_gatk_pipeline.sge.BwaSolidMappingJob;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.sf.picard.sam.PicardBamMerger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -30,37 +28,31 @@ import org.ggf.drmaa.DrmaaException;
  *
  * @author Wim Spee
  */
-public class TagFileCollection {
+public class Tag {
 
-    private List<CsFastaFilePair> csFastaFilePairs;
+    private List<CsFastaFilePair> csfastaFiles;
     private List<FastQFile> fastQFiles;
+    
     private List<File> bamFiles;
     private File mergedBamFile;
-    private TagEnum tagEnum;
+    
+    private TagEnum name;
+    
     private ReadGroup readGroup;
+    
     private File outputDirTag;
 
-    public TagFileCollection(TagEnum tagEnum, ReadGroup readGroup) {
-        this.tagEnum = tagEnum;
-        this.readGroup = readGroup;
-
-
-        outputDirTag = new File(readGroup.getOutputDir(), tagEnum.toString());
-        outputDirTag.mkdir();
-
-        csFastaFilePairs = new ArrayList<CsFastaFilePair>();
-        fastQFiles = new ArrayList<FastQFile>();
-        bamFiles = new ArrayList<File>();
-    }
+   
 
     public void startProcessing() {
         try {
 
-            readGroup.getLog().append("Started processing of read group " + tagEnum.toString());
+            readGroup.getLog().append("Started processing of read group " + name.toString());
             deleteFastQChunks();
 
             //process the csfasta files if there are any
-            if (!csFastaFilePairs.isEmpty()) {
+            if (!csfastaFiles.isEmpty()) {
+                lookupCsFastaAndQualFiles();                
                 convertCSFastaToFastQ();
             }
 
@@ -92,6 +84,8 @@ public class TagFileCollection {
             deleteFastQChunks();
         } catch (MappingException ex) {
             readGroup.getLog().append("Could not map fastq chunks: " + ex.getMessage());
+        } catch (IOException ex) {
+            readGroup.getLog().append("Could not find csfasta or qual file: " + ex.getMessage());
         } finally {
 
             readGroup.getLog().close();
@@ -109,40 +103,21 @@ public class TagFileCollection {
         return splitFastQFiles;
     }
 
-    public CsFastaFilePair addCSFastaFile(String csFastaFilePath) throws IOException {
-        CsFastaFilePair csFastaFilePair = new CsFastaFilePair();
-        csFastaFilePair.setCsFastaFile(new File(csFastaFilePath));
-        csFastaFilePair.setTag(tagEnum);
 
-        csFastaFilePair.lookupQualFile();
-        csFastaFilePairs.add(csFastaFilePair);
-
-        return csFastaFilePair;
-    }
-
-    public FastQFile addFastQFile(String filePath) throws IOException {
-
-        File fastqFile = new File(filePath);
-        if (!fastqFile.canRead()) {
-            throw new IOException("Cannot read fastq file " + fastqFile.getPath());
-        }
-
-        FastQFile fastQFile = new FastQFile(new File(filePath));
-        fastQFile.setTag(tagEnum);
-
-        fastQFiles.add(fastQFile);
-
-        return fastQFile;
-    }
 
     public void convertCSFastaToFastQ() throws csFastaToFastqException {
 
         System.out.println("Converting csFasta to fastq ");
-        for (CsFastaFilePair csFastaFilePair : csFastaFilePairs) {
+        
+        //initialize the fastq list if no fastqFiles were set on the list from json
+        if(fastQFiles == null){ fastQFiles = new ArrayList<FastQFile>();}
+        
+        
+        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             FastQFile fastqFile;
             try {
                 fastqFile = csFastaFilePair.convertToFastQFile(outputDirTag, readGroup.getGlobalConfiguration().getCsFastaToFastQFile());
-                fastqFile.setTag(tagEnum);
+                fastqFile.setTag(name);
                 fastQFiles.add(fastqFile);
 
                 readGroup.getLog().append("Converted csFastaFilePair to Fastq");
@@ -192,8 +167,8 @@ public class TagFileCollection {
         }
     }
 
-    public List<BwaMappingJob> createMappingJobs() throws IOException {
-        List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
+    public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
+        List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
 
 
 
@@ -201,14 +176,14 @@ public class TagFileCollection {
             File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(splitFastQFile.getFastqFile().getPath()) + ".bam");
             bamFiles.add(bamFile);
 
-            BwaMappingJob bwaMappingJob = new BwaMappingJob(splitFastQFile.getFastqFile(), bamFile, readGroup);
+            BwaSolidMappingJob bwaMappingJob = new BwaSolidMappingJob(splitFastQFile.getFastqFile(), bamFile, readGroup);
             bwaMappingJobs.add(bwaMappingJob);
         }
         return bwaMappingJobs;
     }
 
-    public void submitMappingJobs(List<BwaMappingJob> mappingJobs) throws DrmaaException {
-        for (BwaMappingJob bwaMappingJob : mappingJobs) {
+    public void submitMappingJobs(List<BwaSolidMappingJob> mappingJobs) throws DrmaaException {
+        for (BwaSolidMappingJob bwaMappingJob : mappingJobs) {
             bwaMappingJob.submit();
         }
 
@@ -217,7 +192,7 @@ public class TagFileCollection {
     public void mapFastqFiles() throws MappingException {
 
         System.out.println("Starting submitting of mapping jobs");
-        List<BwaMappingJob> bwaMappingJobs = new ArrayList<BwaMappingJob>();
+        List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
         try {
             bwaMappingJobs = createMappingJobs();
         } catch (IOException ex) {
@@ -243,9 +218,9 @@ public class TagFileCollection {
 
     }
 
-    private void waitForMappingJobs(List<BwaMappingJob> bwaMappingJobs) throws DrmaaException, JobFaillureException {
+    private void waitForMappingJobs(List<BwaSolidMappingJob> bwaMappingJobs) throws DrmaaException, JobFaillureException {
 
-        for (BwaMappingJob bwaMappingJob : bwaMappingJobs) {
+        for (BwaSolidMappingJob bwaMappingJob : bwaMappingJobs) {
             bwaMappingJob.waitFor();
         }
 
@@ -271,9 +246,7 @@ public class TagFileCollection {
         }
     }
 
-    public List<CsFastaFilePair> getCsFastaFilePairs() {
-        return csFastaFilePairs;
-    }
+   
 
     public List<FastQFile> getFastQFiles() {
         return fastQFiles;
@@ -282,4 +255,45 @@ public class TagFileCollection {
     public File getMergedBamFile() {
         return mergedBamFile;
     }
+
+    public TagEnum getName() {
+        return name;
+    }
+
+    public void setName(TagEnum name) {
+        this.name = name;
+    }
+
+    public List<CsFastaFilePair> getCsfastaFiles() {
+        return csfastaFiles;
+    }
+
+    public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
+        this.csfastaFiles = csfastaFiles;
+    }
+    
+
+    public ReadGroup getReadGroup() {
+        return readGroup;
+    }
+
+    public void setReadGroup(ReadGroup readGroup) {
+        this.readGroup = readGroup;
+    }
+
+    void createOutputDir(File readGroupOutputDir) {
+        outputDirTag = new File(readGroupOutputDir, name.toString());
+        outputDirTag.mkdir();
+    }
+
+    private void lookupCsFastaAndQualFiles() throws IOException {
+        for(CsFastaFilePair csFastaFilePair : csfastaFiles)
+        {
+            csFastaFilePair.lookupCsFastaFile();
+            csFastaFilePair.lookupQualFile();
+        }
+    }
+    
+    
+    
 }

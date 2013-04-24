@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline.GSON;
 
+import bwa_picard_gatk_pipeline.Sample;
 import java.util.List;
 
 /**
@@ -12,15 +13,20 @@ import java.util.List;
  */
 public class JSONConfig {
     
-    List<SamplesDef> samplesDef;
-
-    public List<SamplesDef> getSamplesDef() {
-        return samplesDef;
+    List<Sample> samples;        
+    
+    
+    public List<Sample> getSamples() {
+        return samples;
     }
 
-    public void setSamplesDef(List<SamplesDef> SamplesDef) {
-        this.samplesDef = SamplesDef;
+    public void setSamples(List<Sample> samples) {
+        this.samples = samples;
     }
+    
+    
+
+    
 
     
    

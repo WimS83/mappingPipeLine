@@ -5,9 +5,7 @@
 package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.GSON.JSONConfig;
-import bwa_picard_gatk_pipeline.GSON.JSONTest;
-import bwa_picard_gatk_pipeline.GSON.ReadgroupsDef;
-import bwa_picard_gatk_pipeline.GSON.SamplesDef;
+import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +41,12 @@ public class CommandLineClass {
         options.addOption("i", "input", true, "the Json config file describing the samples, read groups, tags and files to process. ");
         options.addOption("o", "output", true, "base output directory. Subdirectories will be created in this dir for each sample, read group and tag. ");
         options.addOption("h", "help", false, "print this message");
-        options.addOption("t", "target", false, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
+        options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
+        options.addOption("r", "reference", true, "reference file. fai and BWA indexes should be next to this file.");
+        options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
+        options.addOption("q", "converter", true, "Location of Frans Paul his csfasta to fastq converter. Default is /home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq .");
+        options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. Thist option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
+        options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
 
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -62,39 +65,45 @@ public class CommandLineClass {
         
         GlobalConfiguration globalConfiguration = new GlobalConfiguration();
         globalConfiguration.setBaseOutputDir(outputDir);
+        
+        globalConfiguration.setChunkSize( new Long(cmd.getOptionValue("c", "1000000")));   
+        globalConfiguration.setCsFastaToFastQFile(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq")));  
+        globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));  
+        globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
+        String targetString = cmd.getOptionValue("t");
+        
+        globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));        
 
         File JsonConfigFile = new File(cmd.getOptionValue("i"));
         
         List<Sample> samples = new ArrayList<Sample>();
         
         ObjectMapper mapper = new ObjectMapper(); 
-         try {
-             JSONConfig jsconConfig = mapper.readValue(JsonConfigFile, JSONConfig.class); // 'src' can be File, InputStream, Reader, String
+        try {
+            JSONConfig jsconConfig = mapper.readValue(JsonConfigFile, JSONConfig.class); // 'src' can be File, InputStream, Reader, String
+                        
+            samples = jsconConfig.getSamples();
             
-             for(SamplesDef samplesDef : jsconConfig.getSamplesDef())
-             {
-                 Sample sample = new Sample();
+            for(Sample sample : samples)
+            {
+                sample.setGlobalConfiguration(globalConfiguration);
+                sample.startProcessing();
+            }
+            
+            
+        } catch (IOException ex) {
+            Logger.getLogger(CommandLineClass.class.getName()).log(Level.SEVERE, null, ex);
+     
+        }
+            
                  
-                 for(ReadgroupsDef readgroupsDef : samplesDef.getReadgroupsDef())
-                 {
                  
-                 
-                 }
-                 
-                 
-             
-             }
-             
-             
-             
-         } catch (IOException ex) {
-             Logger.getLogger(JSONTest.class.getName()).log(Level.SEVERE, null, ex);
-         }
+    
 
     
+    
+    
     }
-    
-    
 
 
 

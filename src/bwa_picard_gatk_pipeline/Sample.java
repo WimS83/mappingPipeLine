@@ -4,7 +4,7 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import java.util.ArrayList;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -14,19 +14,26 @@ import java.util.List;
 public class Sample {
 
     
-    List<ReadGroup> readGroups;
-
-    public Sample() {
-        readGroups = new ArrayList<ReadGroup>();
-        
-    }   
+    private String name;
+    private List<ReadGroup> readGroups;
     
+    private GlobalConfiguration globalConfiguration;
+    
+    private File sampleOutputDir;
     
     
     public void startProcessing() {
         
         for(ReadGroup readGroup : readGroups)
         {
+            sampleOutputDir = new File(globalConfiguration.getBaseOutputDir(), name);
+            sampleOutputDir.mkdir();
+            
+            readGroup.createOutputDir(sampleOutputDir);
+            
+            readGroup.setGlobalConfiguration(globalConfiguration);
+            readGroup.setSample(name);
+            
             readGroup.startProcessing();
         } 
         
@@ -37,6 +44,34 @@ public class Sample {
         
         //cal sv's         
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<ReadGroup> getReadGroups() {
+        return readGroups;
+    }
+
+    public void setReadGroups(List<ReadGroup> readGroups) {
+        this.readGroups = readGroups;
+    }
+
+    public void setGlobalConfiguration(GlobalConfiguration globalConfiguration) {
+        this.globalConfiguration = globalConfiguration;
+    }
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     

@@ -19,15 +19,25 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class CsFastaFilePair {
 
+    
+    private String path;
     private File csFastaFile;
     private File qualFile;
       
     private String baseName;
     
-    private Long recordNr;
+    private Long recordNr;   
     
-    private TagEnum tag;
-
+    
+    public void lookupCsFastaFile() throws IOException {
+        csFastaFile = new File(path) ;
+        if(!csFastaFile.canRead())
+        {
+            throw new IOException("Cannot read csfasta file " + path);
+        }
+    }
+    
+    
     public void lookupQualFile() throws IOException {
 
         if (!csFastaFile.exists()) {
@@ -75,9 +85,7 @@ public class CsFastaFilePair {
         }
         
         recordNr = csFastaRecords;
-        System.out.println("Contains same amount of records "+ toString());
-        
-        
+        System.out.println("Contains same amount of records "+ toString());        
        
     }
     
@@ -157,13 +165,15 @@ public class CsFastaFilePair {
 
     public File getQualFile() {
         return qualFile;
+    }   
+
+    public String getPath() {
+        return path;
     }
 
-    public TagEnum getTag() {
-        return tag;
-    }
-    
-    
+    public void setPath(String path) {
+        this.path = path;
+    }    
 
     @Override
     public String toString() {
@@ -172,9 +182,8 @@ public class CsFastaFilePair {
         sb.append("csFasta: "+csFastaFile.getPath());
         sb.append("\n");
         sb.append("qual: "+qualFile.getPath());
-        sb.append("\n");
-        sb.append("tag: "+tag);
-        sb.append("\n");
+        sb.append("\n");       
+        
         
         if(recordNr == null)
         {
@@ -189,10 +198,9 @@ public class CsFastaFilePair {
         return sb.toString();
         
     }
+    
 
-    public void setTag(TagEnum tag) {
-        this.tag = tag;
-    }
+    
     
     
     

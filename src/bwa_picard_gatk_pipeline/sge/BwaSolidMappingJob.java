@@ -13,7 +13,7 @@ import org.apache.commons.io.FilenameUtils;
  *
  * @author Wim Spee
  */
-public class BwaMappingJob extends Job {
+public class BwaSolidMappingJob extends Job {
 
     private String sgeName;
     private File fastqFile;
@@ -21,7 +21,7 @@ public class BwaMappingJob extends Job {
     
     private ReadGroup readGroup;
 
-    public BwaMappingJob(File fastqFile, File bamFile,  ReadGroup readGroup) throws IOException {
+    public BwaSolidMappingJob(File fastqFile, File bamFile,  ReadGroup readGroup) throws IOException {
 
         super(FilenameUtils.removeExtension(fastqFile.getAbsolutePath()) + ".sh");
 
@@ -49,12 +49,12 @@ public class BwaMappingJob extends Job {
        
         File bamFileSorted = new File(tmpDir, baseName + "_sorted.bam");
 
-        File referenceFile = readGroup.getReferenceFile();
-        File referenceIndex = new File(readGroup.getReferenceFile().getPath() + ".fai");
+        File referenceFile = readGroup.getGlobalConfiguration().getReferenceFile();
+        File referenceIndex = new File(referenceFile.getAbsolutePath() + ".fai");
 
         File parentDir = fastqFile.getParentFile();
         File logFile = new File(parentDir, baseName + ".log");
-        File bwaFile = new File("/usr/local/bwa/0.5.9/bwa");
+        File bwaFile = readGroup.getGlobalConfiguration().getColorSpaceBWA();
         String bwaOptions = "aln -c -l 25 -k 2 -n 10";
         File samtoolsFile = new File("/usr/local/samtools/samtools");
 
@@ -76,12 +76,12 @@ public class BwaMappingJob extends Job {
         //map using bwa
         addCommand("echo starting mapping of fastq file >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());
-        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + readGroup.getReferenceFile().getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + bwaOutputFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + bwaOutputFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
         //create sam file from output
         addCommand("echo starting converting to sam >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath() );
-        addCommand(bwaFile.getPath() + " samse -r ‘@RG\tID:" + readGroup.getId() + "\tLB:" + readGroup.getLibrary() + "\tSM:" + readGroup.getSample() + "’ " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand(bwaFile.getPath() + " samse -r ‘@RG\tID:" + readGroup.getName()+ "\tLB:" + readGroup.getLibrary() + "\tSM:" + readGroup.getSample() + "’ " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
         //create bam file from sam file
         addCommand("echo starting converting to bam >> " + logFile.getAbsolutePath());

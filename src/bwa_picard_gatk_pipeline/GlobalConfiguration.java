@@ -17,8 +17,13 @@ public class GlobalConfiguration {
     private File baseOutputDir;
     private File csFastaToFastQFile;
     private Long ChunkSize;
+    private File referenceFile;
+    private File colorSpaceBWA;
+    
     
     private TargetEnum targetEnum;
+    private Boolean offline;
+    
     
     
     
@@ -54,6 +59,34 @@ public class GlobalConfiguration {
     public void setTargetEnum(TargetEnum targetEnum) {
         this.targetEnum = targetEnum;
     }
+
+    public File getReferenceFile() {
+        return referenceFile;
+    }
+
+    public void setReferenceFile(File referenceFile) {
+        this.referenceFile = referenceFile;
+    }
+
+    public File getColorSpaceBWA() {
+        return colorSpaceBWA;
+    }
+
+    public void setColorSpaceBWA(File colorSpaceBWA) {
+        this.colorSpaceBWA = colorSpaceBWA;
+    }
+
+    public Boolean getOffline() {
+        return offline;
+    }
+
+    public void setOffline(Boolean offline) {
+        this.offline = offline;
+    }
+    
+    
+    
+    
     
     
     
