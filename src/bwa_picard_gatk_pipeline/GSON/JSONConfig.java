@@ -13,6 +13,20 @@ import java.util.List;
 public class JSONConfig {
     
     List<SamplesDef> samplesDef;
+
+    public List<SamplesDef> getSamplesDef() {
+        return samplesDef;
+    }
+
+    public void setSamplesDef(List<SamplesDef> SamplesDef) {
+        this.samplesDef = SamplesDef;
+    }
+
+    
+   
+    
+    
+    
     
     
 }

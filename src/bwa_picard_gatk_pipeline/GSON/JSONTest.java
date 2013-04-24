@@ -22,10 +22,12 @@ public class JSONTest {
      public static void main(String[] args) 
      {
      
-         File jsonFile = new File("/home/wim/BWA_Picard_GATK_pipeline_test/readGroupTestCSFasta.json");
+        File jsonFile = new File("/home/wim/BWA_Picard_GATK_pipeline_test/readGroupTestCSFasta.json");
         ObjectMapper mapper = new ObjectMapper(); 
          try {
              JSONConfig jsconConfig = mapper.readValue(jsonFile, JSONConfig.class); // 'src' can be File, InputStream, Reader, String
+             String blaat = "blaat";
+             
          } catch (IOException ex) {
              Logger.getLogger(JSONTest.class.getName()).log(Level.SEVERE, null, ex);
          }

@@ -4,13 +4,15 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import bwa_picard_gatk_pipeline.enums.FileTypeEnum;
-import bwa_picard_gatk_pipeline.enums.TagEnum;
+import bwa_picard_gatk_pipeline.GSON.JSONConfig;
+import bwa_picard_gatk_pipeline.GSON.JSONTest;
+import bwa_picard_gatk_pipeline.GSON.ReadgroupsDef;
+import bwa_picard_gatk_pipeline.GSON.SamplesDef;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.picard.sam.PicardBamMerger;
@@ -21,8 +23,6 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.ConfigurationException;
-import org.apache.commons.configuration.PropertiesConfiguration;
 
 /**
  *
@@ -40,7 +40,7 @@ public class CommandLineClass {
         // TODO code application logic here
 
         Options options = new Options();
-        options.addOption("i", "input", true, "the input properties file describing the sample, read groups, tags and files to process. ");
+        options.addOption("i", "input", true, "the Json config file describing the samples, read groups, tags and files to process. ");
         options.addOption("o", "output", true, "base output directory. Subdirectories will be created in this dir for each sample, read group and tag. ");
         options.addOption("h", "help", false, "print this message");
         options.addOption("t", "target", false, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
@@ -63,68 +63,40 @@ public class CommandLineClass {
         GlobalConfiguration globalConfiguration = new GlobalConfiguration();
         globalConfiguration.setBaseOutputDir(outputDir);
 
-        File readGroupFile = new File(cmd.getOptionValue("i"));
+        File JsonConfigFile = new File(cmd.getOptionValue("i"));
+        
+        List<Sample> samples = new ArrayList<Sample>();
+        
+        ObjectMapper mapper = new ObjectMapper(); 
+         try {
+             JSONConfig jsconConfig = mapper.readValue(JsonConfigFile, JSONConfig.class); // 'src' can be File, InputStream, Reader, String
+            
+             for(SamplesDef samplesDef : jsconConfig.getSamplesDef())
+             {
+                 Sample sample = new Sample();
+                 
+                 for(ReadgroupsDef readgroupsDef : samplesDef.getReadgroupsDef())
+                 {
+                 
+                 
+                 }
+                 
+                 
+             
+             }
+             
+             
+             
+         } catch (IOException ex) {
+             Logger.getLogger(JSONTest.class.getName()).log(Level.SEVERE, null, ex);
+         }
 
-        Map<String, Sample> samplesToProcess;
-//        try {
-//            samplesToProcess = readPropertiesFile(readGroupFile);
-//
-//            for (Sample sample : samplesToProcess.values()) {
-//                sample.startProcessing();
-//            }
-//        } catch (IOException ex) {
-//            Logger.getLogger(CommandLineClass.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (ConfigurationException ex) {
-//            Logger.getLogger(CommandLineClass.class.getName()).log(Level.SEVERE, null, ex);
-//        }
+    
     }
     
     
 
-//    public static Map<String, Sample> readPropertiesFile(File readGroupFile) throws IOException, ConfigurationException {
-//
-//
-//        if (!readGroupFile.canRead()) {
-//            throw new IOException("Cannot read read group file " + readGroupFile.getPath());
-//        }
-//
-//
-//        config = new PropertiesConfiguration(readGroupFile);
-//
-//        Map<String, S> readGroupMap = new HashMap<String, ReadGroupProcecesser>();
-//
-//        //create the readGroups and readGroups processers
-//        for (String readGroupId : config.getStringArray("readGroup")) {
-//            ReadGroup readGroup = new ReadGroup();
-//            readGroup.setId(config.getString(readGroupId + ".id"));
-//            readGroup.setLibrary(config.getString(readGroupId + ".library"));
-//            readGroup.setSample(config.getString(readGroupId + ".sample"));
-//            readGroup.setReferenceFile(new File(config.getString("referenceFile")));            
-//
-//            File readGroupOutputDir = new File(outputDir, config.getString(readGroupId + ".id"));
-//            File csFastaToFastqConverterFile = new File(config.getString("csFastaToFastQConverter"));
-//
-//            ReadGroupProcecesser readGroupProcesser = new ReadGroupProcecesser(readGroup, readGroupOutputDir, csFastaToFastqConverterFile);
-//            readGroupProcesser.setChunkSize(new Long(config.getString("chunkSize")));
-//
-//            readGroupMap.put(readGroupId, readGroupProcesser);
-//        }
-//
-//        //add the file to the readgroup tag
-//        for (String fileId : config.getStringArray("File")) {
-//            String readGroupId = config.getString(fileId + ".readGroup");
-//            String filePath = config.getString(fileId + ".path");
-//            FileTypeEnum fileType = FileTypeEnum.valueOf(config.getString(fileId + ".type").toUpperCase());
-//            TagEnum tag = TagEnum.valueOf(config.getString(fileId + ".tag").toUpperCase());
-//
-//            readGroupMap.get(readGroupId).getReadGroupFileCollection().addFile(filePath, fileType, tag);
-//
-//        }
-//
-//        return readGroupMap;
-//
-//
-//    }
+
 
     private File mergeBamFilesUsingPicard(List<File> bamFiles) throws IOException {
         PicardBamMerger picardBamMerger = new PicardBamMerger();

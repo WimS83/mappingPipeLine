@@ -13,6 +13,24 @@ import java.util.List;
 public class SamplesDef {
     
     String name;
-    List<ReadgroupsDef> ReadgroupsDef;
+    List<ReadgroupsDef> readgroupsDef;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<ReadgroupsDef> getReadgroupsDef() {
+        return readgroupsDef;
+    }
+
+    public void setReadgroupsDef(List<ReadgroupsDef> ReadgroupsDef) {
+        this.readgroupsDef = ReadgroupsDef;
+    }
+    
+    
     
 }
