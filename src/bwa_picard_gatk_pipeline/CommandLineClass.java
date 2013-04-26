@@ -72,6 +72,9 @@ public class CommandLineClass {
         globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
         String targetString = cmd.getOptionValue("t");
         
+        if(cmd.hasOption("f")){globalConfiguration.setOffline(true);}else{globalConfiguration.setOffline(false);}
+        
+        
         globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));        
 
         File JsonConfigFile = new File(cmd.getOptionValue("i"));

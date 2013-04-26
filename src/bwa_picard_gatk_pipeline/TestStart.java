@@ -28,9 +28,13 @@ public class TestStart {
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
-        arguments.add("FASTQ");   
+        arguments.add("CHUNKS_BAM");   
         arguments.add("-r");
-        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/R_norvegicus_Rnor_5.0.fa");
+        arguments.add("/home/fedor/GENOMES/R_norvegicus/Rnor_5.0_chr1/Rattus_norvegicus.Rnor_5.0.70.dna.chromosome.1.fa");
+        arguments.add("-f");
+        arguments.add("-c");
+        arguments.add("-400");
+        
         
         
         

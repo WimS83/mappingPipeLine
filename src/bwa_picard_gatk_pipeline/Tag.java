@@ -19,6 +19,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.picard.sam.PicardBamMerger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -32,17 +34,11 @@ public class Tag {
 
     private List<CsFastaFilePair> csfastaFiles;
     private List<FastQFile> fastQFiles;
-    
     private List<File> bamFiles;
     private File mergedBamFile;
-    
     private TagEnum name;
-    
     private ReadGroup readGroup;
-    
     private File outputDirTag;
-
-   
 
     public void startProcessing() {
         try {
@@ -52,7 +48,7 @@ public class Tag {
 
             //process the csfasta files if there are any
             if (!csfastaFiles.isEmpty()) {
-                lookupCsFastaAndQualFiles();                
+                lookupCsFastaAndQualFiles();
                 convertCSFastaToFastQ();
             }
 
@@ -67,13 +63,12 @@ public class Tag {
                 }
 
                 //merge the bam files
-                 if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank())
-                 {                        
+                if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank()) {
                     if (!bamFiles.isEmpty()) {
                         mergeBamFiles();
                     }
-                 
-                 }
+
+                }
             }
 
 
@@ -103,16 +98,16 @@ public class Tag {
         return splitFastQFiles;
     }
 
-
-
     public void convertCSFastaToFastQ() throws csFastaToFastqException {
 
         System.out.println("Converting csFasta to fastq ");
-        
+
         //initialize the fastq list if no fastqFiles were set on the list from json
-        if(fastQFiles == null){ fastQFiles = new ArrayList<FastQFile>();}
-        
-        
+        if (fastQFiles == null) {
+            fastQFiles = new ArrayList<FastQFile>();
+        }
+
+
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             FastQFile fastqFile;
             try {
@@ -170,8 +165,10 @@ public class Tag {
     public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
         List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
 
+        //initialize the bam files list if not set by json
+        if(bamFiles == null){bamFiles = new ArrayList<File>();}
 
-
+        
         for (FastQFile splitFastQFile : getSplitFastQFiles()) {
             File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(splitFastQFile.getFastqFile().getPath()) + ".bam");
             bamFiles.add(bamFile);
@@ -199,23 +196,47 @@ public class Tag {
             throw new MappingException(ex.getMessage());
         }
 
-        try {
-            submitMappingJobs(bwaMappingJobs);
-        } catch (DrmaaException ex) {
-            throw new MappingException("Cannot submit job : " + ex.getMessage());
+        if (readGroup.getGlobalConfiguration().getOffline()) 
+        {
+            mapOffline(bwaMappingJobs);
+            
+            
+        } else {
+            
+            try {
+                submitMappingJobs(bwaMappingJobs);
+            } catch (DrmaaException ex) {
+                throw new MappingException("Cannot submit job : " + ex.getMessage());
 
-        }
-        try {
-            waitForMappingJobs(bwaMappingJobs);
-        } catch (DrmaaException ex) {
-            throw new MappingException("Cannot determine status of mapping jobs : " + ex.getMessage());
-        } catch (JobFaillureException ex) {
-            throw new MappingException("A mapping job failed : " + ex.getMessage());
+            }
+            try {
+                waitForMappingJobs(bwaMappingJobs);
+            } catch (DrmaaException ex) {
+                throw new MappingException("Cannot determine status of mapping jobs : " + ex.getMessage());
+            } catch (JobFaillureException ex) {
+                throw new MappingException("A mapping job failed : " + ex.getMessage());
+            }
         }
 
         mergeBamFiles();
-
-
+    }
+    
+    
+    private void mapOffline(List<BwaSolidMappingJob> bwaMappingJobs) throws MappingException {
+        
+        for(BwaSolidMappingJob bwaSolidMappingJob : bwaMappingJobs)
+        {
+            try {
+                bwaSolidMappingJob.mapOffline();
+            } catch (IOException ex) {
+                throw new MappingException("A offline mapping job failed : " + ex.getMessage());
+            } catch (InterruptedException ex) {
+                throw new MappingException("A offline mapping job failed : " + ex.getMessage());
+            }
+        }
+                      
+        
+        
     }
 
     private void waitForMappingJobs(List<BwaSolidMappingJob> bwaMappingJobs) throws DrmaaException, JobFaillureException {
@@ -246,8 +267,6 @@ public class Tag {
         }
     }
 
-   
-
     public List<FastQFile> getFastQFiles() {
         return fastQFiles;
     }
@@ -271,7 +290,6 @@ public class Tag {
     public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
         this.csfastaFiles = csfastaFiles;
     }
-    
 
     public ReadGroup getReadGroup() {
         return readGroup;
@@ -287,13 +305,11 @@ public class Tag {
     }
 
     private void lookupCsFastaAndQualFiles() throws IOException {
-        for(CsFastaFilePair csFastaFilePair : csfastaFiles)
-        {
+        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             csFastaFilePair.lookupCsFastaFile();
             csFastaFilePair.lookupQualFile();
         }
     }
-    
-    
+
     
 }
