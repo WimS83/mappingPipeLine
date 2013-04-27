@@ -95,7 +95,7 @@ public class CsFastaFilePairTest {
         csFastaFilePair.setCsFastaFile(csFastaFile);
         csFastaFilePair.lookupQualFile();        
         
-        fastqFile = csFastaFilePair.convertToFastQFile(tmpDir, converter);
+        csFastaFilePair.convertToFastQ(tmpDir);
         
         
         

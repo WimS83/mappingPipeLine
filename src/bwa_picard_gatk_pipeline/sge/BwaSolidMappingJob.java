@@ -84,7 +84,7 @@ public class BwaSolidMappingJob extends Job {
         //create sam file from output
         addCommand("echo starting converting to sam >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath() );
-        addCommand(bwaFile.getPath() + " samse -r \"@RG\\tID:" + readGroup.getName()+ "\\tPL:SOLID\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\" " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand(bwaFile.getPath() + " samse -r \"@RG\\tID:" + readGroup.getId()+ "\\tPL:SOLID\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
         //create bam file from sam file
         addCommand("echo starting converting to bam >> " + logFile.getAbsolutePath());

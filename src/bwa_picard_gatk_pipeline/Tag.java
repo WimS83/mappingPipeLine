@@ -19,8 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import net.sf.picard.sam.PicardBamMerger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -83,7 +81,7 @@ public class Tag {
             readGroup.getLog().append("Could not find csfasta or qual file: " + ex.getMessage());
         } finally {
 
-            readGroup.getLog().close();
+            
         }
 
     }
@@ -111,7 +109,7 @@ public class Tag {
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             FastQFile fastqFile;
             try {
-                fastqFile = csFastaFilePair.convertToFastQFile(outputDirTag, readGroup.getGlobalConfiguration().getCsFastaToFastQFile());
+                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag);
                 fastqFile.setTag(name);
                 fastQFiles.add(fastqFile);
 
@@ -126,11 +124,6 @@ public class Tag {
                 readGroup.getLog().append("error: " + ex.getMessage());
                 throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
 
-            } catch (InterruptedException ex) {
-                readGroup.getLog().append("Could not convert csFastaFilePair to Fastq");
-                readGroup.getLog().append(csFastaFilePair.toString());
-                readGroup.getLog().append("error: " + ex.getMessage());
-                throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
             }
         }
     }
