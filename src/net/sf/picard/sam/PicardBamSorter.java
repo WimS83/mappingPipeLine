@@ -34,7 +34,7 @@ public class PicardBamSorter {
         tmpDir.add(outputDir);
         sortBamFiles.TMP_DIR = tmpDir;
         sortBamFiles.CREATE_INDEX = true;
-        sortBamFiles.VALIDATION_STRINGENCY = sortBamFiles.VALIDATION_STRINGENCY.LENIENT;
+        sortBamFiles.VALIDATION_STRINGENCY = sortBamFiles.VALIDATION_STRINGENCY.LENIENT;        
        
         if(sortBamFiles.doWork() != 0 )
         {

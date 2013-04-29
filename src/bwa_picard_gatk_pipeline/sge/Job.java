@@ -19,6 +19,8 @@ public abstract class Job extends File{
 	private int timesSubmitted = 0;
 	private int maxSubmits = 5;
 	private BufferedWriter out;
+        protected String hostName;
+        
 
 	public Job(String filePath) throws IOException{
 		super(filePath);
@@ -46,7 +48,7 @@ public abstract class Job extends File{
 	 * @throws DrmaaException
 	 */
 	public final void submit() throws DrmaaException{
-		sgeID = JobController.getInstance().submitJob(this);
+		sgeID = JobController.getInstance().submitJob(this, hostName);
 		System.out.println("Submitted job " + getSGEName() + "ID: " + sgeID);
 	}
 	
@@ -75,6 +77,7 @@ public abstract class Job extends File{
 			JobController.getInstance().waitFor(sgeID);
 		}catch(JobFaillureException e){
 			reSubmit();
+                    
 		}
 	}
 	

@@ -6,6 +6,8 @@ package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
+import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
+import bwa_picard_gatk_pipeline.sge.PiclPairReadsJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.picard.sam.PicardBamSorter;
 import net.sf.samtools.SAMFileHeader.SortOrder;
+import org.ggf.drmaa.DrmaaException;
 
 /**
  *
@@ -59,9 +62,13 @@ public class ReadGroup {
             try {
                 mergeTagBams();
             } catch (IOException ex) {
-                Logger.getLogger(ReadGroup.class.getName()).log(Level.SEVERE, null, ex);
+                log.append(ex.getMessage());
             } catch (InterruptedException ex) {
-                Logger.getLogger(ReadGroup.class.getName()).log(Level.SEVERE, null, ex);
+                log.append(ex.getMessage());
+            } catch (DrmaaException ex) {
+                log.append(ex.getMessage());
+            } catch (JobFaillureException ex) {
+                log.append(ex.getMessage());
             }
         }
         
@@ -69,7 +76,7 @@ public class ReadGroup {
     
     }
     
-    private void mergeTagBams() throws IOException, InterruptedException {
+    private void mergeTagBams() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
         
         for(Tag tag : tags)
         {
@@ -108,33 +115,49 @@ public class ReadGroup {
         }        
     }
     
-    private File mergeF3AndF5Bam() throws IOException, InterruptedException {
+    private File mergeF3AndF5Bam() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
         
-        File pairedBamFileSortedByQueryName = new File(readGroupOutputDir, id+"_F3_F5_paired.bam");
         
-        PicardBamSorter picardBamSorter = new PicardBamSorter();
+        File pairedBamFileSortedByCoordinate = new File(readGroupOutputDir, id+"_F3_F5_paired.bam");
         
-        File F3BamFileSortedByQueryName = picardBamSorter.sortBamFilesUsingPicard(F3Bam, SortOrder.queryname);
-        File F5BamFileSortedByQueryName = picardBamSorter.sortBamFilesUsingPicard(F5Bam, SortOrder.queryname);
+        PiclPairReadsJob piclPairReadsJob = new PiclPairReadsJob(F3Bam, F5Bam, pairedBamFileSortedByCoordinate, this, "fedor35");
         
-        List<String> commands = new ArrayList<String>();
-        commands.add("/usr/local/Picl/picl");
-        commands.add("pairedbammaker");        
-        commands.add("-ori"); 
-        commands.add("ni"); 
-        commands.add("-first"); 
-        commands.add(F3BamFileSortedByQueryName.getAbsolutePath()); 
-        commands.add("-second"); 
-        commands.add(F5BamFileSortedByQueryName.getAbsolutePath()); 
-        commands.add("-output"); 
-        commands.add(pairedBamFileSortedByQueryName.getAbsolutePath());   
+        if(globalConfiguration.getOffline())
+        {
+            piclPairReadsJob.pairOffline();
+        }
+        else
+        {
+            piclPairReadsJob.submit();
+            piclPairReadsJob.waitFor();
+        }
         
-        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-        processBuilder.directory(readGroupOutputDir);   
-        Process proces = processBuilder.start();        
-        proces.waitFor();
         
-        File pairedBamFileSortedByCoordinate = picardBamSorter.sortBamFilesUsingPicard(pairedBamFileSortedByQueryName, SortOrder.coordinate);
+        
+        
+//        PicardBamSorter picardBamSorter = new PicardBamSorter();
+//        
+//        File F3BamFileSortedByQueryName = picardBamSorter.sortBamFilesUsingPicard(F3Bam, SortOrder.queryname);
+//        File F5BamFileSortedByQueryName = picardBamSorter.sortBamFilesUsingPicard(F5Bam, SortOrder.queryname);
+//        
+//        List<String> commands = new ArrayList<String>();
+//        commands.add("/usr/local/Picl/picl");
+//        commands.add("pairedbammaker");        
+//        commands.add("-ori"); 
+//        commands.add("ni"); 
+//        commands.add("-first"); 
+//        commands.add(F3BamFileSortedByQueryName.getAbsolutePath()); 
+//        commands.add("-second"); 
+//        commands.add(F5BamFileSortedByQueryName.getAbsolutePath()); 
+//        commands.add("-output"); 
+//        commands.add(pairedBamFileSortedByQueryName.getAbsolutePath());   
+//        
+//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+//        processBuilder.directory(readGroupOutputDir);   
+//        Process proces = processBuilder.start();        
+//        proces.waitFor();
+//        
+//        File pairedBamFileSortedByCoordinate = picardBamSorter.sortBamFilesUsingPicard(pairedBamFileSortedByQueryName, SortOrder.coordinate);
         
         return pairedBamFileSortedByCoordinate;
         
