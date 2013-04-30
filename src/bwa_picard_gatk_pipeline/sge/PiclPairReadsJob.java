@@ -85,12 +85,12 @@ public class PiclPairReadsJob extends Job {
         addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
         addCommand("\n");
         //sort the bam files by queryname
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + "TMP_DIR="+tmpDir.getAbsolutePath()+ " SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + "TMP_DIR="+tmpDir.getAbsolutePath()+ " SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //pair the bam files
         addCommand("/usr/local/Picl/picl pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + " &>> " + logFile.getAbsolutePath());
         //sort the bam file
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() +" O="+ F3_F5BamSortedByCoordinate.getAbsolutePath() + " SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ F3_F5BamSortedByCoordinate.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //copy the bamFile back to the server
         addCommand("echo starting copying of bam back to the server >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());

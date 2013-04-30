@@ -109,7 +109,7 @@ public class Tag {
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             FastQFile fastqFile;
             try {
-                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag);
+                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId());
                 fastqFile.setTag(name);
                 fastQFiles.add(fastqFile);
 

@@ -19,10 +19,10 @@ public class FastqEntry {
     private String csValues;
     private String qualValues;
 
-    public FastqEntry(Long counter, String csFastaLine, String qualLine) {
+    public FastqEntry(String seqName, String csFastaLine, String qualLine) {
 
 
-        seqName = counter.toString();
+        this.seqName = seqName;
         
         csToBWACSMap = new HashMap<Character, Character>();
         csToBWACSMap.put('0', 'A');
