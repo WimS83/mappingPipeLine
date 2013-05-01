@@ -142,7 +142,7 @@ public class CsFastaFilePair {
 //        return fastQFileWrapper;
 //    }
 
-    public FastQFile convertToFastQ(File outputDir, String readGroupId) throws FileNotFoundException, IOException {
+    public FastQFile convertToFastQ(File outputDir, String readGroupId, Long fastqRecordCounter) throws FileNotFoundException, IOException {
 
         File fastqFile = new File(outputDir, baseName + ".fastq");
         
@@ -155,8 +155,7 @@ public class CsFastaFilePair {
         String csFastaLine;
 
 
-        Long csFastLineCounter = new Long(0);
-        Long fastqRecordCounter = new Long(0);
+        Long csFastLineCounter = new Long(0);       
 
 
         Long diveder = new Long(2);

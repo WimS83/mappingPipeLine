@@ -44,7 +44,7 @@ public class PicardBamMergerTest {
     @Test
     public void testMergeBamFilesUsingPicard() throws Exception {
         
-        File dir = new File("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/F334/F334_F1/F3/");
+        File dir = new File("/home/wim/Analysis/ratfounders/pipelineTest/testOutput/testOutput/F334/F334_F1/F3");
         String[] extensions = new String[] { "bam" };
         List<File> bamFileList = (List<File>) FileUtils.listFiles(dir, extensions, true);
         

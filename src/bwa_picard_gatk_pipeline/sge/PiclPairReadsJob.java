@@ -63,12 +63,15 @@ public class PiclPairReadsJob extends Job {
        
         File F3_F5BamSortedByQueryName =  new File(tmpDir, baseName + "_F3_F5_queryNameSorted.bam");            
         File F3_F5BamSortedByCoordinate = new File(tmpDir, pairedBamFile.getName());    
+        File F3_F5BamSortedByCoordinateIndex = new File(tmpDir, FilenameUtils.getBaseName(F3_F5BamSortedByCoordinate.getName())+".bai");  
             
         
         File logFile = new File(pairedBamFile.getParentFile(), baseName + "_pairing.log");        
         
         File picardSortSam = new File("/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
-
+        File picl = new File("/home/sge_share_fedor8/common_scripts/Picl/picl");
+        
+        
         //add sge hostname and date information to log
         addCommand("uname -n >> " + logFile.getAbsolutePath());
         addCommand("\n");
@@ -88,13 +91,17 @@ public class PiclPairReadsJob extends Job {
         addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //pair the bam files
-        addCommand("/usr/local/Picl/picl pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + " &>> " + logFile.getAbsolutePath());
+        addCommand(picl.getAbsolutePath()+" pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + " &>> " + logFile.getAbsolutePath());
         //sort the bam file
         addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ F3_F5BamSortedByCoordinate.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //copy the bamFile back to the server
         addCommand("echo starting copying of bam back to the server >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());
         addCommand("cp " + F3_F5BamSortedByCoordinate.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
+        addCommand("cp " + F3_F5BamSortedByCoordinateIndex.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
+        
+        
+        
         addCommand("\n");
         //remove the tmp dir from the sge host
         addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());

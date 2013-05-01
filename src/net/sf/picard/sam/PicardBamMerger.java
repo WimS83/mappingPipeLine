@@ -11,6 +11,8 @@ import java.util.List;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileReader.ValidationStringency;
+import net.sf.samtools.SAMFileWriter;
+import net.sf.samtools.SAMFileWriterFactory;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -37,13 +39,15 @@ public class PicardBamMerger {
         mergeSamFiles.SORT_ORDER = SAMFileHeader.SortOrder.coordinate; 
         
         SAMFileReader.setDefaultValidationStringency(ValidationStringency.LENIENT);  
+        SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(true);
+        
         
         String blaat = "blaat";
       
         if(mergeSamFiles.doWork() != 0 )
         {
             throw new IOException("Could not merge bam files using Picard " + bamFiles.toString());
-        }       
+        }           
         
         return mergedBamFile;   
    }

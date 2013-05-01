@@ -7,15 +7,13 @@ package bwa_picard_gatk_pipeline;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
+import bwa_picard_gatk_pipeline.exceptions.TagProcessingException;
 import bwa_picard_gatk_pipeline.sge.PiclPairReadsJob;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.picard.sam.PicardBamSorter;
-import net.sf.samtools.SAMFileHeader.SortOrder;
 import org.ggf.drmaa.DrmaaException;
 
 /**
@@ -54,7 +52,11 @@ public class ReadGroup {
         {
             tag.setReadGroup(this);
             tag.createOutputDir(readGroupOutputDir);
-            tag.startProcessing();        
+            try {        
+                tag.startProcessing();
+            } catch (TagProcessingException ex) {
+                Logger.getLogger(ReadGroup.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }        
         
         if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.READGROUP_BAM.getRank()) 
