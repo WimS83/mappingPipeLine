@@ -55,7 +55,7 @@ public class ReadGroup {
             try {        
                 tag.startProcessing();
             } catch (TagProcessingException ex) {
-                Logger.getLogger(ReadGroup.class.getName()).log(Level.SEVERE, null, ex);
+                log.append(ex.getMessage());
             }
         }        
         

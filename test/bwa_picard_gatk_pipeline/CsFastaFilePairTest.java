@@ -51,38 +51,8 @@ public class CsFastaFilePairTest {
         
     }
 
-    /**
-     * Test of SetFilesBasedOnCsFastaFilePath method, of class CsFastaFilePair.
-     */
-    
-    @Test
-    public void testcountRecordOpeningsInCsFasta() throws Exception {
-        
-        File csFastaFile = new File(getClass().getResource("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.csfasta").getFile());
-        File qualFile = new File(getClass().getResource("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000_QV.qual").getFile());
-        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());               
-        
-        CsFastaFilePair csFastaFilePair = new CsFastaFilePair();
-        
-        long nrCsFastaEntries = csFastaFilePair.countRecordOpeningsInFile(csFastaFile);
-        
-        assertTrue(nrCsFastaEntries==500);          
-        
-    }
-    
-    @Test
-    public void testcountRecordOpeningsInQual() throws Exception {
-        
-        File csFastaFile = new File(getClass().getResource("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.csfasta").getFile());
-        File qualFile = new File(getClass().getResource("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000_QV.qual").getFile());
-        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());               
-        
-        CsFastaFilePair csFastaFilePair = new CsFastaFilePair();
-        
-        long nrCsFastaEntries = csFastaFilePair.countRecordOpeningsInFile(qualFile);
-        
-        assertTrue(nrCsFastaEntries==500);  
-    }
+   
+   
     
     
     @Test
@@ -95,7 +65,7 @@ public class CsFastaFilePairTest {
         csFastaFilePair.setCsFastaFile(csFastaFile);
         csFastaFilePair.lookupQualFile();        
         
-        csFastaFilePair.convertToFastQ(tmpDir,"unitTest", new Long(0));
+        csFastaFilePair.convertToFastQ(tmpDir,"unitTest");
         
         
         

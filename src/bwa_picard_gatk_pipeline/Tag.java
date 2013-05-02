@@ -20,7 +20,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import net.sf.picard.sam.PicardBamIndexStats;
+import net.sf.picard.sam.PicardGetReadCount;
 import net.sf.picard.sam.PicardBamMerger;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -38,8 +38,7 @@ public class Tag {
     private File mergedBamFile;
     private TagEnum name;
     private ReadGroup readGroup;
-    private File outputDirTag;
-    private Long fastqRecordCounter;
+    private File outputDirTag;    
     
     public void startProcessing() throws TagProcessingException {
         try {
@@ -50,7 +49,7 @@ public class Tag {
             //process the csfasta files if there are any
             if (!csfastaFiles.isEmpty()) {
                 lookupCsFastaAndQualFiles();
-                fastqRecordCounter = convertCSFastaToFastQ();
+                convertCSFastaToFastQ();
             }
             
             if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.CHUNKS_BAM.getRank()) {
@@ -103,11 +102,10 @@ public class Tag {
         return splitFastQFiles;
     }
     
-    public Long convertCSFastaToFastQ() throws csFastaToFastqException {
+    public void convertCSFastaToFastQ() throws csFastaToFastqException {
         
-        System.out.println("Converting csFasta to fastq ");
-        
-        Long fastqRecordCounter = new Long(0);
+        System.out.println("Converting csFasta to fastq ");        
+       
 
         //initialize the fastq list if no fastqFiles were set on the list from json
         if (fastQFiles == null) {
@@ -118,7 +116,7 @@ public class Tag {
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             FastQFile fastqFile;
             try {
-                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), fastqRecordCounter);
+                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId());
                 fastqFile.setTag(name);
                 fastQFiles.add(fastqFile);
                 
@@ -134,9 +132,7 @@ public class Tag {
                 throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
                 
             }
-        }
-        
-        return fastqRecordCounter;
+        }        
     }
     
     public void splitFastQFiles() throws SplitFastQException {
@@ -316,17 +312,32 @@ public class Tag {
         }
     }
     
+    
+    private Long getFastqRecordNr()
+    {
+        Long counter = new Long(0);
+        for(FastQFile fastQFile: fastQFiles)
+        {
+            counter = counter + fastQFile.getRecordNr();
+        }
+        
+        return counter;
+    
+    }
+    
     private void checkAllReadsAreAcountedFor() throws MappingException {
         
+        Long fastQRecords = getFastqRecordNr();
+        PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
+        Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);
         
-        PicardBamIndexStats picardBamIndexStats = new PicardBamIndexStats();
-        Long readInBamFile = picardBamIndexStats.getReadCount(mergedBamFile);
         
-        if (fastqRecordCounter.equals(readInBamFile)) {
-            readGroup.getLog().append("Merged bam file and fastq contain same amount of reads: " + fastqRecordCounter);
+        
+        if (fastQRecords.equals(readInBamFile)) {
+            readGroup.getLog().append("Merged bam file and fastq contain same amount of reads: " + fastQRecords.toString());
         } else {
-             readGroup.getLog().append("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastqRecordCounter+" Bam: "+readInBamFile);
-             throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastqRecordCounter+" Bam: "+readInBamFile);
+             readGroup.getLog().append("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
+             throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
             
         }
         

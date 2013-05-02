@@ -11,8 +11,6 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -26,6 +24,8 @@ public class CsFastaFilePair {
     private File qualFile;
     private String baseName;
     private Long recordNr;
+    
+    private String readNameMask;
 
     public void lookupCsFastaFile() throws IOException {
         csFastaFile = new File(path);
@@ -65,85 +65,11 @@ public class CsFastaFilePair {
         this.csFastaFile = csFastaFile;
     }
 
-    public void checkCsFastaAndQualContainEqualAmountOfRecords() throws IOException {
 
-        System.out.println("Checking csFasta and qual contain equal amount of records");
-        long csFastaRecords = countRecordOpeningsInFile(csFastaFile);
-        long qualRecords = countRecordOpeningsInFile(qualFile);
+    public FastQFile convertToFastQ(File outputDir, String readGroupId) throws FileNotFoundException, IOException {
 
-        if (csFastaRecords != qualRecords) {
-            throw new IOException("csFasta file " + csFastaFile.getPath() + " and qual " + qualFile.getPath() + " file do not contain same amount of records. Csfasta contains " + csFastaRecords + " and qual file contains  " + qualRecords);
-        }
-
-        recordNr = csFastaRecords;
-        System.out.println("Contains same amount of records " + toString());
-
-    }
-
-    public long countRecordOpeningsInFile(File file) {
-        long recordCounter = new Long(0);
-        Character recordOpeningCharacter = '>';
-
-        try {
-
-            BufferedReader br = new BufferedReader(new FileReader(file));
-            String line;
-            while ((line = br.readLine()) != null) {
-                if (line.charAt(0) == recordOpeningCharacter) {
-                    recordCounter++;
-                }
-            }
-            br.close();
-        } catch (Exception e) {//Catch exception if any
-            System.err.println("Error: " + e.getMessage());
-        }
-
-        return recordCounter;
-    }
-
-//    public FastQFile convertToFastQFile(File outputDir, File csFastaToFastqConverter) throws IOException, InterruptedException {
-//        checkCsFastaAndQualContainEqualAmountOfRecords();
-//
-//
-//        List<String> commands = new ArrayList<String>();
-//        commands.add(csFastaToFastqConverter.getPath());
-//        commands.add("-f");
-//        commands.add(csFastaFile.getPath());
-//        commands.add("-q");
-//        commands.add(qualFile.getPath());
-//        commands.add("-e");
-//        commands.add(baseName);
-//
-//
-//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-//        processBuilder.directory(outputDir);
-//        Process proces = processBuilder.start();
-//        proces.waitFor();
-//
-//        System.out.println("working directory = " + outputDir.getPath());
-//        System.out.println("Converting csFasta file " + csFastaFile.getPath());
-//
-//
-//
-//        File fastqFile = new File(outputDir, "p1." + baseName + ".fastq");
-//
-//        if (!fastqFile.exists()) {
-//            throw new IOException("Cannot find fastq file " + fastqFile.getPath());
-//        }
-//
-//        FastQFile fastQFileWrapper = new FastQFile(fastqFile);
-//        fastQFileWrapper.countNumberOfrecords();
-//
-//        if (fastQFileWrapper.getRecordNr() != recordNr) {
-//            throw new IOException("Not same amount of records in csfasta and fastq file. Csfasta = " + recordNr + " fastq = " + fastQFileWrapper.getFastqFile().getPath() + " = " + fastQFileWrapper.getRecordNr());
-//        }
-//
-//
-//        return fastQFileWrapper;
-//    }
-
-    public FastQFile convertToFastQ(File outputDir, String readGroupId, Long fastqRecordCounter) throws FileNotFoundException, IOException {
-
+        recordNr = new Long(0);
+        
         File fastqFile = new File(outputDir, baseName + ".fastq");
         
         // Create file 
@@ -155,7 +81,8 @@ public class CsFastaFilePair {
         String csFastaLine;
 
 
-        Long csFastLineCounter = new Long(0);       
+        Long csFastLineCounter = new Long(0);
+        String seqName = "";
 
 
         Long diveder = new Long(2);
@@ -169,13 +96,30 @@ public class CsFastaFilePair {
             }
             csFastLineCounter++;
 
-            if (csFastLineCounter % diveder == 0) {
-                fastqRecordCounter++;
-                String seqName = readGroupId+":"+fastqRecordCounter;
+            //if at the second and last line of a csfasta record
+            if (csFastLineCounter % diveder == 0) {                
+                seqName = readGroupId+":"+seqName;
+                
+                
                 FastqEntry fastqEntry = new FastqEntry(seqName, csFastaLine, qualLine);
                 
                 out.write(fastqEntry.toString());
             }
+            //if at the first line of a csfasta record
+            else
+            {
+                //remove the leading > from the seqname
+                seqName = csFastaLine.substring(1);
+                
+                //remove a string (for example F3 or F5-P2) from the seqname to make them identical for later pairing
+                if(readNameMask != null)
+                {
+                    seqName = seqName.replace(readNameMask, "");
+                }
+                recordNr++;
+            }
+            
+            
         }
         
         csFastaReader.close();
@@ -208,6 +152,16 @@ public class CsFastaFilePair {
     public void setPath(String path) {
         this.path = path;
     }
+
+    public String getReadNameMask() {
+        return readNameMask;
+    }
+
+    public void setReadNameMask(String readNameMask) {
+        this.readNameMask = readNameMask;
+    }
+    
+    
 
     @Override
     public String toString() {
