@@ -11,7 +11,6 @@ import java.util.List;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileReader.ValidationStringency;
-import net.sf.samtools.SAMFileWriter;
 import net.sf.samtools.SAMFileWriterFactory;
 import org.apache.commons.io.FilenameUtils;
 
@@ -22,7 +21,7 @@ import org.apache.commons.io.FilenameUtils;
 public class PicardBamMerger {
     
     
-   public File mergeBamFilesUsingPicard(List<File> bamFiles) throws IOException 
+   public File mergeBamFilesUsingPicard(List<File> bamFiles, File tmpDir) throws IOException 
    {
         File outputDir = bamFiles.get(0).getParentFile();
         String baseName = FilenameUtils.getBaseName(bamFiles.get(0).getName());        
@@ -32,9 +31,9 @@ public class PicardBamMerger {
         mergeSamFiles.INPUT = bamFiles;
         mergeSamFiles.OUTPUT = mergedBamFile;
         mergeSamFiles.USE_THREADING = true;
-        List<File> tmpDir = new ArrayList<File>(0);
-        tmpDir.add(outputDir);
-        mergeSamFiles.TMP_DIR = tmpDir;
+        List<File> tmpDirList = new ArrayList<File>(0);
+        tmpDirList.add(tmpDir);
+        mergeSamFiles.TMP_DIR = tmpDirList;
         mergeSamFiles.CREATE_INDEX = true;
         mergeSamFiles.SORT_ORDER = SAMFileHeader.SortOrder.coordinate; 
         

@@ -12,8 +12,6 @@ import bwa_picard_gatk_pipeline.sge.PiclPairReadsJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.ggf.drmaa.DrmaaException;
 
 /**

@@ -11,6 +11,10 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -24,6 +28,13 @@ public class CsFastaFilePair {
     private File qualFile;
     private String baseName;
     private Long recordNr;
+    private File outputDir;
+    private Integer chunkCounter;
+    private List<FastQChunk> fastQChunks;
+    private FastQChunk currentChunk;
+    
+    
+    BufferedWriter out;
     
     private String readNameMask;
 
@@ -66,26 +77,28 @@ public class CsFastaFilePair {
     }
 
 
-    public FastQFile convertToFastQ(File outputDir, String readGroupId) throws FileNotFoundException, IOException {
+    public List<FastQChunk> convertToFastQ(File outputDir, String readGroupId, Integer chunkSize) throws FileNotFoundException, IOException {
 
+        
+        fastQChunks = new ArrayList<FastQChunk>();
+        this.outputDir = outputDir;
         recordNr = new Long(0);
-        
-        File fastqFile = new File(outputDir, baseName + ".fastq");
-        
-        // Create file 
-        FileWriter fstream = new FileWriter(fastqFile);
-        BufferedWriter out = new BufferedWriter(fstream);
+        chunkCounter = 0;
+        Integer chunkRecordCounter = 0;
 
+        //initalize the reader
         BufferedReader csFastaReader = new BufferedReader(new FileReader(csFastaFile));
         BufferedReader qualReader = new BufferedReader(new FileReader(qualFile));
         String csFastaLine;
 
-
+        //initialize the writer
+        setWriterToNextChunk();   
+        
+        //initialize the counter to check if we are on a description or csvalues line
         Long csFastLineCounter = new Long(0);
-        String seqName = "";
-
-
-        Long diveder = new Long(2);
+        Long diveder = new Long(2);        
+        
+        String seqName = "";        
 
         while ((csFastaLine = csFastaReader.readLine()) != null) {
             String qualLine = qualReader.readLine();
@@ -98,12 +111,21 @@ public class CsFastaFilePair {
 
             //if at the second and last line of a csfasta record
             if (csFastLineCounter % diveder == 0) {                
-                seqName = readGroupId+":"+seqName;
                 
+               if(recordNr % chunkSize == 0 && recordNr != 0)
+               {
+                   closeWriter(chunkRecordCounter);
+                   chunkRecordCounter = 0;
+                   setWriterToNextChunk();
+               }
+                
+                seqName = readGroupId+":"+seqName;
                 
                 FastqEntry fastqEntry = new FastqEntry(seqName, csFastaLine, qualLine);
                 
                 out.write(fastqEntry.toString());
+                recordNr++; 
+                chunkRecordCounter++;
             }
             //if at the first line of a csfasta record
             else
@@ -115,23 +137,46 @@ public class CsFastaFilePair {
                 if(readNameMask != null)
                 {
                     seqName = seqName.replace(readNameMask, "");
-                }
-                recordNr++;
-            }
-            
-            
+                }               
+            }            
         }
         
         csFastaReader.close();
-        qualReader.close();        
-        out.close();
+        qualReader.close();  
         
-        FastQFile fastQFileWrapper = new FastQFile(fastqFile);
+        closeWriter(chunkRecordCounter);           
         
-        return fastQFileWrapper;
+        return fastQChunks;
 
 
     }
+    
+    
+    private void setWriterToNextChunk() {
+        
+       
+        try {
+            chunkCounter++;
+            File fastqFile = new File(outputDir, baseName + "_chunk"+chunkCounter+".fastq"); 
+            currentChunk = new FastQChunk(fastqFile);
+            fastQChunks.add(currentChunk); 
+            FileWriter fstream = new FileWriter(fastqFile);
+             out = new BufferedWriter(fstream);
+        } catch (IOException ex) {
+            Logger.getLogger(CsFastaFilePair.class.getName()).log(Level.SEVERE, null, ex);
+        }
+       
+    }
+    
+    private void closeWriter(Integer chunkRecordCounter) {
+        currentChunk.setRecordNr(chunkRecordCounter);
+        try {
+            out.close();
+        } catch (IOException ex) {
+            Logger.getLogger(CsFastaFilePair.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
 
     public long getRecordNr() {
         return recordNr;
@@ -183,4 +228,8 @@ public class CsFastaFilePair {
         return sb.toString();
 
     }
+
+    
+
+    
 }

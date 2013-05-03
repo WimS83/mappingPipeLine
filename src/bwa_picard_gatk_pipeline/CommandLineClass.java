@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.picard.sam.PicardBamMerger;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.GnuParser;
@@ -43,10 +42,10 @@ public class CommandLineClass {
         options.addOption("h", "help", false, "print this message");
         options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
         options.addOption("r", "reference", true, "reference file. fai and BWA indexes should be next to this file.");
-        options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
-        options.addOption("q", "converter", true, "Location of Frans Paul his csfasta to fastq converter. Default is /home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq .");
+        options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");        
         options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. Thist option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
         options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
+        options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. ");
 
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -66,10 +65,10 @@ public class CommandLineClass {
         GlobalConfiguration globalConfiguration = new GlobalConfiguration();
         globalConfiguration.setBaseOutputDir(outputDir);
         
-        globalConfiguration.setChunkSize( new Long(cmd.getOptionValue("c", "1000000")));   
-        globalConfiguration.setCsFastaToFastQFile(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/SAP42-testing/csfastaToFastq")));  
+        globalConfiguration.setChunkSize( new Integer(cmd.getOptionValue("c", "1000000")));   
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));  
         globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
+        globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m")));
         String targetString = cmd.getOptionValue("t");
         
         if(cmd.hasOption("f")){globalConfiguration.setOffline(true);}else{globalConfiguration.setOffline(false);}
@@ -97,23 +96,9 @@ public class CommandLineClass {
         } catch (IOException ex) {
             Logger.getLogger(CommandLineClass.class.getName()).log(Level.SEVERE, null, ex);
      
-        }
-            
-                 
-                 
-    
-
-    
-    
-    
+        }   
     }
-
-
-
-    private File mergeBamFilesUsingPicard(List<File> bamFiles) throws IOException {
-        PicardBamMerger picardBamMerger = new PicardBamMerger();
-        return picardBamMerger.mergeBamFilesUsingPicard(bamFiles);
-    }
+   
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();

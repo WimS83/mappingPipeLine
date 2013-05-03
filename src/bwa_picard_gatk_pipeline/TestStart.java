@@ -34,12 +34,8 @@ public class TestStart {
         arguments.add("-f");
         arguments.add("-c");
         arguments.add("-400");
-        
-        
-        
-        
-        
-        
+        arguments.add("-m");
+        arguments.add("/tmp/");        
         
         CommandLineClass.main(arguments.toArray(new String[0]));
         

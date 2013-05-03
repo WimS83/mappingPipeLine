@@ -64,16 +64,20 @@ public class FastqEntry {
         for(String qualValue : splitQualLine2)
         {
             Character charToAppend;
+            
+            
+            int charInteger = new Integer(qualValue);
+            charInteger = charInteger + 33;
+            charToAppend =  (char) charInteger;
+            
             if(qualValue.equalsIgnoreCase("-1"))
             {
                 charToAppend ='"';
             }
-            else
+            if(qualValue.equalsIgnoreCase("0"))
             {
-                int charInteger = new Integer(qualValue);
-                charInteger = charInteger + 33;
-                charToAppend =  (char) charInteger;
-            }
+                charToAppend ='"';
+            }         
             
             qualSB.append(charToAppend);
         

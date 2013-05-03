@@ -14,18 +14,14 @@ import java.io.File;
 public class GlobalConfiguration {
     
     
-    private File baseOutputDir;
-    private File csFastaToFastQFile;
-    private Long ChunkSize;
+    private File baseOutputDir;    
+    private Integer ChunkSize;
     private File referenceFile;
     private File colorSpaceBWA;
-    
+    private File tmpDir;
     
     private TargetEnum targetEnum;
     private Boolean offline;
-    
-    
-    
     
 
     public File getBaseOutputDir() {
@@ -36,19 +32,11 @@ public class GlobalConfiguration {
         this.baseOutputDir = baseOutputDir;
     }
 
-    public File getCsFastaToFastQFile() {
-        return csFastaToFastQFile;
-    }
-
-    public void setCsFastaToFastQFile(File csFastaToFastQFile) {
-        this.csFastaToFastQFile = csFastaToFastQFile;
-    }
-
-    public Long getChunkSize() {
+    public Integer getChunkSize() {
         return ChunkSize;
     }
 
-    public void setChunkSize(Long ChunkSize) {
+    public void setChunkSize(Integer ChunkSize) {
         this.ChunkSize = ChunkSize;
     }
 
@@ -83,6 +71,16 @@ public class GlobalConfiguration {
     public void setOffline(Boolean offline) {
         this.offline = offline;
     }
+
+    public File getTmpDir() {
+        return tmpDir;
+    }
+
+    public void setTmpDir(File tmpDir) {
+        this.tmpDir = tmpDir;
+    }
+    
+    
     
     
     

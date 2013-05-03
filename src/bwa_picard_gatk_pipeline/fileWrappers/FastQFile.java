@@ -26,24 +26,19 @@ public class FastQFile {
     private Long recordNr;
     private File fastqFile;
     
-    private TagEnum tag;
-            
-    private List<FastQFile> splitFastQFiles;
+    private TagEnum tag;    
     
-    private BufferedWriter splitFastQout = null;  
+    private BufferedWriter chunkOut = null;  
     private long chunkCounter = new Long(0);
     private String baseName;
     
+    private List<FastQChunk> fastQChunks;
     
+    private boolean isSplit;
 
     public FastQFile(File fastqFile) {
-        this.fastqFile = fastqFile;
-        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());                
-        
-        splitFastQFiles = new ArrayList<FastQFile>();
-        
-        
-    }    
+        this.fastqFile = fastqFile;        
+    }  
     
 
     public long getRecordNr() {
@@ -61,6 +56,8 @@ public class FastQFile {
    
 
     public long countNumberOfrecords() {
+        
+        if(fastqFile == null){ return 0;}
         
         long lineCounter = new Long(0);        
         
@@ -82,8 +79,13 @@ public class FastQFile {
         return recordNr;               
     }
     
-    public void splitFastQFile(Long chunkSize, File outputDir) throws FileNotFoundException, IOException, SplitFastQException
+    public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir) throws FileNotFoundException, IOException, SplitFastQException
     {
+        
+        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());                
+        
+        fastQChunks = new ArrayList<FastQChunk>();
+        
         long lineCounterIn = new Long(0);    
         long lineCounterOut = new Long(0);   
         
@@ -104,8 +106,8 @@ public class FastQFile {
                 
             }                
 
-            splitFastQout.write(line);
-            splitFastQout.write("\n");
+            chunkOut.write(line);
+            chunkOut.write("\n");
             lineCounterOut++;
             lineCounterIn++; 
 
@@ -122,6 +124,8 @@ public class FastQFile {
             throw new SplitFastQException(toString()+"Record nr in chunks is not equal to record nr in fastq file");
         }
         
+        return fastQChunks;
+        
         
     }
     
@@ -129,23 +133,23 @@ public class FastQFile {
     {
         chunkCounter++;
         File outputChunkFile = new File(outputDir, baseName + "_chunk"+chunkCounter+".fastq");
-        FastQFile fastQChunk = new FastQFile(outputChunkFile);
-        splitFastQFiles.add(fastQChunk);
+        FastQChunk fastQChunk = new FastQChunk(outputChunkFile);       
+        fastQChunks.add(fastQChunk);
         
         FileWriter fstream = new FileWriter(outputChunkFile);
-        splitFastQout = new BufferedWriter(fstream);        
+        chunkOut = new BufferedWriter(fstream);        
     
     }
     
     private void closeCurrentChunk(Long lineCounterOut) throws IOException {
-        splitFastQFiles.get(splitFastQFiles.size() -1).setRecordNr(lineCounterOut / new Long(4));
-        splitFastQout.close();
+        fastQChunks.get(fastQChunks.size() -1).setRecordNr(lineCounterOut / new Long(4));
+        chunkOut.close();
         
     }   
     
 
-    public List<FastQFile> getSplitFastQFiles() {
-        return splitFastQFiles;
+    public List<FastQChunk> getSplitFastQFiles() {
+        return fastQChunks;
     }
 
     public void setTag(TagEnum tag) {
@@ -171,7 +175,7 @@ public class FastQFile {
         }
         sb.append("\n"); 
         
-        if(!splitFastQFiles.isEmpty())
+        if(!fastQChunks.isEmpty())
         {            
             sb.append("records in chunks: "+getRecordNrInChunks());
         }
@@ -185,18 +189,32 @@ public class FastQFile {
     public Long getRecordNrInChunks()
     {
         Long recordInChunks = new Long(0);
-        for(FastQFile fastQFileChunk : splitFastQFiles)
+        for(FastQChunk fastQChunk : fastQChunks)
         {
-            recordInChunks= recordInChunks+fastQFileChunk.getRecordNr();
+            recordInChunks= recordInChunks+fastQChunk.getRecordNr();
         }
         
         return recordInChunks;
     
     }
 
-    
+    public boolean getIsSplit() {
+        return isSplit;
+    }
+
+    public void setIsSplit(boolean isSplit) {
+        this.isSplit = isSplit;
+    }
 
     
+
+   
+
+    
+
+   
+    
+  
         
     
     

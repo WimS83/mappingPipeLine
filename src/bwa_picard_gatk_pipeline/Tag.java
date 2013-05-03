@@ -12,6 +12,7 @@ import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import bwa_picard_gatk_pipeline.exceptions.TagProcessingException;
 import bwa_picard_gatk_pipeline.exceptions.csFastaToFastqException;
 import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
+import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.BwaSolidMappingJob;
 import java.io.File;
@@ -34,6 +35,8 @@ public class Tag {
     
     private List<CsFastaFilePair> csfastaFiles;
     private List<FastQFile> fastQFiles;
+    private List<FastQChunk> fastQChunks;
+    
     private List<File> bamFiles;
     private File mergedBamFile;
     private TagEnum name;
@@ -45,20 +48,23 @@ public class Tag {
             
             readGroup.getLog().append("Started processing of read group " + name.toString());
             deleteFastQChunks();
+            
+            fastQChunks = new ArrayList<FastQChunk>();
 
             //process the csfasta files if there are any
             if (!csfastaFiles.isEmpty()) {
                 lookupCsFastaAndQualFiles();
-                convertCSFastaToFastQ();
+                fastQChunks.addAll(convertCSFastaToFastQ());
+            }
+            if (fastQFiles != null &&!fastQFiles.isEmpty()) {
+                   fastQChunks.addAll(splitFastQFiles());
             }
             
             if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.CHUNKS_BAM.getRank()) {
                 //process the fastq files if there any (given in the properties file or converted from csfasta)
-                if (!fastQFiles.isEmpty()) {
-                    splitFastQFiles();
-                }
+                
                 //map the fastqChunks if there are any
-                if (!getSplitFastQFiles().isEmpty()) {
+                if (!getFastqChunks().isEmpty()) {
                     mapFastqFiles();
                 }
 
@@ -66,8 +72,7 @@ public class Tag {
                 if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank()) {
                     if (!bamFiles.isEmpty()) {
                         mergeBamFiles();
-                    }
-                    
+                    }                    
                 }
             }
             
@@ -92,57 +97,46 @@ public class Tag {
         
     }
     
-    public List<FastQFile> getSplitFastQFiles() {
-        List<FastQFile> splitFastQFiles = new ArrayList<FastQFile>();
-        
-        for (FastQFile fastQFile : fastQFiles) {
-            splitFastQFiles.addAll(fastQFile.getSplitFastQFiles());
-        }
-        
-        return splitFastQFiles;
+    public List<FastQChunk> getFastqChunks() {
+               
+        return fastQChunks;
     }
     
-    public void convertCSFastaToFastQ() throws csFastaToFastqException {
+    public List<FastQChunk> convertCSFastaToFastQ() throws csFastaToFastqException {
         
         System.out.println("Converting csFasta to fastq ");        
-       
-
-        //initialize the fastq list if no fastqFiles were set on the list from json
-        if (fastQFiles == null) {
-            fastQFiles = new ArrayList<FastQFile>();
-        }
-        
+        List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
         
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
-            FastQFile fastqFile;
-            try {
-                fastqFile = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId());
-                fastqFile.setTag(name);
-                fastQFiles.add(fastqFile);
-                
+           try {
+                fastQChunks = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), readGroup.getGlobalConfiguration().getChunkSize());
+                                
                 readGroup.getLog().append("Converted csFastaFilePair to Fastq");
-                readGroup.getLog().append(csFastaFilePair.toString());
-                readGroup.getLog().append(fastqFile.toString());
-                
-                
+                readGroup.getLog().append(csFastaFilePair.toString());                
             } catch (IOException ex) {
                 readGroup.getLog().append("Could not convert csFastaFilePair to Fastq");
                 readGroup.getLog().append(csFastaFilePair.toString());
                 readGroup.getLog().append("error: " + ex.getMessage());
                 throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
-                
             }
-        }        
+        }
+        
+        return fastQChunksConverted;
     }
     
-    public void splitFastQFiles() throws SplitFastQException {
+    public List<FastQChunk> splitFastQFiles() throws SplitFastQException {
         readGroup.getLog().append("Start splitting fastqFiles");
+        List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
         
         try {
             
             for (FastQFile fastQFile : fastQFiles) {
                 
-                fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag);
+                //skip the fastq files that are already split
+                if(fastQFile.getIsSplit()){continue;}
+                
+                
+                fastQChunksConverted = fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag);
                 readGroup.getLog().append("Splitted fastQFile:");
                 readGroup.getLog().append(fastQFile.toString());
             }
@@ -160,6 +154,8 @@ public class Tag {
             throw ex;
             
         }
+        
+        return fastQChunksConverted;
     }
     
     public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
@@ -171,11 +167,11 @@ public class Tag {
         }
         
         
-        for (FastQFile splitFastQFile : getSplitFastQFiles()) {
-            File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(splitFastQFile.getFastqFile().getPath()) + ".bam");
+        for (FastQChunk fastQChunk : getFastqChunks()) {
+            File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(fastQChunk.getFastqFile().getPath()) + ".bam");
             bamFiles.add(bamFile);
             
-            BwaSolidMappingJob bwaMappingJob = new BwaSolidMappingJob(splitFastQFile.getFastqFile(), bamFile, readGroup);
+            BwaSolidMappingJob bwaMappingJob = new BwaSolidMappingJob(fastQChunk.getFastqFile(), bamFile, readGroup);
             bwaMappingJobs.add(bwaMappingJob);
         }
         return bwaMappingJobs;
@@ -251,7 +247,7 @@ public class Tag {
     private void mergeBamFiles() {
         PicardBamMerger picardBamMerger = new PicardBamMerger();
         try {
-            mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamFiles);
+            mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamFiles, readGroup.getGlobalConfiguration().getTmpDir());
         } catch (IOException ex) {
             readGroup.getLog().append("Could not merge bam files in dir  " + outputDirTag.getAbsolutePath() + " :" + ex.getMessage());
         }
@@ -313,12 +309,12 @@ public class Tag {
     }
     
     
-    private Long getFastqRecordNr()
+    private Long getReadsInChunks()
     {
         Long counter = new Long(0);
-        for(FastQFile fastQFile: fastQFiles)
+        for(FastQChunk fastQChunk: fastQChunks)
         {
-            counter = counter + fastQFile.getRecordNr();
+            counter = counter + fastQChunk.getRecordNr();
         }
         
         return counter;
@@ -327,7 +323,7 @@ public class Tag {
     
     private void checkAllReadsAreAcountedFor() throws MappingException {
         
-        Long fastQRecords = getFastqRecordNr();
+        Long fastQRecords = getReadsInChunks();
         PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
         Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);
         

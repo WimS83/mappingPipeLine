@@ -83,7 +83,7 @@ public class FastQFileTest {
        
        fastQFileWrapper.countNumberOfrecords();          
         try {
-            fastQFileWrapper.splitFastQFile(new Long(500), outputDir);
+            fastQFileWrapper.splitFastQFile(new Integer(500), outputDir);
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         } catch (IOException ex) {
@@ -92,9 +92,9 @@ public class FastQFileTest {
             System.out.println(ex.getMessage());
         }
        
-       List<FastQFile> splitFastQfiles = fastQFileWrapper.getSplitFastQFiles();
+       List<FastQChunk> fastqChunks = fastQFileWrapper.getSplitFastQFiles();
        
-       assertTrue(splitFastQfiles.size() == 4);
+       assertTrue(fastqChunks.size() == 4);
        
        long fastQrecords = fastQFileWrapper.getRecordNr();
        long splitRecordsNr = fastQFileWrapper.getRecordNrInChunks();
