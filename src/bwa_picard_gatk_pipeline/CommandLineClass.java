@@ -19,7 +19,6 @@ import org.apache.commons.cli.GnuParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
-import org.apache.commons.configuration.Configuration;
 
 /**
  *
@@ -28,7 +27,7 @@ import org.apache.commons.configuration.Configuration;
 public class CommandLineClass {
 
     static File outputDir;
-    static Configuration config;
+  
 
     /**
      * @param args the command line arguments
@@ -45,7 +44,9 @@ public class CommandLineClass {
         options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");        
         options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. Thist option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
         options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
-        options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. ");
+        options.addOption("s", "picard-sortsam", true, "Location on the SGE cluster of the Picard SortSam. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
+        options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is home/sge_share_fedor8/common_scripts/Picl/picl");
+        options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. Default is /tmp/ ");
 
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -68,7 +69,10 @@ public class CommandLineClass {
         globalConfiguration.setChunkSize( new Integer(cmd.getOptionValue("c", "1000000")));   
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));  
         globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
-        globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m")));
+        globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m", "/tmp")));
+        globalConfiguration.setPicardSortSam(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar")));
+        globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
+        
         String targetString = cmd.getOptionValue("t");
         
         if(cmd.hasOption("f")){globalConfiguration.setOffline(true);}else{globalConfiguration.setOffline(false);}

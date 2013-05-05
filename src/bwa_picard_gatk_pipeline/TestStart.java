@@ -35,7 +35,14 @@ public class TestStart {
         arguments.add("-c");
         arguments.add("-400");
         arguments.add("-m");
-        arguments.add("/tmp/");        
+        arguments.add("/tmp/");       
+        arguments.add("-s");
+        arguments.add("/home/wim/NetBeansProjects/java_libs/picard-tools-1.90/picard-tools-1.90/SortSam.jar");       
+        arguments.add("-p");
+        arguments.add("/usr/local/picl/picl");   
+        
+        
+        
         
         CommandLineClass.main(arguments.toArray(new String[0]));
         

@@ -4,10 +4,7 @@
  */
 package bwa_picard_gatk_pipeline;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.Map;
-import org.apache.commons.configuration.ConfigurationException;
+
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

@@ -23,10 +23,6 @@ public class PiclPairReadsJob extends Job {
     private File F5Bam;
     private File pairedBamFile;
     
-    
-    
-    
-    
     private ReadGroup readGroup;
 
     public PiclPairReadsJob(File F3Bam, File F5Bam, File pairedBamFile,  ReadGroup readGroup, String hostNameArg) throws IOException {
@@ -68,8 +64,8 @@ public class PiclPairReadsJob extends Job {
         
         File logFile = new File(pairedBamFile.getParentFile(), baseName + "_pairing.log");        
         
-        File picardSortSam = new File("/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
-        File picl = new File("/home/sge_share_fedor8/common_scripts/Picl/picl");
+        File picardSortSam = readGroup.getGlobalConfiguration().getPicardSortSam();
+        File picl = readGroup.getGlobalConfiguration().getPicl();
         
         
         //add sge hostname and date information to log

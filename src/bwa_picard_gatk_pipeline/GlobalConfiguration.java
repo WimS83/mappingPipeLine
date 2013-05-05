@@ -19,6 +19,9 @@ public class GlobalConfiguration {
     private File referenceFile;
     private File colorSpaceBWA;
     private File tmpDir;
+    private File picardSortSam;
+    private File picl;
+    
     
     private TargetEnum targetEnum;
     private Boolean offline;
@@ -79,6 +82,25 @@ public class GlobalConfiguration {
     public void setTmpDir(File tmpDir) {
         this.tmpDir = tmpDir;
     }
+
+    public File getPicardSortSam() {
+        return picardSortSam;
+    }
+
+    public void setPicardSortSam(File picardSortSam) {
+        this.picardSortSam = picardSortSam;
+    }
+
+    public File getPicl() {
+        return picl;
+    }
+
+    public void setPicl(File picl) {
+        this.picl = picl;
+    }
+    
+    
+    
     
     
     
