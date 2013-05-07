@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import net.sf.picard.cmdline.CommandLineProgram;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileReader.ValidationStringency;
@@ -26,6 +27,10 @@ public class PicardBamMerger {
         File outputDir = bamFiles.get(0).getParentFile();
         String baseName = FilenameUtils.getBaseName(bamFiles.get(0).getName());        
         File mergedBamFile = new File(outputDir, baseName+ "_merged.bam");
+        
+        SAMFileReader.setDefaultValidationStringency(ValidationStringency.LENIENT);  
+        SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(true);
+        
        
         MergeSamFiles mergeSamFiles = new MergeSamFiles();     
         mergeSamFiles.INPUT = bamFiles;
@@ -35,10 +40,7 @@ public class PicardBamMerger {
         tmpDirList.add(tmpDir);
         mergeSamFiles.TMP_DIR = tmpDirList;
         mergeSamFiles.CREATE_INDEX = true;
-        mergeSamFiles.SORT_ORDER = SAMFileHeader.SortOrder.coordinate; 
-        
-        SAMFileReader.setDefaultValidationStringency(ValidationStringency.LENIENT);  
-        SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(true);
+        mergeSamFiles.SORT_ORDER = SAMFileHeader.SortOrder.coordinate;    
         
         
         String blaat = "blaat";

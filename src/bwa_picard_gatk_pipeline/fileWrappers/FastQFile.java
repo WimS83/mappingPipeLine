@@ -35,10 +35,8 @@ public class FastQFile {
     private List<FastQChunk> fastQChunks;
     
     private boolean isSplit;
-
-    public FastQFile(File fastqFile) {
-        this.fastqFile = fastqFile;        
-    }  
+    
+    private String path;
     
 
     public long getRecordNr() {
@@ -55,9 +53,11 @@ public class FastQFile {
 
    
 
-    public long countNumberOfrecords() {
+    public Long countNumberOfrecords() {
         
-        if(fastqFile == null){ return 0;}
+         fastqFile = new File(path);
+        
+        if(fastqFile == null){ return new Long(0);}
         
         long lineCounter = new Long(0);        
         
@@ -81,8 +81,10 @@ public class FastQFile {
     
     public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir) throws FileNotFoundException, IOException, SplitFastQException
     {
+        fastqFile = new File(path);
+        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());   
         
-        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());                
+        Integer chunksizeInLines = 4 * chunkSize;
         
         fastQChunks = new ArrayList<FastQChunk>();
         
@@ -97,7 +99,7 @@ public class FastQFile {
         while ((line = br.readLine()) != null) {
 
             //if linecounter is multiple of chunksize
-            if(lineCounterIn % chunkSize == 0 && lineCounterIn > 0)
+            if(lineCounterIn % chunksizeInLines == 0 && lineCounterIn > 0)
             {
                 //close the current chunk      
                 closeCurrentChunk(lineCounterOut);
@@ -205,6 +207,16 @@ public class FastQFile {
     public void setIsSplit(boolean isSplit) {
         this.isSplit = isSplit;
     }
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+    
+    
 
     
 

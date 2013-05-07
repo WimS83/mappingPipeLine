@@ -28,18 +28,20 @@ public class TestStart {
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
-        arguments.add("READGROUP_BAM");   
+        arguments.add("SAMPLE_VCF");   
         arguments.add("-r");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/Rnor5.0_chr1and2/Rattus_norvegicus.Rnor_5.0.71.dna.chromosome.1and2.fa");
         arguments.add("-f");
         arguments.add("-c");
         arguments.add("-400");
         arguments.add("-m");
-        arguments.add("/tmp/");       
+        arguments.add("/tmp/blaat");       
         arguments.add("-s");
         arguments.add("/home/wim/NetBeansProjects/java_libs/picard-tools-1.90/picard-tools-1.90/SortSam.jar");       
         arguments.add("-p");
-        arguments.add("/usr/local/picl/picl");   
+        arguments.add("/home/sge_share_fedor8/common_scripts/Picl/picl");   
+        arguments.add("-q");
+        arguments.add("/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap");   
         
         
         

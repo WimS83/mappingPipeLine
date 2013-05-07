@@ -52,7 +52,7 @@ public class Tag {
             fastQChunks = new ArrayList<FastQChunk>();
 
             //process the csfasta files if there are any
-            if (!csfastaFiles.isEmpty()) {
+            if (csfastaFiles != null && !csfastaFiles.isEmpty()) {
                 lookupCsFastaAndQualFiles();
                 fastQChunks.addAll(convertCSFastaToFastQ());
             }
@@ -72,6 +72,7 @@ public class Tag {
                 if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank()) {
                     if (!bamFiles.isEmpty()) {
                         mergeBamFiles();
+                        checkAllReadsAreAcountedFor();
                     }                    
                 }
             }
@@ -215,8 +216,8 @@ public class Tag {
             }
         }
         
-        mergeBamFiles();        
-        checkAllReadsAreAcountedFor();
+       
+      
         
     }
     
@@ -224,7 +225,7 @@ public class Tag {
         
         for (BwaSolidMappingJob bwaSolidMappingJob : bwaMappingJobs) {
             try {
-                bwaSolidMappingJob.mapOffline();
+                bwaSolidMappingJob.executeOffline();
             } catch (IOException ex) {
                 throw new MappingException("A offline mapping job failed : " + ex.getMessage());
             } catch (InterruptedException ex) {

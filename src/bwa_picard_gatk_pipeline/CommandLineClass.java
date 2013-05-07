@@ -47,6 +47,9 @@ public class CommandLineClass {
         options.addOption("s", "picard-sortsam", true, "Location on the SGE cluster of the Picard SortSam. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
         options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is home/sge_share_fedor8/common_scripts/Picl/picl");
         options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. Default is /tmp/ ");
+        options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
+        options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
+        options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
 
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -72,10 +75,15 @@ public class CommandLineClass {
         globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m", "/tmp")));
         globalConfiguration.setPicardSortSam(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar")));
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
+        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
+        globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));
+        
+        
         
         String targetString = cmd.getOptionValue("t");
         
         if(cmd.hasOption("f")){globalConfiguration.setOffline(true);}else{globalConfiguration.setOffline(false);}
+        if(cmd.hasOption("k")){globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));}
         
         
         globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));        

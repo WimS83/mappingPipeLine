@@ -51,15 +51,15 @@ public class PiclPairReadsJob extends Job {
         String baseName = readGroup.getId();
         File tmpDir = new File("/tmp/" + baseName);
         
-        File copiedF3Bam = new File(tmpDir, F3Bam.getName());
-        File copiedF5Bam = new File(tmpDir, F5Bam.getName());
+//        File copiedF3Bam = new File(tmpDir, F3Bam.getName());
+//        File copiedF5Bam = new File(tmpDir, F5Bam.getName());
         
-        File F3BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(copiedF3Bam.getAbsolutePath()) + "F3_queryNameSorted.bam");    
-        File F5BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(copiedF5Bam.getAbsolutePath()) + "F5_queryNameSorted.bam"); 
+        File F3BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(F3Bam.getAbsolutePath()) + "F3_queryNameSorted.bam");    
+        File F5BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(F5Bam.getAbsolutePath()) + "F5_queryNameSorted.bam"); 
        
         File F3_F5BamSortedByQueryName =  new File(tmpDir, baseName + "_F3_F5_queryNameSorted.bam");            
-        File F3_F5BamSortedByCoordinate = new File(tmpDir, pairedBamFile.getName());    
-        File F3_F5BamSortedByCoordinateIndex = new File(tmpDir, FilenameUtils.getBaseName(F3_F5BamSortedByCoordinate.getName())+".bai");  
+//        File F3_F5BamSortedByCoordinate = new File(tmpDir, pairedBamFile.getName());    
+//        File F3_F5BamSortedByCoordinateIndex = new File(tmpDir, FilenameUtils.getBaseName(F3_F5BamSortedByCoordinate.getName())+".bai");  
             
         
         File logFile = new File(pairedBamFile.getParentFile(), baseName + "_pairing.log");        
@@ -84,17 +84,17 @@ public class PiclPairReadsJob extends Job {
         addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
         addCommand("\n");
         //sort the bam files by queryname
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+copiedF5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //pair the bam files
         addCommand(picl.getAbsolutePath()+" pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + " &>> " + logFile.getAbsolutePath());
         //sort the bam file
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ F3_F5BamSortedByCoordinate.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ pairedBamFile.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         //copy the bamFile back to the server
         addCommand("echo starting copying of bam back to the server >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());
-        addCommand("cp " + F3_F5BamSortedByCoordinate.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
-        addCommand("cp " + F3_F5BamSortedByCoordinateIndex.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
+//        addCommand("cp " + F3_F5BamSortedByCoordinate.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
+//        addCommand("cp " + F3_F5BamSortedByCoordinateIndex.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
         
         
         
@@ -106,19 +106,19 @@ public class PiclPairReadsJob extends Job {
         addCommand("date  >> " + logFile.getAbsolutePath());
     }
     
-    public void pairOffline() throws IOException, InterruptedException
-    {
-        List<String> commands = new ArrayList<String>();
-        commands.add("/bin/sh");
-        commands.add(this.getAbsolutePath()); 
-        
-        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-        processBuilder.directory(this.getParentFile());   
-        Process proces = processBuilder.start();        
-        proces.waitFor();
-        
-    
-    }
+//    public void pairOffline() throws IOException, InterruptedException
+//    {
+//        List<String> commands = new ArrayList<String>();
+//        commands.add("/bin/sh");
+//        commands.add(this.getAbsolutePath()); 
+//        
+//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+//        processBuilder.directory(this.getParentFile());   
+//        Process proces = processBuilder.start();        
+//        proces.waitFor();
+//        
+//    
+//    }
     
     
     

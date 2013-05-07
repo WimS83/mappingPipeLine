@@ -65,8 +65,13 @@ public class FastQFileTest {
     public void testCountNumberOfrecords() {
        
         File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());  
-        FastQFile fastQFileWrapper = new FastQFile(fastqFile);
-        assertTrue(fastQFileWrapper.countNumberOfrecords() == 500);
+        FastQFile fastQFileWrapper = new FastQFile();
+        fastQFileWrapper.setPath(fastqFile.getAbsolutePath());
+        
+        Long expectedCount = new Long(500);
+        Long foundCount = fastQFileWrapper.countNumberOfrecords();
+        
+        assertTrue("Found number of records does not match expected. Found: "+foundCount +" expedted: "+expectedCount, foundCount.equals(expectedCount));
         
     }
 
@@ -76,7 +81,8 @@ public class FastQFileTest {
     @Test
     public void testSplitFastQFile() {
        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());  
-       FastQFile fastQFileWrapper = new FastQFile(fastqFile);
+       FastQFile fastQFileWrapper = new FastQFile();
+       fastQFileWrapper.setPath(fastqFile.getAbsolutePath());
        
        outputDir = new File(tmpDir, "tmpOutputDir");
        outputDir.mkdir();

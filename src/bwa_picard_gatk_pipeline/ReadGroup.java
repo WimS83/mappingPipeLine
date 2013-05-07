@@ -11,7 +11,9 @@ import bwa_picard_gatk_pipeline.exceptions.TagProcessingException;
 import bwa_picard_gatk_pipeline.sge.PiclPairReadsJob;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
+import org.apache.commons.io.FilenameUtils;
 import org.ggf.drmaa.DrmaaException;
 
 /**
@@ -61,6 +63,8 @@ public class ReadGroup {
         {         
             try {
                 mergeTagBams();
+                runQualimap();                
+                
             } catch (IOException ex) {
                 log.append(ex.getMessage());
             } catch (InterruptedException ex) {
@@ -124,7 +128,7 @@ public class ReadGroup {
         
         if(globalConfiguration.getOffline())
         {
-            piclPairReadsJob.pairOffline();
+            piclPairReadsJob.executeOffline();
         }
         else
         {
@@ -166,6 +170,31 @@ public class ReadGroup {
     private File mergeF3AndR3Bam() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
+    
+     private void runQualimap() throws IOException, InterruptedException {
+        
+        List<String> commands = new ArrayList<String>();
+        commands.add(globalConfiguration.getQualiMap().getAbsolutePath()); 
+        commands.add("bamqc");
+        commands.add("-bam");
+        commands.add(mergedBam.getAbsolutePath());
+        commands.add("-outdir");
+        commands.add(readGroupOutputDir.getAbsolutePath());
+        commands.add("-outformat");
+        commands.add("PDF");
+        
+        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+        processBuilder.directory(readGroupOutputDir);   
+        Process proces = processBuilder.start();        
+        proces.waitFor();
+         
+        File report = new File(readGroupOutputDir, "report.pdf");
+        //rename the report file
+        String reportRenamed = FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + ".pdf";
+        report.renameTo(new File(reportRenamed));    
+    }
+    
+     
 
     public String getId() {
         return id;
@@ -230,6 +259,10 @@ public class ReadGroup {
         readGroupOutputDir.mkdir();
         
     }
+
+   
+
+   
 
     
 

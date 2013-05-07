@@ -108,17 +108,17 @@ public class BwaSolidMappingJob extends Job {
         addCommand("date  >> " + logFile.getAbsolutePath());
     }
     
-    public void mapOffline() throws IOException, InterruptedException
-    {
-        List<String> commands = new ArrayList<String>();
-        commands.add("/bin/sh");
-        commands.add(this.getAbsolutePath()); 
-        
-        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-        processBuilder.directory(this.getParentFile());   
-        Process proces = processBuilder.start();        
-        proces.waitFor();
-        
-    
-    }
+//    public void mapOffline() throws IOException, InterruptedException
+//    {
+//        List<String> commands = new ArrayList<String>();
+//        commands.add("/bin/sh");
+//        commands.add(this.getAbsolutePath()); 
+//        
+//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
+//        processBuilder.directory(this.getParentFile());   
+//        Process proces = processBuilder.start();        
+//        proces.waitFor();
+//        
+//    
+//    }
 }

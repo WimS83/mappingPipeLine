@@ -21,6 +21,10 @@ public class GlobalConfiguration {
     private File tmpDir;
     private File picardSortSam;
     private File picl;
+    private File qualiMap;
+    private File gatk;
+    private File knownIndels;
+    
     
     
     private TargetEnum targetEnum;
@@ -98,6 +102,34 @@ public class GlobalConfiguration {
     public void setPicl(File picl) {
         this.picl = picl;
     }
+
+    public File getQualiMap() {
+        return qualiMap;
+    }
+
+    public void setQualiMap(File qualiMap) {
+        this.qualiMap = qualiMap;
+    }
+
+    public File getGatk() {
+        return gatk;
+    }
+
+    public void setGatk(File gatk) {
+        this.gatk = gatk;
+    }
+
+    public File getKnownIndels() {
+        return knownIndels;
+    }
+
+    public void setKnownIndels(File knownIndels) {
+        this.knownIndels = knownIndels;
+    }
+    
+    
+    
+    
     
     
     
