@@ -30,7 +30,7 @@ public class GATKRealignIndelsJob extends Job {
         
         
         sgeName = "createRealignTarget_"+dedupBam.getName();
-        
+        close();
     }
     
     
