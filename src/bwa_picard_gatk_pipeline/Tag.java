@@ -46,34 +46,23 @@ public class Tag {
     public void startProcessing() throws TagProcessingException {
         try {
             
-            readGroup.getLog().append("Started processing of read group " + name.toString());
-            deleteFastQChunks();
             
-            fastQChunks = new ArrayList<FastQChunk>();
-
-            //process the csfasta files if there are any
-            if (csfastaFiles != null && !csfastaFiles.isEmpty()) {
-                lookupCsFastaAndQualFiles();
-                fastQChunks.addAll(convertCSFastaToFastQ());
-            }
-            if (fastQFiles != null &&!fastQFiles.isEmpty()) {
-                   fastQChunks.addAll(splitFastQFiles());
-            }
+            
+            readGroup.getLog().append("Started processing of read group " + name.toString());
+            
+            initalizeUnsetList();           //initialize the unset list to empty list  
+            deleteFastQChunks();            //delete existing chunks
+            lookupCsFastaAndQualFiles();    //lookup the csfasta and qual files for given csfasta paths
+            convertCSFastaToFastQ();        //convert csfasta to fastq chunks
+            splitFastQFiles();              //if fastq files were given split them to fastq chunks
             
             if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.CHUNKS_BAM.getRank()) {
-                //process the fastq files if there any (given in the properties file or converted from csfasta)
-                
-                //map the fastqChunks if there are any
-                if (!getFastqChunks().isEmpty()) {
-                    mapFastqFiles();
-                }
+                            
+               mapFastqFiles();     //map fastq chunks to bam files        
 
-                //merge the bam files
                 if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank()) {
-                    if (!bamFiles.isEmpty()) {
-                        mergeBamFiles();
-                        checkAllReadsAreAcountedFor();
-                    }                    
+                    mergeBamFiles();                //merge the bam files
+                    checkAllReadsAreAcountedFor();  //check all the reads are accounted for
                 }
             }
             
@@ -98,19 +87,30 @@ public class Tag {
         
     }
     
+    private void initalizeUnsetList() {
+        
+        if(csfastaFiles == null){csfastaFiles = new ArrayList<CsFastaFilePair>();}
+        if(fastQFiles == null){fastQFiles = new ArrayList<FastQFile>();}
+        if(fastQChunks == null){fastQChunks = new ArrayList<FastQChunk>();}
+        if(bamFiles == null){bamFiles = new ArrayList<File>();}
+        
+    }
+    
+    
+    
     public List<FastQChunk> getFastqChunks() {
                
         return fastQChunks;
     }
     
-    public List<FastQChunk> convertCSFastaToFastQ() throws csFastaToFastqException {
+    public void convertCSFastaToFastQ() throws csFastaToFastqException {
         
         System.out.println("Converting csFasta to fastq ");        
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
         
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
            try {
-                fastQChunks = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), readGroup.getGlobalConfiguration().getChunkSize());
+                fastQChunksConverted = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), readGroup.getGlobalConfiguration().getChunkSize());
                                 
                 readGroup.getLog().append("Converted csFastaFilePair to Fastq");
                 readGroup.getLog().append(csFastaFilePair.toString());                
@@ -122,10 +122,10 @@ public class Tag {
             }
         }
         
-        return fastQChunksConverted;
+        fastQChunks.addAll(fastQChunksConverted);
     }
     
-    public List<FastQChunk> splitFastQFiles() throws SplitFastQException {
+    public void splitFastQFiles() throws SplitFastQException {
         readGroup.getLog().append("Start splitting fastqFiles");
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
         
@@ -156,18 +156,12 @@ public class Tag {
             
         }
         
-        return fastQChunksConverted;
+        fastQChunks.addAll(fastQChunksConverted);
     }
     
     public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
         List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
 
-        //initialize the bam files list if not set by json
-        if (bamFiles == null) {
-            bamFiles = new ArrayList<File>();
-        }
-        
-        
         for (FastQChunk fastQChunk : getFastqChunks()) {
             File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(fastQChunk.getFastqFile().getPath()) + ".bam");
             bamFiles.add(bamFile);
@@ -214,10 +208,7 @@ public class Tag {
             } catch (JobFaillureException ex) {
                 throw new MappingException("A mapping job failed : " + ex.getMessage());
             }
-        }
-        
-       
-      
+        }     
         
     }
     
@@ -246,6 +237,9 @@ public class Tag {
     }
     
     private void mergeBamFiles() {
+        
+        if(bamFiles.isEmpty()){return;} //return if there are no bamchunks 
+        
         PicardBamMerger picardBamMerger = new PicardBamMerger();
         try {
             mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamFiles, readGroup.getGlobalConfiguration().getTmpDir());
@@ -324,11 +318,11 @@ public class Tag {
     
     private void checkAllReadsAreAcountedFor() throws MappingException {
         
+        if(fastQChunks.isEmpty()){ return;} //return if fastq chunks are empty and no mapping could have been done
+        
         Long fastQRecords = getReadsInChunks();
         PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
-        Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);
-        
-        
+        Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);        
         
         if (fastQRecords.equals(readInBamFile)) {
             readGroup.getLog().append("Merged bam file and fastq contain same amount of reads: " + fastQRecords.toString());
@@ -336,9 +330,8 @@ public class Tag {
              readGroup.getLog().append("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
              throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
             
-        }
-        
-        
-        
+        }        
     }
+
+    
 }
