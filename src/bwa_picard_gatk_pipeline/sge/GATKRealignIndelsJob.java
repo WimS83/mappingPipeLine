@@ -11,25 +11,29 @@ import org.apache.commons.io.FilenameUtils;
 
 /**
  *
- * @author wim
+ * @author Wim Spee
  */
 public class GATKRealignIndelsJob extends Job {
     
     private String sgeName;   
     private File dedupBam;   
+    private File realignedBam;
+    
     private GlobalConfiguration gc;
     
 
-    public GATKRealignIndelsJob(File dedupBam, GlobalConfiguration gc) throws IOException {        
+    public GATKRealignIndelsJob(File dedupBam, File realignedBam, GlobalConfiguration gc) throws IOException {        
         
-        super(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_createRealignTargets.sh");        
+        super(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignIndels.sh");        
         this.gc = gc;
         this.dedupBam = dedupBam;
+        this.realignedBam = realignedBam;
+        
         
         addCommands();
         
         
-        sgeName = "createRealignTarget_"+dedupBam.getName();
+        sgeName = "realignIndels_"+dedupBam.getName();
         close();
     }
     
@@ -44,9 +48,15 @@ public class GATKRealignIndelsJob extends Job {
     private void addCommands() throws IOException 
     {
         String baseName = FilenameUtils.getBaseName(dedupBam.getAbsolutePath()); 
-        File logFile = new File(dedupBam.getParentFile(), baseName + "createRealignTargets.log");  
+        File logFile = new File(dedupBam.getParentFile(), baseName + "_realign.log");  
         File tmpDir = new File("/tmp", baseName);    
-        File realignTarget = new File(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignTargets.intever"); 
+        
+        File localdedupBam = new File(tmpDir, dedupBam.getName());
+        File remoteIndex = new File(dedupBam.getParentFile(), baseName+".bai");
+        File localIndex = new File(localdedupBam.getParentFile(), baseName+".bai");
+        
+        
+        File realignTargets = new File(FilenameUtils.removeExtension(localdedupBam.getAbsolutePath()) + "_realignTargets.intervals"); 
         
                
         //add sge hostname and date information to log
@@ -59,13 +69,25 @@ public class GATKRealignIndelsJob extends Job {
         addCommand("mkdir " + tmpDir);
         addCommand("\n");
         
+        //copy the bam to the node
+        addCommand("cp " + dedupBam.getAbsolutePath() +" "+localdedupBam.getAbsolutePath());  
+        addCommand("cp " + remoteIndex.getAbsolutePath() +" "+localIndex.getAbsolutePath());  
+        
         String knownIndels = "";
         if(gc.getKnownIndels()!= null)
         {
-            knownIndels = "--known "+gc.getKnownIndels().getAbsolutePath();
+            knownIndels = "-known "+gc.getKnownIndels().getAbsolutePath();
         }        
         
-        addCommand("java -jar "+gc.getGatk().getAbsolutePath() +" -T RealignerTargetCreator "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+dedupBam.getAbsolutePath()+ " -o "+realignTarget.getAbsolutePath()+knownIndels);
+        addCommand("java -jar "+gc.getGatk().getAbsolutePath() +" -T RealignerTargetCreator "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+ " -o "+realignTargets.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
+        addCommand("java -jar "+gc.getGatk().getAbsolutePath() +" -T IndelRealigner "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+" -targetIntervals "+realignTargets.getAbsolutePath() + " -o "+realignedBam.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
+        
+        addCommand("\n");
+        //remove the tmp dir from the sge host
+        addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("\n");
+        addCommand("echo finished >> " + logFile.getAbsolutePath());
+        addCommand("date  >> " + logFile.getAbsolutePath());
                  
     
     }

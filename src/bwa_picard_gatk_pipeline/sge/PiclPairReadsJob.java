@@ -78,11 +78,11 @@ public class PiclPairReadsJob extends Job {
         addCommand("\n");
         //copy the fastQFile to the tmp dir 
         addCommand("echo starting copying of first bam file >> " + logFile.getAbsolutePath());
-        addCommand("cp " + F3Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
-        addCommand("\n");
-        addCommand("echo starting copying of second bam file >> " + logFile.getAbsolutePath());
-        addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
-        addCommand("\n");
+//        addCommand("cp " + F3Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        addCommand("\n");
+//        addCommand("echo starting copying of second bam file >> " + logFile.getAbsolutePath());
+//        addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        addCommand("\n");
         //sort the bam files by queryname
         addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
         addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
@@ -102,7 +102,7 @@ public class PiclPairReadsJob extends Job {
         //remove the tmp dir from the sge host
         addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
-        addCommand("finished >> " + logFile.getAbsolutePath());
+        addCommand("echo finished >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());
     }
     

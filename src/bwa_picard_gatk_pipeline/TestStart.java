@@ -28,7 +28,7 @@ public class TestStart {
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
-        arguments.add("SAMPLE_VCF");   
+        arguments.add("SAMPLE_ANNOTATED_VCF");   
         arguments.add("-r");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/Rnor5.0_chr1and2/Rattus_norvegicus.Rnor_5.0.71.dna.chromosome.1and2.fa");
         arguments.add("-f");

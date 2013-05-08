@@ -27,7 +27,6 @@ import org.apache.commons.cli.ParseException;
 public class CommandLineClass {
 
     static File outputDir;
-  
 
     /**
      * @param args the command line arguments
@@ -41,7 +40,7 @@ public class CommandLineClass {
         options.addOption("h", "help", false, "print this message");
         options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
         options.addOption("r", "reference", true, "reference file. fai and BWA indexes should be next to this file.");
-        options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");        
+        options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
         options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. Thist option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
         options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
         options.addOption("s", "picard-sortsam", true, "Location on the SGE cluster of the Picard SortSam. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
@@ -50,6 +49,7 @@ public class CommandLineClass {
         options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
         options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
+        options.addOption("h", "gatk-sge-threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 1, when doing offline processing number of threads is always set to 1.");
 
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -65,52 +65,58 @@ public class CommandLineClass {
 
         outputDir = new File(cmd.getOptionValue("o"));
         outputDir.mkdirs();
-        
+
         GlobalConfiguration globalConfiguration = new GlobalConfiguration();
         globalConfiguration.setBaseOutputDir(outputDir);
-        
-        globalConfiguration.setChunkSize( new Integer(cmd.getOptionValue("c", "1000000")));   
-        globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));  
+
+        globalConfiguration.setChunkSize(new Integer(cmd.getOptionValue("c", "1000000")));
+        globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));
         globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
         globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m", "/tmp")));
         globalConfiguration.setPicardSortSam(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar")));
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));
-        
-        
-        
+        globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("h", "1")));
+
+
+
         String targetString = cmd.getOptionValue("t");
-        
-        if(cmd.hasOption("f")){globalConfiguration.setOffline(true);}else{globalConfiguration.setOffline(false);}
-        if(cmd.hasOption("k")){globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));}
-        
-        
-        globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));        
+
+        if (cmd.hasOption("f")) {
+            globalConfiguration.setOffline(true);
+            globalConfiguration.setGatkSGEThreads(1);
+        } else {
+            globalConfiguration.setOffline(false);
+        }
+        if (cmd.hasOption("k")) {
+            globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));
+        }
+
+
+        globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));
 
         File JsonConfigFile = new File(cmd.getOptionValue("i"));
-        
+
         List<Sample> samples = new ArrayList<Sample>();
-        
-        ObjectMapper mapper = new ObjectMapper(); 
+
+        ObjectMapper mapper = new ObjectMapper();
         try {
             JSONConfig jsconConfig = mapper.readValue(JsonConfigFile, JSONConfig.class); // 'src' can be File, InputStream, Reader, String
-                        
+
             samples = jsconConfig.getSamples();
-            
-            for(Sample sample : samples)
-            {
+
+            for (Sample sample : samples) {
                 sample.setGlobalConfiguration(globalConfiguration);
                 sample.startProcessing();
             }
-            
-            
+
+
         } catch (IOException ex) {
             Logger.getLogger(CommandLineClass.class.getName()).log(Level.SEVERE, null, ex);
-     
-        }   
+
+        }
     }
-   
 
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();

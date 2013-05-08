@@ -24,6 +24,7 @@ public class GlobalConfiguration {
     private File qualiMap;
     private File gatk;
     private File knownIndels;
+    private Integer gatkSGEThreads;
     
     
     
@@ -126,6 +127,21 @@ public class GlobalConfiguration {
     public void setKnownIndels(File knownIndels) {
         this.knownIndels = knownIndels;
     }
+
+    public Integer getGatkSGEThreads() {
+        return gatkSGEThreads;
+    }
+
+    public void setGatkSGEThreads(Integer gatkSGEThreads) {
+        this.gatkSGEThreads = gatkSGEThreads;
+    }
+    
+    
+    
+    
+
+    
+    
     
     
     
