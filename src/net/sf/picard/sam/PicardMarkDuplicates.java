@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileWriterFactory;
-import net.sf.samtools.SAMRecord;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -35,7 +34,7 @@ public class PicardMarkDuplicates {
         File duplicatesMarkedbam = new File(outputDir, baseName+ "_dedup"+".bam");
         File duplicatesMarkedbamMetrics = new File(outputDir, baseName+ "_dedup"+".metrics");
        
-        MarkDuplicates markDuplicates = new MarkDuplicates();
+        MarkDuplicates markDuplicates = new MarkDuplicates();                
         markDuplicates.INPUT = inputBamFileList;
         markDuplicates.OUTPUT = duplicatesMarkedbam; 
         List<File> tmpDirList = new ArrayList<File>(0);

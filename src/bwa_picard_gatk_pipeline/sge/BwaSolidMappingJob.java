@@ -104,7 +104,7 @@ public class BwaSolidMappingJob extends Job {
         //remove the tmp dir from the sge host
         addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
-        addCommand("finished >> " + logFile.getAbsolutePath());
+        addCommand("echo finished >> " + logFile.getAbsolutePath());
         addCommand("date  >> " + logFile.getAbsolutePath());
     }
     

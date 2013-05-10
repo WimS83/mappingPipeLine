@@ -8,23 +8,22 @@ import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.exceptions.MappingException;
-import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import bwa_picard_gatk_pipeline.exceptions.TagProcessingException;
-import bwa_picard_gatk_pipeline.exceptions.csFastaToFastqException;
 import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.BwaSolidMappingJob;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.sf.picard.sam.PicardGetReadCount;
 import net.sf.picard.sam.PicardBamMerger;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.ggf.drmaa.DrmaaException;
 
 /**
@@ -32,306 +31,276 @@ import org.ggf.drmaa.DrmaaException;
  * @author Wim Spee
  */
 public class Tag {
-    
-    private List<CsFastaFilePair> csfastaFiles;
-    private List<FastQFile> fastQFiles;
-    private List<FastQChunk> fastQChunks;
-    
-    private List<File> bamFiles;
-    private File mergedBamFile;
+
+    //the required input for processing the tag
     private TagEnum name;
     private ReadGroup readGroup;
-    private File outputDirTag;    
-    
+    private File outputDirTag;
+    //the possible input for the processing of the tag
+    private List<CsFastaFilePair> csfastaFiles;
+    private List<FastQFile> fastQFiles;
+    private File existingFastqChunkDir;
+    private List<File> existingFastqChunksList;
+    private File existingBamChunkDir;
+    private List<File> existingBamChunksList;
+    //the output of the processing
+    private List<FastQChunk> fastQChunks;
+    private List<File> bamChunks;
+    private File mergedBamFile;
+    private String[] bamExtension = new String[]{"bam"};
+    private String[] fastqExtension = new String[]{"fastq"};
+
     public void startProcessing() throws TagProcessingException {
         try {
-            
-            
-            
+
             readGroup.getLog().append("Started processing of read group " + name.toString());
-            
-            initalizeUnsetList();           //initialize the unset list to empty list  
-            deleteFastQChunks();            //delete existing chunks
-            lookupCsFastaAndQualFiles();    //lookup the csfasta and qual files for given csfasta paths
-            convertCSFastaToFastQ();        //convert csfasta to fastq chunks
-            splitFastQFiles();              //if fastq files were given split them to fastq chunks
-            
+
+
+            initalizeUnsetList();               //initialize the unset list to empty list and setup existing fastq chunks and existing bam chunks list
+            lookupCsFastaAndQualFiles();        //lookup the csfasta and qual files for given csfasta paths
+            convertCSFastaToFastQChunks();      //convert csfasta to fastq chunks
+            convertFastQFilesToFastQChunks();   //if fastq files were given split them to fastq chunks
+
             if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.CHUNKS_BAM.getRank()) {
-                            
-               mapFastqFiles();     //map fastq chunks to bam files        
+
+                mapFastqFiles();     //map fastq chunks to bam files        
 
                 if (readGroup.getGlobalConfiguration().getTargetEnum().getRank() >= TargetEnum.TAG_BAM.getRank()) {
-                    mergeBamFiles();                //merge the bam files
+                    mergeBamChunks();               //merge the bam chunks
                     checkAllReadsAreAcountedFor();  //check all the reads are accounted for
                 }
             }
-            
-            
-        } catch (csFastaToFastqException ex) {
-            readGroup.getLog().append("Could not convert csFasta file " + ex.getMessage());
-            throw new TagProcessingException("Error processing tag " + name.toString() + ": " + ex.getMessage());
-        } catch (SplitFastQException ex) {
-            readGroup.getLog().append("Could not split fastq file " + ex.getMessage());            
-            deleteFastQChunks();
-            throw new TagProcessingException("Error processing tag " + name.toString() + ": " + ex.getMessage());
-        } catch (MappingException ex) {
+
+        }catch (MappingException ex) {
             readGroup.getLog().append("Could not map fastq chunks: " + ex.getMessage());
             throw new TagProcessingException("Error processing tag " + name.toString() + ": " + ex.getMessage());
         } catch (IOException ex) {
-            readGroup.getLog().append("Could not find csfasta or qual file: " + ex.getMessage());
+            readGroup.getLog().append("Could not find a csfasta, fastq or bam file: " + ex.getMessage());
             throw new TagProcessingException("Error processing tag " + name.toString() + ": " + ex.getMessage());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (DrmaaException ex) {
+            Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JobFaillureException ex) {
+            Logger.getLogger(Tag.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
-            
-            
         }
-        
+
     }
-    
+
     private void initalizeUnsetList() {
-        
-        if(csfastaFiles == null){csfastaFiles = new ArrayList<CsFastaFilePair>();}
-        if(fastQFiles == null){fastQFiles = new ArrayList<FastQFile>();}
-        if(fastQChunks == null){fastQChunks = new ArrayList<FastQChunk>();}
-        if(bamFiles == null){bamFiles = new ArrayList<File>();}
-        
-    }
-    
-    
-    
-    public List<FastQChunk> getFastqChunks() {
-               
-        return fastQChunks;
-    }
-    
-    public void convertCSFastaToFastQ() throws csFastaToFastqException {
-        
-        System.out.println("Converting csFasta to fastq ");        
-        List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
-        
-        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
-           try {
-                fastQChunksConverted = csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), readGroup.getGlobalConfiguration().getChunkSize());
-                                
-                readGroup.getLog().append("Converted csFastaFilePair to Fastq");
-                readGroup.getLog().append(csFastaFilePair.toString());                
-            } catch (IOException ex) {
-                readGroup.getLog().append("Could not convert csFastaFilePair to Fastq");
-                readGroup.getLog().append(csFastaFilePair.toString());
-                readGroup.getLog().append("error: " + ex.getMessage());
-                throw new csFastaToFastqException("Could not convert csFastaFilePair to Fastq: " + ex.getMessage());
-            }
+
+        if (csfastaFiles == null) {
+            csfastaFiles = new ArrayList<CsFastaFilePair>();
         }
-        
+        if (fastQFiles == null) {
+            fastQFiles = new ArrayList<FastQFile>();
+        }
+        if (fastQChunks == null) {
+            fastQChunks = new ArrayList<FastQChunk>();
+        }
+        if (bamChunks == null) {
+            bamChunks = new ArrayList<File>();
+        }
+
+        if (existingFastqChunkDir != null) {
+            existingFastqChunksList = (List<File>) FileUtils.listFiles(existingFastqChunkDir, fastqExtension, false);
+        } else {
+            existingFastqChunksList = new ArrayList<File>();
+        }
+
+        if (existingBamChunkDir != null) {
+            existingBamChunksList = (List<File>) FileUtils.listFiles(existingBamChunkDir, bamExtension, false);
+        } else {
+            existingBamChunksList = new ArrayList<File>();
+        }
+    }
+
+    public void convertCSFastaToFastQChunks() throws IOException {
+
+        System.out.println("Converting csFasta to fastq ");
+        List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
+
+        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
+
+            fastQChunksConverted.addAll(csFastaFilePair.convertToFastQ(outputDirTag, readGroup.getId(), readGroup.getGlobalConfiguration().getChunkSize()));
+            readGroup.getLog().append(csFastaFilePair.toString());
+        }
+
+        readGroup.getLog().append("Converted " + csfastaFiles.size() + " csFastaFilePairs to " + fastQChunksConverted.size() + " Fastq chunks");
         fastQChunks.addAll(fastQChunksConverted);
     }
-    
-    public void splitFastQFiles() throws SplitFastQException {
+
+    public void convertFastQFilesToFastQChunks() throws FileNotFoundException, IOException {
         readGroup.getLog().append("Start splitting fastqFiles");
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
-        
-        try {
-            
-            for (FastQFile fastQFile : fastQFiles) {
-                
-                //skip the fastq files that are already split
-                if(fastQFile.getIsSplit()){continue;}
-                
-                
-                fastQChunksConverted = fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag);
-                readGroup.getLog().append("Splitted fastQFile:");
-                readGroup.getLog().append(fastQFile.toString());
-            }
-        } catch (FileNotFoundException ex) {
-            readGroup.getLog().append("Could not split fastq file");
-            readGroup.getLog().append("error: " + ex.getMessage());
-            throw new SplitFastQException("Could not split fastq file: " + ex.getMessage());
-        } catch (IOException ex) {
-            readGroup.getLog().append("Could not split fastq file");
-            readGroup.getLog().append("error: " + ex.getMessage());
-            throw new SplitFastQException("Could not split fastq file: " + ex.getMessage());
-        } catch (SplitFastQException ex) {
-            readGroup.getLog().append("Could not split fastq file");
-            readGroup.getLog().append("error: " + ex.getMessage());
-            throw ex;
-            
+
+        for (FastQFile fastQFile : fastQFiles) {
+            fastQChunksConverted.addAll(fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag));
+            readGroup.getLog().append(fastQFile.toString());
         }
-        
+
+        readGroup.getLog().append("Splitted " + fastQFiles.size() + " fastQFiles to " + fastQChunksConverted.size() + " fastq chunks");
         fastQChunks.addAll(fastQChunksConverted);
     }
-    
+
     public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
         List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
 
-        for (FastQChunk fastQChunk : getFastqChunks()) {
+        for (FastQChunk fastQChunk : fastQChunks) {
             File bamFile = new File(outputDirTag, FilenameUtils.getBaseName(fastQChunk.getFastqFile().getPath()) + ".bam");
-            bamFiles.add(bamFile);
-            
+            bamChunks.add(bamFile);
+
             BwaSolidMappingJob bwaMappingJob = new BwaSolidMappingJob(fastQChunk.getFastqFile(), bamFile, readGroup);
             bwaMappingJobs.add(bwaMappingJob);
         }
         return bwaMappingJobs;
     }
-    
+
     public void submitMappingJobs(List<BwaSolidMappingJob> mappingJobs) throws DrmaaException {
         for (BwaSolidMappingJob bwaMappingJob : mappingJobs) {
             bwaMappingJob.submit();
         }
-        
+
     }
-    
-    public void mapFastqFiles() throws MappingException {
-        
+
+    public void mapFastqFiles() throws MappingException, InterruptedException, IOException, DrmaaException, JobFaillureException {
+
         System.out.println("Starting submitting of mapping jobs");
-        List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
-        try {
-            bwaMappingJobs = createMappingJobs();
-        } catch (IOException ex) {
-            throw new MappingException(ex.getMessage());
-        }
-        
+        List<BwaSolidMappingJob> bwaMappingJobs = createMappingJobs();
+
         if (readGroup.getGlobalConfiguration().getOffline()) {
             mapOffline(bwaMappingJobs);
-            
-            
         } else {
-            
-            try {
-                submitMappingJobs(bwaMappingJobs);
-            } catch (DrmaaException ex) {
-                throw new MappingException("Cannot submit job : " + ex.getMessage());
-                
-            }
-            try {
-                waitForMappingJobs(bwaMappingJobs);
-            } catch (DrmaaException ex) {
-                throw new MappingException("Cannot determine status of mapping jobs : " + ex.getMessage());
-            } catch (JobFaillureException ex) {
-                throw new MappingException("A mapping job failed : " + ex.getMessage());
-            }
-        }     
-        
-    }
-    
-    private void mapOffline(List<BwaSolidMappingJob> bwaMappingJobs) throws MappingException {
-        
-        for (BwaSolidMappingJob bwaSolidMappingJob : bwaMappingJobs) {
-            try {
-                bwaSolidMappingJob.executeOffline();
-            } catch (IOException ex) {
-                throw new MappingException("A offline mapping job failed : " + ex.getMessage());
-            } catch (InterruptedException ex) {
-                throw new MappingException("A offline mapping job failed : " + ex.getMessage());
-            }
+            submitMappingJobs(bwaMappingJobs);
+            waitForMappingJobs(bwaMappingJobs);
         }
-        
-        
-        
+
     }
-    
+
+    private void mapOffline(List<BwaSolidMappingJob> bwaMappingJobs) throws MappingException, IOException, InterruptedException {
+
+        for (BwaSolidMappingJob bwaSolidMappingJob : bwaMappingJobs) {            
+                bwaSolidMappingJob.executeOffline();
+        }
+    }
+
     private void waitForMappingJobs(List<BwaSolidMappingJob> bwaMappingJobs) throws DrmaaException, JobFaillureException {
-        
+
         for (BwaSolidMappingJob bwaMappingJob : bwaMappingJobs) {
             bwaMappingJob.waitFor();
         }
-        
     }
-    
-    private void mergeBamFiles() {
-        
-        if(bamFiles.isEmpty()){return;} //return if there are no bamchunks 
-        
+
+    private void mergeBamChunks() throws IOException {
+
+        if (bamChunks.isEmpty()) {
+            //try to find existign bam chunks
+            String[] extensions = new String[]{"bam"};
+            bamChunks = (List<File>) FileUtils.listFiles(outputDirTag, extensions, true);
+
+            if (bamChunks.isEmpty()) {
+                return;
+            } //return if there are no bamchunks 
+            else {
+                System.out.println("Found existing bam chunks in the tar directory");
+            }
+        }
+
         PicardBamMerger picardBamMerger = new PicardBamMerger();
-        try {
-            mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamFiles, readGroup.getGlobalConfiguration().getTmpDir());
-        } catch (IOException ex) {
-            readGroup.getLog().append("Could not merge bam files in dir  " + outputDirTag.getAbsolutePath() + " :" + ex.getMessage());
-        }
-        
+        mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamChunks, readGroup.getGlobalConfiguration().getTmpDir());
+       
+
     }
-    
-    private void deleteFastQChunks() {
-        
-        readGroup.getLog().append("Deleting fastq chunk in dir " + outputDirTag.getAbsolutePath());
-        FileFilter fileFilter = new WildcardFileFilter("*_chunk*.fastq");
-        File[] files = outputDirTag.listFiles(fileFilter);
-        for (int i = 0; i < files.length; i++) {
-            files[i].delete();
-        }
-    }
-    
-    public List<FastQFile> getFastQFiles() {
-        return fastQFiles;
-    }
-    
-    public File getMergedBamFile() {
-        return mergedBamFile;
-    }
-    
-    public TagEnum getName() {
-        return name;
-    }
-    
-    public void setName(TagEnum name) {
-        this.name = name;
-    }
-    
-    public List<CsFastaFilePair> getCsfastaFiles() {
-        return csfastaFiles;
-    }
-    
-    public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
-        this.csfastaFiles = csfastaFiles;
-    }
-    
-    public ReadGroup getReadGroup() {
-        return readGroup;
-    }
-    
-    public void setReadGroup(ReadGroup readGroup) {
-        this.readGroup = readGroup;
-    }
-    
-    void createOutputDir(File readGroupOutputDir) {
-        outputDirTag = new File(readGroupOutputDir, name.toString());
-        outputDirTag.mkdir();
-    }
-    
+
     private void lookupCsFastaAndQualFiles() throws IOException {
         for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
             csFastaFilePair.lookupCsFastaFile();
             csFastaFilePair.lookupQualFile();
         }
     }
-    
-    
-    private Long getReadsInChunks()
-    {
+
+    private Long getReadsInChunks() {
         Long counter = new Long(0);
-        for(FastQChunk fastQChunk: fastQChunks)
-        {
+        for (FastQChunk fastQChunk : fastQChunks) {
             counter = counter + fastQChunk.getRecordNr();
         }
-        
+
         return counter;
-    
+
     }
-    
+
     private void checkAllReadsAreAcountedFor() throws MappingException {
-        
-        if(fastQChunks.isEmpty()){ return;} //return if fastq chunks are empty and no mapping could have been done
-        
+
+        if (fastQChunks.isEmpty()) {
+            return;
+        } //return if fastq chunks are empty and no mapping could have been done
+
         Long fastQRecords = getReadsInChunks();
         PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
-        Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);        
-        
+        Long readInBamFile = picardGetReadCount.getReadCount(mergedBamFile);
+
         if (fastQRecords.equals(readInBamFile)) {
             readGroup.getLog().append("Merged bam file and fastq contain same amount of reads: " + fastQRecords.toString());
         } else {
-             readGroup.getLog().append("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
-             throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: "+fastQRecords.toString()+" Bam: "+readInBamFile.toString());
-            
-        }        
+            readGroup.getLog().append("Merged bam file and fastq do not contain same amount of reads. Fastq: " + fastQRecords.toString() + " Bam: " + readInBamFile.toString());
+            throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: " + fastQRecords.toString() + " Bam: " + readInBamFile.toString());
+
+        }
     }
 
-    
+    //getters and setters used by the program
+    public void setReadGroup(ReadGroup readGroup) {
+        this.readGroup = readGroup;
+    }
+
+    public File getMergedBamFile() {
+        return mergedBamFile;
+    }
+
+    public void createOutputDir(File readGroupOutputDir) {
+        outputDirTag = new File(readGroupOutputDir, name.toString());
+        outputDirTag.mkdir();
+    }
+
+    //Getter and setters, used mainly by Jackson to construct this tag from a Json object     
+    public TagEnum getName() {
+        return name;
+    }
+
+    public void setName(TagEnum name) {
+        this.name = name;
+    }
+
+    public List<CsFastaFilePair> getCsfastaFiles() {
+        return csfastaFiles;
+    }
+
+    public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
+        this.csfastaFiles = csfastaFiles;
+    }
+
+    public List<FastQFile> getFastQFiles() {
+        return fastQFiles;
+    }
+
+    public void setFastQFiles(List<FastQFile> fastQFiles) {
+        this.fastQFiles = fastQFiles;
+    }
+
+    public File getExistingFastqChunkDir() {
+        return existingFastqChunkDir;
+    }
+
+    public void setExistingFastqChunkDir(File existingFastqChunkDir) {
+        this.existingFastqChunkDir = existingFastqChunkDir;
+    }
+
+    public File getExistingBamChunkDir() {
+        return existingBamChunkDir;
+    }
+
+    public void setExistingBamChunkDir(File existingBamChunkDir) {
+        this.existingBamChunkDir = existingBamChunkDir;
+    }
 }

@@ -34,7 +34,7 @@ public class FastQFile {
     
     private List<FastQChunk> fastQChunks;
     
-    private boolean isSplit;
+    
     
     private String path;
     
@@ -79,7 +79,7 @@ public class FastQFile {
         return recordNr;               
     }
     
-    public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir) throws FileNotFoundException, IOException, SplitFastQException
+    public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir) throws FileNotFoundException, IOException
     {
         fastqFile = new File(path);
         this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());   
@@ -123,7 +123,7 @@ public class FastQFile {
         
         if(!recordNr.equals(recordsInChunks))
         {
-            throw new SplitFastQException(toString()+"Record nr in chunks is not equal to record nr in fastq file");
+            throw new IOException(toString()+"Record nr in chunks is not equal to record nr in fastq file");
         }
         
         return fastQChunks;
@@ -200,13 +200,7 @@ public class FastQFile {
     
     }
 
-    public boolean getIsSplit() {
-        return isSplit;
-    }
-
-    public void setIsSplit(boolean isSplit) {
-        this.isSplit = isSplit;
-    }
+   
 
     public String getPath() {
         return path;

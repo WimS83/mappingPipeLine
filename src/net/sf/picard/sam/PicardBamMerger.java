@@ -8,12 +8,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import net.sf.picard.cmdline.CommandLineProgram;
 import net.sf.samtools.SAMFileHeader;
 import net.sf.samtools.SAMFileReader;
 import net.sf.samtools.SAMFileReader.ValidationStringency;
 import net.sf.samtools.SAMFileWriterFactory;
 import org.apache.commons.io.FilenameUtils;
+
+
 
 /**
  *
@@ -24,12 +25,22 @@ public class PicardBamMerger {
     
    public File mergeBamFilesUsingPicard(List<File> bamFiles, File tmpDir) throws IOException 
    {
-        File outputDir = bamFiles.get(0).getParentFile();
+      
+       
+       File outputDir = bamFiles.get(0).getParentFile();
         String baseName = FilenameUtils.getBaseName(bamFiles.get(0).getName());        
         File mergedBamFile = new File(outputDir, baseName+ "_merged.bam");
         
         SAMFileReader.setDefaultValidationStringency(ValidationStringency.LENIENT);  
         SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(true);
+        
+        System.out.println("Merging the following "+ bamFiles.size()+ " bam files:"); 
+        for(File bamFile : bamFiles)
+        {
+            System.out.println(bamFile.getPath());
+        }
+        
+        
         
        
         MergeSamFiles mergeSamFiles = new MergeSamFiles();     

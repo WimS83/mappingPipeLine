@@ -44,12 +44,12 @@ public class PicardBamMergerTest {
     @Test
     public void testMergeBamFilesUsingPicard() throws Exception {
         
-        File dir = new File("/home/wim/Analysis/ratfounders/pipelineTest/testOutput/testOutput/F334/F334_F1/F3");
+        File dir = new File("/home/wim//Analysis/BWA_Picard_GATK_pipeline_test/testInput/M520_F1_bam_chunks");
         String[] extensions = new String[] { "bam" };
         List<File> bamFileList = (List<File>) FileUtils.listFiles(dir, extensions, true);
         
         PicardBamMerger picardBamMerger = new PicardBamMerger();        
-        picardBamMerger.mergeBamFilesUsingPicard(bamFileList, new File("/tmp/"));
+        picardBamMerger.mergeBamFilesUsingPicard(bamFileList, new File("/tmp/blaat"));
         
         
         
