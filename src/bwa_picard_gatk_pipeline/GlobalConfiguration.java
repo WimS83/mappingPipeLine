@@ -25,6 +25,10 @@ public class GlobalConfiguration {
     private File gatk;
     private File knownIndels;
     private Integer gatkSGEThreads;
+    private Integer gatkSGEMemory;
+    private Integer qualimapSGEThreads;
+    private Integer qualimapSGEMemory;
+            
     
     
     
@@ -135,6 +139,34 @@ public class GlobalConfiguration {
     public void setGatkSGEThreads(Integer gatkSGEThreads) {
         this.gatkSGEThreads = gatkSGEThreads;
     }
+
+    public Integer getGatkSGEMemory() {
+        return gatkSGEMemory;
+    }
+
+    public void setGatkSGEMemory(Integer gatkSGEMemory) {
+        this.gatkSGEMemory = gatkSGEMemory;
+    }
+
+    public Integer getQualimapSGEThreads() {
+        return qualimapSGEThreads;
+    }
+
+    public void setQualimapSGEThreads(Integer qualimapSGEThreads) {
+        this.qualimapSGEThreads = qualimapSGEThreads;
+    }
+
+    public Integer getQualimapSGEMemory() {
+        return qualimapSGEMemory;
+    }
+
+    public void setQualimapSGEMemory(Integer qualimapSGEMemory) {
+        this.qualimapSGEMemory = qualimapSGEMemory;
+    }
+    
+    
+
+    
     
     
     

@@ -47,8 +47,7 @@ public class GATKCallRawVariants extends Job {
         
         String baseName = FilenameUtils.getBaseName(realignedBam.getAbsolutePath()); 
         File logFile = new File(realignedBam.getParentFile(), baseName + "_callRawVariants.log");  
-        File tmpDir = new File("/tmp", baseName);   
-        
+        File tmpDir = new File("/tmp", baseName);           
                
         File localVCF = new File(tmpDir, rawVCF.getName());
         File localVCFMetrics = new File("/tmp", FilenameUtils.removeExtension(baseName)+".metrics");          

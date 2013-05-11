@@ -130,8 +130,10 @@ public class Sample {
 
         if (readGroupBamFiles.size() > 1) {
             try {
+                mergedBamFile = new File(sampleOutputDir, name+".bam");
+                
                 PicardBamMerger picardBamMerger = new PicardBamMerger();
-                mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(readGroupBamFiles, globalConfiguration.getTmpDir());
+                picardBamMerger.mergeBamFilesUsingPicard(readGroupBamFiles, mergedBamFile, globalConfiguration.getTmpDir());
             } catch (IOException ex) {
                 Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -36,6 +36,7 @@ public class Tag {
     private TagEnum name;
     private ReadGroup readGroup;
     private File outputDirTag;
+    
     //the possible input for the processing of the tag
     private List<CsFastaFilePair> csfastaFiles;
     private List<FastQFile> fastQFiles;
@@ -43,10 +44,12 @@ public class Tag {
     private List<File> existingFastqChunksList;
     private File existingBamChunkDir;
     private List<File> existingBamChunksList;
+    
     //the output of the processing
     private List<FastQChunk> fastQChunks;
     private List<File> bamChunks;
     private File mergedBamFile;
+    
     private String[] bamExtension = new String[]{"bam"};
     private String[] fastqExtension = new String[]{"fastq"};
 
@@ -105,18 +108,23 @@ public class Tag {
 
         if (existingFastqChunkDir != null) {
             existingFastqChunksList = (List<File>) FileUtils.listFiles(existingFastqChunkDir, fastqExtension, false);
+            System.out.println("Found existing "+existingFastqChunksList.size()+" fastq chunks");
+            readGroup.getLog().append("Found existing "+existingFastqChunksList.size()+" fastq chunks");
+            
         } else {
             existingFastqChunksList = new ArrayList<File>();
         }
 
         if (existingBamChunkDir != null) {
             existingBamChunksList = (List<File>) FileUtils.listFiles(existingBamChunkDir, bamExtension, false);
+            System.out.println("Found existing "+existingBamChunksList.size()+" bam chunks");
+            readGroup.getLog().append("Found existing "+existingBamChunksList.size()+" bam chunks");
         } else {
             existingBamChunksList = new ArrayList<File>();
         }
     }
 
-    public void convertCSFastaToFastQChunks() throws IOException {
+    private void convertCSFastaToFastQChunks() throws IOException {
 
         System.out.println("Converting csFasta to fastq ");
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
@@ -131,7 +139,7 @@ public class Tag {
         fastQChunks.addAll(fastQChunksConverted);
     }
 
-    public void convertFastQFilesToFastQChunks() throws FileNotFoundException, IOException {
+    private void convertFastQFilesToFastQChunks() throws FileNotFoundException, IOException {
         readGroup.getLog().append("Start splitting fastqFiles");
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
 
@@ -144,7 +152,7 @@ public class Tag {
         fastQChunks.addAll(fastQChunksConverted);
     }
 
-    public List<BwaSolidMappingJob> createMappingJobs() throws IOException {
+    private List<BwaSolidMappingJob> createMappingJobs() throws IOException {
         List<BwaSolidMappingJob> bwaMappingJobs = new ArrayList<BwaSolidMappingJob>();
 
         for (FastQChunk fastQChunk : fastQChunks) {
@@ -156,15 +164,8 @@ public class Tag {
         }
         return bwaMappingJobs;
     }
-
-    public void submitMappingJobs(List<BwaSolidMappingJob> mappingJobs) throws DrmaaException {
-        for (BwaSolidMappingJob bwaMappingJob : mappingJobs) {
-            bwaMappingJob.submit();
-        }
-
-    }
-
-    public void mapFastqFiles() throws MappingException, InterruptedException, IOException, DrmaaException, JobFaillureException {
+    
+     private void mapFastqFiles() throws MappingException, InterruptedException, IOException, DrmaaException, JobFaillureException {
 
         System.out.println("Starting submitting of mapping jobs");
         List<BwaSolidMappingJob> bwaMappingJobs = createMappingJobs();
@@ -178,9 +179,16 @@ public class Tag {
 
     }
 
-    private void mapOffline(List<BwaSolidMappingJob> bwaMappingJobs) throws MappingException, IOException, InterruptedException {
+    private void submitMappingJobs(List<BwaSolidMappingJob> mappingJobs) throws DrmaaException {
+        readGroup.getLog().append("Submitting "+mappingJobs.size() + " mapping jobs");
+        for (BwaSolidMappingJob bwaMappingJob : mappingJobs) {
+            bwaMappingJob.submit();
+        }
+    }   
 
-        for (BwaSolidMappingJob bwaSolidMappingJob : bwaMappingJobs) {            
+    private void mapOffline(List<BwaSolidMappingJob> mappingJobs) throws MappingException, IOException, InterruptedException {
+        readGroup.getLog().append("Executing "+mappingJobs.size() + " mapping jobs offline");
+        for (BwaSolidMappingJob bwaSolidMappingJob : mappingJobs) {            
                 bwaSolidMappingJob.executeOffline();
         }
     }
@@ -194,21 +202,14 @@ public class Tag {
 
     private void mergeBamChunks() throws IOException {
 
-        if (bamChunks.isEmpty()) {
-            //try to find existign bam chunks
-            String[] extensions = new String[]{"bam"};
-            bamChunks = (List<File>) FileUtils.listFiles(outputDirTag, extensions, true);
-
-            if (bamChunks.isEmpty()) {
-                return;
-            } //return if there are no bamchunks 
-            else {
-                System.out.println("Found existing bam chunks in the tar directory");
-            }
-        }
-
-        PicardBamMerger picardBamMerger = new PicardBamMerger();
-        mergedBamFile = picardBamMerger.mergeBamFilesUsingPicard(bamChunks, readGroup.getGlobalConfiguration().getTmpDir());
+       if (bamChunks.isEmpty()) { return; } //return if there are no bamchunks 
+       
+       File mergedBamDir = new File(outputDirTag, "MergedBam");
+       mergedBamDir.mkdir();
+       mergedBamFile = new File(mergedBamDir, readGroup.getId()+"_"+name.toString()+".bam");
+       
+       PicardBamMerger picardBamMerger = new PicardBamMerger();
+       picardBamMerger.mergeBamFilesUsingPicard(bamChunks, mergedBamFile, readGroup.getGlobalConfiguration().getTmpDir());
        
 
     }

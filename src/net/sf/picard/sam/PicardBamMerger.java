@@ -23,14 +23,8 @@ import org.apache.commons.io.FilenameUtils;
 public class PicardBamMerger {
     
     
-   public File mergeBamFilesUsingPicard(List<File> bamFiles, File tmpDir) throws IOException 
+   public File mergeBamFilesUsingPicard(List<File> bamFiles, File mergedBam, File tmpDir) throws IOException 
    {
-      
-       
-       File outputDir = bamFiles.get(0).getParentFile();
-        String baseName = FilenameUtils.getBaseName(bamFiles.get(0).getName());        
-        File mergedBamFile = new File(outputDir, baseName+ "_merged.bam");
-        
         SAMFileReader.setDefaultValidationStringency(ValidationStringency.LENIENT);  
         SAMFileWriterFactory.setDefaultCreateIndexWhileWriting(true);
         
@@ -38,14 +32,11 @@ public class PicardBamMerger {
         for(File bamFile : bamFiles)
         {
             System.out.println(bamFile.getPath());
-        }
-        
-        
-        
+        }      
        
         MergeSamFiles mergeSamFiles = new MergeSamFiles();     
         mergeSamFiles.INPUT = bamFiles;
-        mergeSamFiles.OUTPUT = mergedBamFile;
+        mergeSamFiles.OUTPUT = mergedBam;
         mergeSamFiles.USE_THREADING = true;
         List<File> tmpDirList = new ArrayList<File>(0);
         tmpDirList.add(tmpDir);
@@ -61,7 +52,7 @@ public class PicardBamMerger {
             throw new IOException("Could not merge bam files using Picard " + bamFiles.toString());
         }           
         
-        return mergedBamFile;   
+        return mergedBam;   
    }
     
 }

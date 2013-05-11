@@ -48,8 +48,10 @@ public class PicardBamMergerTest {
         String[] extensions = new String[] { "bam" };
         List<File> bamFileList = (List<File>) FileUtils.listFiles(dir, extensions, true);
         
+        File mergedBam = new File("/tmp/testMerged.bam");
+        
         PicardBamMerger picardBamMerger = new PicardBamMerger();        
-        picardBamMerger.mergeBamFilesUsingPicard(bamFileList, new File("/tmp/blaat"));
+        picardBamMerger.mergeBamFilesUsingPicard(bamFileList, mergedBam, new File("/tmp/blaat"));
         
         
         
