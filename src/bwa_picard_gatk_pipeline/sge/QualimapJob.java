@@ -20,13 +20,15 @@ public class QualimapJob extends Job {
     private File qualimapReport;
     private GlobalConfiguration gc;
 
-    public QualimapJob(File bam, File qualimapReport, GlobalConfiguration gc) throws IOException {
+    public QualimapJob(File bam, File qualimapReport, GlobalConfiguration gc, String hostNameArg) throws IOException {
         super(FilenameUtils.removeExtension(bam.getAbsolutePath()) + "_qualimap.sh");     
         this.bam = bam;
         this.qualimapReport = qualimapReport;
         this.gc = gc;
         
         sgeName = "qualimap_"+bam.getName();
+        
+        hostName = hostNameArg;
         
         addCommands();
         close();                
@@ -45,9 +47,11 @@ public class QualimapJob extends Job {
         File tmpDir = new File("/tmp", baseName);
         File localQualimapReport = new File(tmpDir, "report.pdf");
         
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        
         
         //create a tmp dir
-        addCommand("mkdir " + tmpDir);
+        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
         addCommand("\n");
         
         //call the raw variants 
@@ -58,18 +62,18 @@ public class QualimapJob extends Job {
                     " -outformat PDF"+
                     " -nt "+gc.getQualimapSGEThreads()+
                     " --java-mem-size="+gc.getQualimapSGEMemory()+"G"+
-                    " &>> "+logFile.getAbsolutePath());
+                    appendAlloutputToLog);
         addCommand("\n");
         
         //copy the resutls back
-        addCommand("cp "+localQualimapReport.getAbsolutePath() +" " + qualimapReport.getAbsolutePath());
+        addCommand("cp "+localQualimapReport.getAbsolutePath() +" " + qualimapReport.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
         
         //remove the tmp dir from the sge host
-        addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
-        addCommand("echo finished >> " + logFile.getAbsolutePath());
-        addCommand("date  >> " + logFile.getAbsolutePath());    
+        addCommand("echo finished " + appendAlloutputToLog);
+        addCommand("date " + appendAlloutputToLog);    
     }        
     
 }

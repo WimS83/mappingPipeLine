@@ -7,8 +7,6 @@ package bwa_picard_gatk_pipeline.sge;
 import bwa_picard_gatk_pipeline.ReadGroup;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -67,32 +65,34 @@ public class PiclPairReadsJob extends Job {
         File picardSortSam = readGroup.getGlobalConfiguration().getPicardSortSam();
         File picl = readGroup.getGlobalConfiguration().getPicl();
         
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        
         
         //add sge hostname and date information to log
-        addCommand("uname -n >> " + logFile.getAbsolutePath());
+        addCommand("uname -n " + appendAlloutputToLog);
         addCommand("\n");
-        addCommand("date >> " + logFile.getAbsolutePath());
+        addCommand("date " + appendAlloutputToLog);
         addCommand("\n");
         //create a tmp dir
-        addCommand("mkdir " + tmpDir);
+        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
         addCommand("\n");
         //copy the fastQFile to the tmp dir 
-        addCommand("echo starting copying of first bam file >> " + logFile.getAbsolutePath());
+        //addCommand("echo starting copying of first bam file " + appendAlloutputToLog);
 //        addCommand("cp " + F3Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
 //        addCommand("\n");
 //        addCommand("echo starting copying of second bam file >> " + logFile.getAbsolutePath());
 //        addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
 //        addCommand("\n");
         //sort the bam files by queryname
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
         //pair the bam files
-        addCommand(picl.getAbsolutePath()+" pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + " &>> " + logFile.getAbsolutePath());
+        addCommand(picl.getAbsolutePath()+" pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + appendAlloutputToLog);
         //sort the bam file
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ pairedBamFile.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true &>> " + logFile.getAbsolutePath());
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3_F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath() +" O="+ pairedBamFile.getAbsolutePath() + " VALIDATION_STRINGENCY=LENIENT SO=coordinate CREATE_INDEX=true " + appendAlloutputToLog);
         //copy the bamFile back to the server
-        addCommand("echo starting copying of bam back to the server >> " + logFile.getAbsolutePath());
-        addCommand("date  >> " + logFile.getAbsolutePath());
+        //addCommand("echo starting copying of bam back to the server " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
 //        addCommand("cp " + F3_F5BamSortedByCoordinate.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
 //        addCommand("cp " + F3_F5BamSortedByCoordinateIndex.getAbsolutePath() + " " + pairedBamFile.getParentFile().getAbsolutePath());
         
@@ -100,10 +100,10 @@ public class PiclPairReadsJob extends Job {
         
         addCommand("\n");
         //remove the tmp dir from the sge host
-        addCommand("rm -rf " + tmpDir.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
-        addCommand("echo finished >> " + logFile.getAbsolutePath());
-        addCommand("date  >> " + logFile.getAbsolutePath());
+        addCommand("echo finished" + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
     }
     
 //    public void pairOffline() throws IOException, InterruptedException

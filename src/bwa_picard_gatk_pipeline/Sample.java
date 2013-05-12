@@ -5,7 +5,8 @@
 package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
-import bwa_picard_gatk_pipeline.sge.GATKCallRawVariants;
+import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
+import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
 import java.io.File;
 import java.io.IOException;
@@ -33,6 +34,7 @@ public class Sample {
     private File mergedBamFileDedup;
     private File mergedBamDedupRealigned;
     private File rawVCFFile;
+    private File annotatedVCFFile;
 
     public void startProcessing() {
 
@@ -66,6 +68,13 @@ public class Sample {
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_RAW_VCF.getRank()) {
                 callRawSNPs();
             }
+            if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_ANNOTATED_VCF.getRank()) {
+                annotateRawSNPs();
+            }
+            
+            
+            
+            
 
 
             //realign the bam around indels
@@ -173,12 +182,28 @@ public class Sample {
         
         rawVCFFile = new File(sampleOutputDir, FilenameUtils.getBaseName(mergedBamDedupRealigned.getName())+ "_raw.vcf");
         
-        GATKCallRawVariants gATKCallRawVariants = new GATKCallRawVariants(mergedBamDedupRealigned, rawVCFFile, globalConfiguration, globalConfiguration.getGatkSGEThreads());
+        GATKCallRawVariantsJob gATKCallRawVariants = new GATKCallRawVariantsJob(mergedBamDedupRealigned, rawVCFFile, globalConfiguration);
         
         if (globalConfiguration.getOffline()) {
             gATKCallRawVariants.executeOffline();
         } else {
             gATKCallRawVariants.submit();
+        }
+        
+    }
+    
+    private void annotateRawSNPs() throws IOException, InterruptedException, DrmaaException{
+        
+        if(rawVCFFile == null){ return;}
+        
+        annotatedVCFFile = new File(sampleOutputDir, FilenameUtils.getBaseName(mergedBamDedupRealigned.getName())+ "_annotated.vcf");
+        
+        GATKAnnotateVariantsJob gATKAnnotateVariantsJob = new GATKAnnotateVariantsJob(rawVCFFile, annotatedVCFFile, globalConfiguration);
+        
+        if (globalConfiguration.getOffline()) {
+            gATKAnnotateVariantsJob.executeOffline();
+        } else {
+            gATKAnnotateVariantsJob.submit();
         }
         
     }

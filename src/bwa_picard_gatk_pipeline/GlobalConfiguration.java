@@ -26,6 +26,7 @@ public class GlobalConfiguration {
     private File knownIndels;
     private Integer gatkSGEThreads;
     private Integer gatkSGEMemory;
+    private Boolean gatkCallReference;
     private Integer qualimapSGEThreads;
     private Integer qualimapSGEMemory;
             
@@ -163,6 +164,18 @@ public class GlobalConfiguration {
     public void setQualimapSGEMemory(Integer qualimapSGEMemory) {
         this.qualimapSGEMemory = qualimapSGEMemory;
     }
+
+    public Boolean getGatkCallReference() {
+        return gatkCallReference;
+    }
+
+    public void setGatkCallReference(Boolean gatkCallReference) {
+        this.gatkCallReference = gatkCallReference;
+    }
+
+   
+    
+    
     
     
 

@@ -123,6 +123,13 @@ public class Tag {
             existingBamChunksList = new ArrayList<File>();
         }
     }
+    
+     private void lookupCsFastaAndQualFiles() throws IOException {
+        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
+            csFastaFilePair.lookupCsFastaFile();
+            csFastaFilePair.lookupQualFile();
+        }
+    }
 
     private void convertCSFastaToFastQChunks() throws IOException {
 
@@ -210,26 +217,9 @@ public class Tag {
        
        PicardBamMerger picardBamMerger = new PicardBamMerger();
        picardBamMerger.mergeBamFilesUsingPicard(bamChunks, mergedBamFile, readGroup.getGlobalConfiguration().getTmpDir());
-       
 
-    }
-
-    private void lookupCsFastaAndQualFiles() throws IOException {
-        for (CsFastaFilePair csFastaFilePair : csfastaFiles) {
-            csFastaFilePair.lookupCsFastaFile();
-            csFastaFilePair.lookupQualFile();
-        }
-    }
-
-    private Long getReadsInChunks() {
-        Long counter = new Long(0);
-        for (FastQChunk fastQChunk : fastQChunks) {
-            counter = counter + fastQChunk.getRecordNr();
-        }
-
-        return counter;
-
-    }
+    } 
+    
 
     private void checkAllReadsAreAcountedFor() throws MappingException {
 
@@ -248,6 +238,16 @@ public class Tag {
             throw new MappingException("Merged bam file and fastq do not contain same amount of reads. Fastq: " + fastQRecords.toString() + " Bam: " + readInBamFile.toString());
 
         }
+    }
+    
+    private Long getReadsInChunks() {
+        Long counter = new Long(0);
+        for (FastQChunk fastQChunk : fastQChunks) {
+            counter = counter + fastQChunk.getRecordNr();
+        }
+
+        return counter;
+
     }
 
     //getters and setters used by the program

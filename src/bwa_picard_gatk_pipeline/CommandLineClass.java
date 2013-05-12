@@ -48,6 +48,7 @@ public class CommandLineClass {
         options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. Default is /tmp/ ");
         options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
+        options.addOption("x", "call-reference", false, "Have GATK also output all the reference calls to VCF. Default is false");
         options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("0", "gatk-sge-threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 1, when doing offline processing number of threads is always set to 1.");
         options.addOption("1", "gatk-sge-mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
@@ -87,8 +88,11 @@ public class CommandLineClass {
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("3", "32")));
 
 
-        String targetString = cmd.getOptionValue("t");
+        
 
+        if (cmd.hasOption("x")) {globalConfiguration.setGatkCallReference(true);}
+        else{globalConfiguration.setGatkCallReference(false);}
+        
         if (cmd.hasOption("f")) {
             globalConfiguration.setOffline(true);
             globalConfiguration.setGatkSGEThreads(1);
@@ -102,7 +106,7 @@ public class CommandLineClass {
             globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));
         }
 
-
+        String targetString = cmd.getOptionValue("t");
         globalConfiguration.setTargetEnum(TargetEnum.valueOf(targetString));
 
         File JsonConfigFile = new File(cmd.getOptionValue("i"));

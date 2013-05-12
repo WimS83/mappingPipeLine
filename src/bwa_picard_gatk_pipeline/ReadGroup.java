@@ -136,16 +136,17 @@ public class ReadGroup {
     private void runQualimap() throws IOException, InterruptedException, DrmaaException {
 
         File qualimapReport = new File(readGroupOutputDir, id+"_qualimap.pdf");        
-        QualimapJob qualimapJob = new QualimapJob(mergedBam, qualimapReport, globalConfiguration);
+        QualimapJob qualimapJob = new QualimapJob(mergedBam, qualimapReport, globalConfiguration, "fedor8");
         
-        if(globalConfiguration.getOffline())
-        {
-            qualimapJob.executeOffline();
-        }
-        else
-        {
-            qualimapJob.submit();
-        }              
+         qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node    
+//        if(globalConfiguration.getOffline())
+//        {
+//            qualimapJob.executeOffline();
+//        }
+//        else
+//        {
+//            qualimapJob.submit();
+//        }              
     }
 
     public String getId() {

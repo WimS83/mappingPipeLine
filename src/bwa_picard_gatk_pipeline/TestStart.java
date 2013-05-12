@@ -25,11 +25,11 @@ public class TestStart {
         
         arguments.add("-i");
         //arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta_existinBamChunks.json");
-        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta_2PEReadGroups.json");
+        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta_singleFragmentReadgroup.json");
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
-        arguments.add("READGROUP_BAM");   
+        arguments.add("SAMPLE_ANNOTATED_VCF");   
         arguments.add("-r");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/Rnor5.0_chr1and2/Rattus_norvegicus.Rnor_5.0.71.dna.chromosome.1and2.fa");
         arguments.add("-f");
@@ -43,6 +43,8 @@ public class TestStart {
         arguments.add("/usr/local/Picl/picl ");   
         arguments.add("-q");
         arguments.add("/home/wim/qualimap_v0.7.1/qualimap");   
+        arguments.add("-g");
+        arguments.add("/home/wim/GenomeAnalysisTK-2.5-2-gf57256b/GenomeAnalysisTK.jar");   
         
         
         
