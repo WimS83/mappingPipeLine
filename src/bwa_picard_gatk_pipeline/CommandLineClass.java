@@ -50,9 +50,9 @@ public class CommandLineClass {
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
         options.addOption("x", "call-reference", false, "Have GATK also output all the reference calls to VCF. Default is false");
         options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
-        options.addOption("0", "gatk-sge-threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 1, when doing offline processing number of threads is always set to 1.");
+        options.addOption("0", "gatk-sge-threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("1", "gatk-sge-mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
-        options.addOption("2", "qualimap-sge-threads", true, "Number of threads that Qualimap should use on a SGE compute node. Default is 1, when doing offline processing number of threads is always set to 1.");
+        options.addOption("2", "qualimap-sge-threads", true, "Number of threads that Qualimap should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("3", "qualimap-sge-mem", true, "Max memory that Qualimap should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         
         
@@ -82,9 +82,9 @@ public class CommandLineClass {
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));
-        globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("0", "1")));
+        globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("0", "8")));
         globalConfiguration.setGatkSGEMemory(new Integer(cmd.getOptionValue("1", "32")));
-        globalConfiguration.setQualimapSGEThreads(new Integer(cmd.getOptionValue("2", "1")));
+        globalConfiguration.setQualimapSGEThreads(new Integer(cmd.getOptionValue("2", "8")));
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("3", "32")));
 
 
@@ -95,7 +95,7 @@ public class CommandLineClass {
         
         if (cmd.hasOption("f")) {
             globalConfiguration.setOffline(true);
-            globalConfiguration.setGatkSGEThreads(1);
+            globalConfiguration.setGatkSGEThreads(2);
             globalConfiguration.setGatkSGEMemory(2);
             globalConfiguration.setQualimapSGEThreads(1);
             globalConfiguration.setQualimapSGEMemory(2);

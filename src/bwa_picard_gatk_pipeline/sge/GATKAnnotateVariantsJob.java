@@ -29,6 +29,8 @@ public class GATKAnnotateVariantsJob extends Job{
         
         addCommands();        
         
+        sgeThreads = gc.getGatkSGEThreads();
+        
         sgeName = "annotateVariants_"+rawVCF.getName();
         close();        
     }
@@ -69,9 +71,8 @@ public class GATKAnnotateVariantsJob extends Job{
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+  
                     " -jar "+gc.getGatk().getAbsolutePath() +
-                    " -T VariantFiltration -A AlleleBalance -A Coverage -stand_call_conf 30.0 -stand_emit_conf 10 "+
-                    " -R "+gc.getReferenceFile().getAbsolutePath()+
-                    " -nt "+ gc.getGatkSGEThreads() +
+                    " -T VariantFiltration "+
+                    " -R "+gc.getReferenceFile().getAbsolutePath()+                  
                     " -V "+rawVCF.getAbsolutePath()+
                     " -o "+localAnnotatedVCF.getAbsolutePath()+
                     clusterAnnotation+                    

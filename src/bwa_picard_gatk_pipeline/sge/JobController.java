@@ -77,18 +77,23 @@ public class JobController{
 	 * @return The ID to access this job at the sun grid engine
 	 * @throws DrmaaException When submitting the job fails
 	 */
-	protected String submitJob(Job jobToSubmit, String hostName) throws DrmaaException {
+	protected String submitJob(Job jobToSubmit, String hostName, Integer threads) throws DrmaaException {
 		sgeJob.setJobName(jobToSubmit.getSGEName());
 		
+                
+                StringBuilder nativeSpeficicaion = new StringBuilder();
+                nativeSpeficicaion.append(" -b no");               
+                
                 if(hostName != null)
                 {
-                    sgeJob.setNativeSpecification("-b no -l hostname="+hostName);
+                    nativeSpeficicaion.append(" -l hostname="+hostName );
                 }
-                else
+                if(threads != null)
                 {
-                    sgeJob.setNativeSpecification("-b no");
+                    nativeSpeficicaion.append(" -pe threaded "+ threads);
                 }
                 
+                sgeJob.setNativeSpecification(nativeSpeficicaion.toString());                
 		sgeJob.setRemoteCommand(jobToSubmit.getAbsolutePath());
 		//sgeJob.setErrorPath("fedor12:" + ((TophatJob)jobToSubmit).getFastaFile().getOpts().get(Opts.OUTPUTDIR));
 		

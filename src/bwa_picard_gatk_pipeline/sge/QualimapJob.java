@@ -30,6 +30,8 @@ public class QualimapJob extends Job {
         
         hostName = hostNameArg;
         
+        sgeThreads = gc.getQualimapSGEThreads();
+        
         addCommands();
         close();                
         

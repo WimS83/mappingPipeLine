@@ -29,6 +29,7 @@ public class GATKCallRawVariantsJob extends Job {
         this.rawVCF = rawVCF;
         this.gc = gc;
         
+        sgeThreads = gc.getGatkSGEThreads();
         
         addCommands();        
         
@@ -49,7 +50,7 @@ public class GATKCallRawVariantsJob extends Job {
         File tmpDir = new File("/tmp", baseName);           
                
         File localVCF = new File(tmpDir, rawVCF.getName());
-        File localVCFMetrics = new File("/tmp", FilenameUtils.removeExtension(baseName)+".metrics");       
+        File localVCFMetrics = new File(tmpDir, FilenameUtils.removeExtension(baseName)+".metrics");       
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         

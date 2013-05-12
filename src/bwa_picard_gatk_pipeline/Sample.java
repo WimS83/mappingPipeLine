@@ -8,6 +8,7 @@ import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
+import bwa_picard_gatk_pipeline.sge.QualimapJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -58,6 +59,8 @@ public class Sample {
             //merge readgroup bam files
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_BAM.getRank()) {
                 mergeReadGroupBamFiles();
+                runQualimap();
+                
             }
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.DEDUP_BAM.getRank()) {
                 markDuplicates();
@@ -70,15 +73,11 @@ public class Sample {
             }
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_ANNOTATED_VCF.getRank()) {
                 annotateRawSNPs();
-            }
-            
-            
-            
+            }            
             
 
 
-            //realign the bam around indels
-            String args[] = new String[]{"-T", "UnifiedGenotyper", "-R ", "my.fasta", "-I", "my.bam- my.vcf"};
+          
 
 
         } catch (IOException ex) {
@@ -149,6 +148,23 @@ public class Sample {
         }
 
     }
+    
+      private void runQualimap() throws IOException, InterruptedException, DrmaaException {
+
+        File qualimapReport = new File(sampleOutputDir, name+"_qualimap.pdf");        
+        QualimapJob qualimapJob = new QualimapJob(mergedBamFile, qualimapReport, globalConfiguration, "fedor8");
+        
+         qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node    
+//        if(globalConfiguration.getOffline())
+//        {
+//            qualimapJob.executeOffline();
+//        }
+//        else
+//        {
+//            qualimapJob.submit();
+//        }              
+    }
+    
 
     private void markDuplicates() throws IOException {
         //if a merged bam file was created by processing the readgroups or was set by json 
