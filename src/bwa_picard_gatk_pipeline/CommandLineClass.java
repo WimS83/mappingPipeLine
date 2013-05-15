@@ -43,7 +43,7 @@ public class CommandLineClass {
         options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
         options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. This option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
         options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
-        options.addOption("s", "picard-sortsam", true, "Location on the SGE cluster of the Picard SortSam. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
+        options.addOption("s", "picard", true, "Location on the SGE cluster of the Picard. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/");
         options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is home/sge_share_fedor8/common_scripts/Picl/picl");
         options.addOption("m", "tmpDir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. Default is /tmp/ ");
         options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
@@ -78,7 +78,7 @@ public class CommandLineClass {
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("z", "/usr/local/bwa/0.5.9/bwa")));
         globalConfiguration.setReferenceFile(new File(cmd.getOptionValue("r")));
         globalConfiguration.setTmpDir(new File(cmd.getOptionValue("m", "/tmp")));
-        globalConfiguration.setPicardSortSam(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar")));
+        globalConfiguration.setPicardDirectory(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/")));
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));

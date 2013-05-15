@@ -62,11 +62,12 @@ public class PiclPairReadsJob extends Job {
         
         File logFile = new File(pairedBamFile.getParentFile(), baseName + "_pairing.log");        
         
-        File picardSortSam = readGroup.getGlobalConfiguration().getPicardSortSam();
+        File picardDir = readGroup.getGlobalConfiguration().getPicardDirectory();
+        File picardSortSam = new File(picardDir, "SortSam.jar");
         File picl = readGroup.getGlobalConfiguration().getPicl();
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
-        
+               
         
         //add sge hostname and date information to log
         addCommand("uname -n " + appendAlloutputToLog);

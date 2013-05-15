@@ -19,7 +19,7 @@ public class GlobalConfiguration {
     private File referenceFile;
     private File colorSpaceBWA;
     private File tmpDir;
-    private File picardSortSam;
+    private File picardDirectory;
     private File picl;
     private File qualiMap;
     private File gatk;
@@ -93,12 +93,12 @@ public class GlobalConfiguration {
         this.tmpDir = tmpDir;
     }
 
-    public File getPicardSortSam() {
-        return picardSortSam;
+    public File getPicardDirectory() {
+        return picardDirectory;
     }
 
-    public void setPicardSortSam(File picardSortSam) {
-        this.picardSortSam = picardSortSam;
+    public void setPicardDirectory(File picardDirectory) {
+        this.picardDirectory = picardDirectory;
     }
 
     public File getPicl() {
