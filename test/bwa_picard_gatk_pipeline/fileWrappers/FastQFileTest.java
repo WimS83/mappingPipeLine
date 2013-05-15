@@ -4,13 +4,10 @@
  */
 package bwa_picard_gatk_pipeline.fileWrappers;
 
-import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -53,9 +50,6 @@ public class FastQFileTest {
             outputDir.delete();
         }
     }   
-
-   
-
    
 
     /**
@@ -89,24 +83,22 @@ public class FastQFileTest {
        
        fastQFileWrapper.countNumberOfrecords();          
         try {
-            fastQFileWrapper.splitFastQFile(new Integer(500), outputDir);
+            fastQFileWrapper.splitFastQFile(new Integer(200), outputDir);
         } catch (FileNotFoundException ex) {
             System.out.println(ex.getMessage());
         } catch (IOException ex) {
             System.out.println(ex.getMessage());
-        } catch (SplitFastQException ex) {
-            System.out.println(ex.getMessage());
-        }
+        } 
        
        List<FastQChunk> fastqChunks = fastQFileWrapper.getSplitFastQFiles();
        
-       assertTrue(fastqChunks.size() == 4);
+       assertTrue("Expected number of chunks is 3, found number of chunks is "+fastqChunks.size() ,fastqChunks.size() == 3);
        
        long fastQrecords = fastQFileWrapper.getRecordNr();
        long splitRecordsNr = fastQFileWrapper.getRecordNrInChunks();
       
        
-       assertTrue(fastQrecords == splitRecordsNr);
+       assertTrue("Expected fastq records: "+fastQrecords +" , found fastq records: "+splitRecordsNr, fastQrecords == splitRecordsNr);
        
        
         

@@ -38,10 +38,10 @@ public class CommandLineClass {
         options.addOption("i", "input", true, "the Json config file describing the samples, read groups, tags and files to process. ");
         options.addOption("o", "output", true, "base output directory. Subdirectories will be created in this dir for each sample, read group and tag. ");
         options.addOption("h", "help", false, "print this message");
-        options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, SAMPLE_BAM, SAMPLE_VCF ");
+        options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, DEDUP_BAM, REALIGN_BAM, SAMPLE_RAW_VCF, SAMPLE_ANNOTATED_VCF ");
         options.addOption("r", "reference", true, "reference file. fai and BWA indexes should be next to this file.");
         options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
-        options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. Thist option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
+        options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. This option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
         options.addOption("z", "color-space-bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
         options.addOption("s", "picard-sortsam", true, "Location on the SGE cluster of the Picard SortSam. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/SortSam.jar");
         options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is home/sge_share_fedor8/common_scripts/Picl/picl");
@@ -94,11 +94,7 @@ public class CommandLineClass {
         else{globalConfiguration.setGatkCallReference(false);}
         
         if (cmd.hasOption("f")) {
-            globalConfiguration.setOffline(true);
-            globalConfiguration.setGatkSGEThreads(2);
-            globalConfiguration.setGatkSGEMemory(2);
-            globalConfiguration.setQualimapSGEThreads(1);
-            globalConfiguration.setQualimapSGEMemory(2);
+            globalConfiguration.setOffline(true);            
         } else {
             globalConfiguration.setOffline(false);
         }

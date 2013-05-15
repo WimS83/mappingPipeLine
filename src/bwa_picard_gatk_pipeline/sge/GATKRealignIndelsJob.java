@@ -29,6 +29,7 @@ public class GATKRealignIndelsJob extends Job {
         this.dedupBam = dedupBam;
         this.realignedBam = realignedBam;
         
+        sgeThreads = gc.getGatkSGEThreads();
         
         addCommands();
         
@@ -79,8 +80,8 @@ public class GATKRealignIndelsJob extends Job {
             knownIndels = "-known "+gc.getKnownIndels().getAbsolutePath();
         }        
         
-        addCommand("java -jar "+gc.getGatk().getAbsolutePath() +" -T RealignerTargetCreator "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+ " -o "+realignTargets.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
-        addCommand("java -jar "+gc.getGatk().getAbsolutePath() +" -T IndelRealigner "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+" -targetIntervals "+realignTargets.getAbsolutePath() + " -o "+realignedBam.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
+        addCommand("java -Xmx"+gc.getGatkSGEMemory()+"G"+  "-jar "+gc.getGatk().getAbsolutePath() +" -T RealignerTargetCreator "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+ " -o "+realignTargets.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
+        addCommand("java -Xmx"+gc.getGatkSGEMemory()+"G"+  "-jar "+gc.getGatk().getAbsolutePath() +" -T IndelRealigner "+" -R "+gc.getReferenceFile().getAbsolutePath()+" -I "+localdedupBam.getAbsolutePath()+" -targetIntervals "+realignTargets.getAbsolutePath() + " -o "+realignedBam.getAbsolutePath()+knownIndels +" &>> "+logFile.getAbsolutePath());
         
         addCommand("\n");
         //remove the tmp dir from the sge host

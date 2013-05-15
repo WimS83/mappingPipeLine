@@ -41,10 +41,11 @@ public class Sample {
 
         initalizeUnsetList();           //initialize the unset list to empty list  
 
+        sampleOutputDir = new File(globalConfiguration.getBaseOutputDir(), name);
+        sampleOutputDir.mkdir();
+        
         //process the readGroups is any were set
-        for (ReadGroup readGroup : readGroups) {
-            sampleOutputDir = new File(globalConfiguration.getBaseOutputDir(), name);
-            sampleOutputDir.mkdir();
+        for (ReadGroup readGroup : readGroups) {            
 
             readGroup.createOutputDir(sampleOutputDir);
 
@@ -223,4 +224,15 @@ public class Sample {
         }
         
     }
+
+    public List<File> getReadGroupBamFiles() {
+        return readGroupBamFiles;
+    }
+
+    public void setReadGroupBamFiles(List<File> readGroupBamFiles) {
+        this.readGroupBamFiles = readGroupBamFiles;
+    }
+    
+    
+    
 }

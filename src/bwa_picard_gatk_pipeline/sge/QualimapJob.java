@@ -56,6 +56,8 @@ public class QualimapJob extends Job {
         addCommand("mkdir " + tmpDir + appendAlloutputToLog);
         addCommand("\n");
         
+        addCommand("unset DISPLAY");  //somehow needed to prevent missing X11 error from qualimap when the pipeline is executed from a user not logged in with - X
+        
         //call the raw variants 
         addCommand(gc.getQualiMap().getAbsolutePath() +
                     " bamqc "+

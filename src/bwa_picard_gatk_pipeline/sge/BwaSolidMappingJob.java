@@ -7,8 +7,6 @@ package bwa_picard_gatk_pipeline.sge;
 import bwa_picard_gatk_pipeline.ReadGroup;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -108,18 +106,6 @@ public class BwaSolidMappingJob extends Job {
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
     }
-    
-//    public void mapOffline() throws IOException, InterruptedException
-//    {
-//        List<String> commands = new ArrayList<String>();
-//        commands.add("/bin/sh");
-//        commands.add(this.getAbsolutePath()); 
-//        
-//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-//        processBuilder.directory(this.getParentFile());   
-//        Process proces = processBuilder.start();        
-//        proces.waitFor();
-//        
-//    
-//    }
+   
+
 }
