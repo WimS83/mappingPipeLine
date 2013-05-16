@@ -5,7 +5,6 @@
 package bwa_picard_gatk_pipeline.sge;
 
 import bwa_picard_gatk_pipeline.GlobalConfiguration;
-import bwa_picard_gatk_pipeline.ReadGroup;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -71,7 +70,7 @@ public class PicardMergeBamJob extends Job {
             inputString.append(" ");
         }
         
-        addCommand("java -jar "+picardMergeSam.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING = true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardMergeSam.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
         
     }
     

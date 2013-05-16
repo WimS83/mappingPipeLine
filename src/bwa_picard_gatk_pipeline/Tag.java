@@ -13,6 +13,7 @@ import bwa_picard_gatk_pipeline.fileWrappers.CsFastaFilePair;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.BwaSolidMappingJob;
+import bwa_picard_gatk_pipeline.sge.PicardMergeBamJob;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -207,7 +208,7 @@ public class Tag {
         }
     }
 
-    private void mergeBamChunks() throws IOException {
+    private void mergeBamChunks() throws IOException, InterruptedException {
 
        if (bamChunks.isEmpty()) { return; } //return if there are no bamchunks 
        
@@ -215,8 +216,11 @@ public class Tag {
        mergedBamDir.mkdir();
        mergedBamFile = new File(mergedBamDir, readGroup.getId()+"_"+name.toString()+".bam");
        
-       PicardBamMerger picardBamMerger = new PicardBamMerger();
-       picardBamMerger.mergeBamFilesUsingPicard(bamChunks, mergedBamFile, readGroup.getGlobalConfiguration().getTmpDir());
+//       PicardBamMerger picardBamMerger = new PicardBamMerger();
+//       picardBamMerger.mergeBamFilesUsingPicard(bamChunks, mergedBamFile, readGroup.getGlobalConfiguration().getTmpDir());
+       
+       PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamChunks, mergedBamFile, null, readGroup.getGlobalConfiguration());
+       picardMergeBamJob.executeOffline();
 
     } 
     
