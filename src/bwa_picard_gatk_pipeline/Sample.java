@@ -8,6 +8,7 @@ import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
+import bwa_picard_gatk_pipeline.sge.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
 import java.io.File;
 import java.io.IOException;
@@ -45,13 +46,10 @@ public class Sample {
         sampleOutputDir.mkdir();
         
         //process the readGroups is any were set
-        for (ReadGroup readGroup : readGroups) {            
-
+        for (ReadGroup readGroup : readGroups) { 
             readGroup.createOutputDir(sampleOutputDir);
-
             readGroup.setGlobalConfiguration(globalConfiguration);
             readGroup.setSample(name);
-
             readGroup.startProcessing();
         }
 
@@ -126,7 +124,7 @@ public class Sample {
         this.globalConfiguration = globalConfiguration;
     }
 
-    private void mergeReadGroupBamFiles() throws IOException {
+    private void mergeReadGroupBamFiles() throws IOException, InterruptedException {
 
 
         for (ReadGroup readGroup : readGroups) {
@@ -141,8 +139,12 @@ public class Sample {
             try {
                 mergedBamFile = new File(sampleOutputDir, name+".bam");
                 
-                PicardBamMerger picardBamMerger = new PicardBamMerger();
-                picardBamMerger.mergeBamFilesUsingPicard(readGroupBamFiles, mergedBamFile, globalConfiguration.getTmpDir());
+//                PicardBamMerger picardBamMerger = new PicardBamMerger();
+//                picardBamMerger.mergeBamFilesUsingPicard(readGroupBamFiles, mergedBamFile, globalConfiguration.getTmpDir());
+                
+                PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration);
+                picardMergeBamJob.executeOffline();
+                
             } catch (IOException ex) {
                 Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
             }

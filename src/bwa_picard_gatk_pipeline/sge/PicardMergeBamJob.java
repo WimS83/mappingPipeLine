@@ -71,7 +71,7 @@ public class PicardMergeBamJob extends Job {
             inputString.append(" ");
         }
         
-        addCommand("java -jar "+picardMergeSam.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING = true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardMergeSam.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
         
     }
     
