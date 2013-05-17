@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
+import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
@@ -72,10 +73,7 @@ public class Sample {
             }
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_ANNOTATED_VCF.getRank()) {
                 annotateRawSNPs();
-            }            
-            
-
-
+            }      
           
 
 
@@ -84,6 +82,8 @@ public class Sample {
         } catch (InterruptedException ex) {
             Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
         } catch (DrmaaException ex) {
+            Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (JobFaillureException ex) {
             Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
         }
 
@@ -144,6 +144,7 @@ public class Sample {
                 
                 PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration);
                 picardMergeBamJob.executeOffline();
+                picardMergeBamJob.waitForOfflineExecution();
                 
             } catch (IOException ex) {
                 Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
@@ -180,7 +181,7 @@ public class Sample {
 
     }
 
-    private void realignBam() throws IOException, InterruptedException, DrmaaException {
+    private void realignBam() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
 
         if(mergedBamFileDedup == null) {return;}
         
@@ -190,12 +191,14 @@ public class Sample {
 
         if (globalConfiguration.getOffline()) {
             gATKRealignIndelsJob.executeOffline();
+            gATKRealignIndelsJob.waitForOfflineExecution();
         } else {
             gATKRealignIndelsJob.submit();
+            gATKRealignIndelsJob.waitFor();
         }
     }
 
-    private void callRawSNPs() throws IOException, InterruptedException, DrmaaException{
+    private void callRawSNPs() throws IOException, InterruptedException, DrmaaException, JobFaillureException{
         
         if(mergedBamDedupRealigned == null){ return;}
         
@@ -205,13 +208,15 @@ public class Sample {
         
         if (globalConfiguration.getOffline()) {
             gATKCallRawVariants.executeOffline();
+            gATKCallRawVariants.waitForOfflineExecution();
         } else {
             gATKCallRawVariants.submit();
+            gATKCallRawVariants.waitFor();
         }
         
     }
     
-    private void annotateRawSNPs() throws IOException, InterruptedException, DrmaaException{
+    private void annotateRawSNPs() throws IOException, InterruptedException, DrmaaException, JobFaillureException{
         
         if(rawVCFFile == null){ return;}
         
@@ -221,8 +226,10 @@ public class Sample {
         
         if (globalConfiguration.getOffline()) {
             gATKAnnotateVariantsJob.executeOffline();
+            gATKAnnotateVariantsJob.waitForOfflineExecution();
         } else {
             gATKAnnotateVariantsJob.submit();
+            gATKAnnotateVariantsJob.waitFor();
         }
         
     }

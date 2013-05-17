@@ -14,8 +14,7 @@ import java.util.List;
 public class JSONConfig {
     
     List<Sample> samples;        
-    
-    
+
     public List<Sample> getSamples() {
         return samples;
     }
@@ -24,6 +23,8 @@ public class JSONConfig {
         this.samples = samples;
     }
     
+    
+   
     
 
     

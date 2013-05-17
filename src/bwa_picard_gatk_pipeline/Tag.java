@@ -198,6 +198,7 @@ public class Tag {
         readGroup.getLog().append("Executing "+mappingJobs.size() + " mapping jobs offline");
         for (BwaSolidMappingJob bwaSolidMappingJob : mappingJobs) {            
                 bwaSolidMappingJob.executeOffline();
+                bwaSolidMappingJob.waitForOfflineExecution();
         }
     }
 
@@ -221,6 +222,7 @@ public class Tag {
        
        PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamChunks, mergedBamFile, null, readGroup.getGlobalConfiguration());
        picardMergeBamJob.executeOffline();
+       picardMergeBamJob.waitForOfflineExecution();
 
     } 
     
