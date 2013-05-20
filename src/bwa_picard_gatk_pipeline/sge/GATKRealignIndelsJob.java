@@ -50,14 +50,9 @@ public class GATKRealignIndelsJob extends Job {
     {
         String baseName = FilenameUtils.getBaseName(dedupBam.getAbsolutePath()); 
         File logFile = new File(dedupBam.getParentFile(), baseName + "_realign.log");  
-        File tmpDir = new File("/tmp", baseName);    
+        File tmpDir = new File("/tmp", baseName);          
         
-        File localdedupBam = new File(tmpDir, dedupBam.getName());
-        File remoteIndex = new File(dedupBam.getParentFile(), baseName+".bai");
-        File localIndex = new File(localdedupBam.getParentFile(), baseName+".bai");
-        
-        
-        File realignTargets = new File(FilenameUtils.removeExtension(localdedupBam.getAbsolutePath()) + "_realignTargets.intervals"); 
+        File realignTargets = new File(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignTargets.intervals"); 
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
                
@@ -70,10 +65,8 @@ public class GATKRealignIndelsJob extends Job {
         //create a tmp dir
         addCommand("mkdir " + tmpDir);
         addCommand("\n");
-        
-        //copy the bam to the node
-        addCommand("cp " + dedupBam.getAbsolutePath() +" "+localdedupBam.getAbsolutePath());  
-        addCommand("cp " + remoteIndex.getAbsolutePath() +" "+localIndex.getAbsolutePath());  
+       
+
         
         String knownIndels = "";
         if(gc.getKnownIndels()!= null)
@@ -86,7 +79,7 @@ public class GATKRealignIndelsJob extends Job {
                     " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T RealignerTargetCreator " +
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
-                    " -I "+localdedupBam.getAbsolutePath()+ 
+                    " -I "+dedupBam.getAbsolutePath()+ 
                     " -o "+realignTargets.getAbsolutePath()+knownIndels +
                     appendAlloutputToLog);
         
@@ -96,7 +89,7 @@ public class GATKRealignIndelsJob extends Job {
                     " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T IndelRealigner "+
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
-                    " -I "+localdedupBam.getAbsolutePath()+
+                    " -I "+dedupBam.getAbsolutePath()+
                     " -targetIntervals "+realignTargets.getAbsolutePath() + 
                     " -o "+realignedBam.getAbsolutePath()+knownIndels +
                     appendAlloutputToLog);
