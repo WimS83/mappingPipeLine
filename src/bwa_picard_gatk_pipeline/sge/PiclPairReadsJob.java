@@ -107,19 +107,7 @@ public class PiclPairReadsJob extends Job {
         addCommand("date  " + appendAlloutputToLog);
     }
     
-//    public void pairOffline() throws IOException, InterruptedException
-//    {
-//        List<String> commands = new ArrayList<String>();
-//        commands.add("/bin/sh");
-//        commands.add(this.getAbsolutePath()); 
-//        
-//        ProcessBuilder processBuilder = new ProcessBuilder(commands);
-//        processBuilder.directory(this.getParentFile());   
-//        Process proces = processBuilder.start();        
-//        proces.waitFor();
-//        
-//    
-//    }
+
     
     
     

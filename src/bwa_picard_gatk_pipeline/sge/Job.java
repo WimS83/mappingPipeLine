@@ -25,6 +25,8 @@ public abstract class Job extends File {
     private BufferedWriter out;
     protected String hostName;
     protected Integer sgeThreads;
+    
+    private Process proces;
 
     public Job(String filePath) throws IOException {
         super(filePath);
@@ -123,9 +125,12 @@ public abstract class Job extends File {
 
         ProcessBuilder processBuilder = new ProcessBuilder(commands);
         processBuilder.directory(this.getParentFile());
-        Process proces = processBuilder.start();
+        proces = processBuilder.start();
+        
+    }
+    
+    public void waitForOfflineExecution() throws InterruptedException
+    {
         proces.waitFor();
-
-
     }
 }

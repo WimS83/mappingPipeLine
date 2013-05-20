@@ -51,9 +51,9 @@ public class GATKAnnotateVariantsJob extends Job{
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
         //add sge hostname and date information to log
-        addCommand("uname -n >> " + logFile.getAbsolutePath());
+        addCommand("uname -n " + appendAlloutputToLog);
         addCommand("\n");
-        addCommand("date >> " + logFile.getAbsolutePath());
+        addCommand("date " + appendAlloutputToLog);
         addCommand("\n");
         
         //create a tmp dir
