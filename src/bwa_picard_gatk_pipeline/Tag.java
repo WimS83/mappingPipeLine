@@ -152,7 +152,7 @@ public class Tag {
         List<FastQChunk> fastQChunksConverted = new ArrayList<FastQChunk>();
 
         for (FastQFile fastQFile : fastQFiles) {
-            fastQChunksConverted.addAll(fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag));
+            fastQChunksConverted.addAll(fastQFile.splitFastQFile(readGroup.getGlobalConfiguration().getChunkSize(), outputDirTag, readGroup.getId()));
             readGroup.getLog().append(fastQFile.toString());
         }
 

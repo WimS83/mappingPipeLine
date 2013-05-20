@@ -5,7 +5,6 @@
 package bwa_picard_gatk_pipeline.fileWrappers;
 
 import bwa_picard_gatk_pipeline.enums.TagEnum;
-import bwa_picard_gatk_pipeline.exceptions.SplitFastQException;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -34,7 +33,7 @@ public class FastQFile {
     
     private List<FastQChunk> fastQChunks;
     
-    
+    private String readNameMask;
     
     private String path;
     
@@ -79,7 +78,7 @@ public class FastQFile {
         return recordNr;               
     }
     
-    public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir) throws FileNotFoundException, IOException
+    public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir, String readGroupId) throws FileNotFoundException, IOException
     {
         fastqFile = new File(path);
         this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());   
@@ -95,6 +94,8 @@ public class FastQFile {
         
         BufferedReader br = new BufferedReader(new FileReader(fastqFile));
         String line;  
+        
+        Integer lineInRecord = 1;
 
         while ((line = br.readLine()) != null) {
 
@@ -106,7 +107,21 @@ public class FastQFile {
                 lineCounterOut = new Long(0);
                 openNextChunk(outputDir);
                 
-            }                
+            }
+            
+            //do something special based on which line in the record this is
+            if(lineInRecord == 1)
+            {
+                if(readNameMask != null){line = "@"+ readGroupId + ":" + line.replace(readNameMask, "");}               
+            }
+            lineInRecord++;
+            
+            //reset lineInRecord to 1 if the we are on a 5th line            
+            if(lineInRecord == 5 )
+            {     
+                lineInRecord = 1;
+            
+            }
 
             chunkOut.write(line);
             chunkOut.write("\n");
@@ -209,6 +224,16 @@ public class FastQFile {
     public void setPath(String path) {
         this.path = path;
     }
+
+    public String getReadNameMask() {
+        return readNameMask;
+    }
+
+    public void setReadNameMask(String readNameMask) {
+        this.readNameMask = readNameMask;
+    }
+    
+    
     
     
 
