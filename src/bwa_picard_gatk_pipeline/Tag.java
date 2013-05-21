@@ -221,6 +221,7 @@ public class Tag {
        
        PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamChunks, mergedBamFile, null, readGroup.getGlobalConfiguration());
        picardMergeBamJob.executeOffline();
+       picardMergeBamJob.waitForOfflineExecution();
 
     } 
     

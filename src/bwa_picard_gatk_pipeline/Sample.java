@@ -144,6 +144,7 @@ public class Sample {
                 
                 PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration);
                 picardMergeBamJob.executeOffline();
+                picardMergeBamJob.waitForOfflineExecution();
             } catch (IOException ex) {
                 Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
             }

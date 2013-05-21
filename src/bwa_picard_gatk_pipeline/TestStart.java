@@ -25,7 +25,8 @@ public class TestStart {
         
         arguments.add("-i");
         //arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta_existinBamChunks.json");
-        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta.json");
+       // arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta.json");
+        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/M520_gatk.json");          
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
