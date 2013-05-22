@@ -50,7 +50,7 @@ public class GATKRealignIndelsJob extends Job {
     {
         String baseName = FilenameUtils.getBaseName(dedupBam.getAbsolutePath()); 
         File logFile = new File(dedupBam.getParentFile(), baseName + "_realign.log");  
-        File tmpDir = new File("/tmp", baseName);          
+       // File tmpDir = new File("/tmp", baseName);          
         
         File realignTargets = new File(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignTargets.intervals"); 
         
@@ -62,10 +62,10 @@ public class GATKRealignIndelsJob extends Job {
         addCommand("date >> " + logFile.getAbsolutePath());
         addCommand("\n");
         
-        //create a tmp dir
-        addCommand("mkdir " + tmpDir);
-        addCommand("\n");
-       
+//        //create a tmp dir
+//        addCommand("mkdir " + tmpDir);
+//        addCommand("\n");
+//       
 
         
         String knownIndels = "";
@@ -96,8 +96,8 @@ public class GATKRealignIndelsJob extends Job {
         
         addCommand("\n");
         //remove the tmp dir from the sge host
-        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
-        addCommand("\n");
+      //  addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+    //    addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date " + appendAlloutputToLog);
                  

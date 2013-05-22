@@ -47,10 +47,12 @@ public class GATKCallRawVariantsJob extends Job {
         
         String baseName = FilenameUtils.getBaseName(realignedBam.getAbsolutePath()); 
         File logFile = new File(realignedBam.getParentFile(), baseName + "_callRawVariants.log");  
-        File tmpDir = new File("/tmp", baseName);           
+        //File tmpDir = new File("/tmp", baseName);           
+        
+        File metricsFile = new File(rawVCF.getParent(), FilenameUtils.getBaseName(rawVCF.getAbsolutePath())+ ".metrics");
                
-        File localVCF = new File(tmpDir, rawVCF.getName());
-        File localVCFMetrics = new File(tmpDir, FilenameUtils.removeExtension(baseName)+".metrics");       
+//        File localVCF = new File(tmpDir, rawVCF.getName());
+//        File localVCFMetrics = new File(tmpDir, FilenameUtils.removeExtension(baseName)+".metrics");       
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
@@ -60,9 +62,9 @@ public class GATKCallRawVariantsJob extends Job {
         addCommand("date " + appendAlloutputToLog);
         addCommand("\n");
         
-        //create a tmp dir
-        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
-        addCommand("\n");
+//        //create a tmp dir
+//        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
+//        addCommand("\n");
         
         String callReference = "";
         if(gc.getGatkCallReference())
@@ -78,21 +80,21 @@ public class GATKCallRawVariantsJob extends Job {
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
                     " -nt "+ gc.getGatkSGEThreads() +
                     " -I "+realignedBam.getAbsolutePath()+
-                    " -o "+localVCF.getAbsolutePath()+
-                    " -metrics "+localVCFMetrics.getAbsolutePath()+
+                    " -o "+rawVCF.getAbsolutePath()+
+                    " -metrics "+metricsFile.getAbsolutePath()+
                     " -slod "+
                     callReference +                          
                     appendAlloutputToLog);
         addCommand("\n");
         
         //copy the resutls back
-        addCommand("cp "+localVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);
-        addCommand("cp "+localVCFMetrics.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath()+ appendAlloutputToLog);
-        addCommand("\n");
+//        addCommand("cp "+localVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);
+//        addCommand("cp "+localVCFMetrics.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath()+ appendAlloutputToLog);
+//        addCommand("\n");
         
         
         //remove the tmp dir from the sge host
-        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+       // addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);

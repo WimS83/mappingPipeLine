@@ -44,9 +44,9 @@ public class GATKAnnotateVariantsJob extends Job{
         
         String baseName = FilenameUtils.getBaseName(rawVCF.getAbsolutePath()); 
         File logFile = new File(rawVCF.getParentFile(), baseName + "_annotateVariants.log");  
-        File tmpDir = new File("/tmp", baseName);           
+      //  File tmpDir = new File("/tmp", baseName);           
                
-        File localAnnotatedVCF = new File(tmpDir, annotatedVCF.getName());          
+       // File localAnnotatedVCF = new File(tmpDir, annotatedVCF.getName());          
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
@@ -56,9 +56,9 @@ public class GATKAnnotateVariantsJob extends Job{
         addCommand("date " + appendAlloutputToLog);
         addCommand("\n");
         
-        //create a tmp dir
-        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
-        addCommand("\n");
+//        //create a tmp dir
+//        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
+//        addCommand("\n");
         
         String clusterAnnotation = "";
         if(!gc.getGatkCallReference())
@@ -74,7 +74,7 @@ public class GATKAnnotateVariantsJob extends Job{
                     " -T VariantFiltration "+
                     " -R "+gc.getReferenceFile().getAbsolutePath()+                  
                     " -V "+rawVCF.getAbsolutePath()+
-                    " -o "+localAnnotatedVCF.getAbsolutePath()+
+                    " -o "+annotatedVCF.getAbsolutePath()+
                     clusterAnnotation+                    
                     " --filterExpression \"MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)\" --filterName \"HARD_TO_VALIDATE\" "+
                     " --filterExpression \"DP < 5 \" --filterName \"LowCoverage\" "+
@@ -86,12 +86,12 @@ public class GATKAnnotateVariantsJob extends Job{
         addCommand("\n");
         
         //copy the resutls back
-        addCommand("cp "+localAnnotatedVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);        
-        addCommand("\n");
+//        addCommand("cp "+localAnnotatedVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);        
+//        addCommand("\n");
         
         
         //remove the tmp dir from the sge host
-        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+        //addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
