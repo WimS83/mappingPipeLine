@@ -241,6 +241,40 @@ public class Sample {
     public void setReadGroupBamFiles(List<File> readGroupBamFiles) {
         this.readGroupBamFiles = readGroupBamFiles;
     }
+
+    public File getMergedBamFile() {
+        return mergedBamFile;
+    }
+
+    public void setMergedBamFile(File mergedBamFile) {
+        this.mergedBamFile = mergedBamFile;
+    }
+
+    public File getMergedBamFileDedup() {
+        return mergedBamFileDedup;
+    }
+
+    public void setMergedBamFileDedup(File mergedBamFileDedup) {
+        this.mergedBamFileDedup = mergedBamFileDedup;
+    }
+
+    public File getMergedBamDedupRealigned() {
+        return mergedBamDedupRealigned;
+    }
+
+    public void setMergedBamDedupRealigned(File mergedBamDedupRealigned) {
+        this.mergedBamDedupRealigned = mergedBamDedupRealigned;
+    }
+
+    public File getRawVCFFile() {
+        return rawVCFFile;
+    }
+
+    public void setRawVCFFile(File rawVCFFile) {
+        this.rawVCFFile = rawVCFFile;
+    }
+    
+    
     
     
     
