@@ -175,7 +175,8 @@ public class CsFastaFilePair {
         } catch (IOException ex) {
             Logger.getLogger(CsFastaFilePair.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
+    }    
+    
     
 
     public long getRecordNr() {

@@ -154,6 +154,9 @@ public class Sample {
     
       private void runQualimap() throws IOException, InterruptedException, DrmaaException {
 
+        
+        if(mergedBamFile == null){return;}
+          
         File qualimapReport = new File(sampleOutputDir, name+"_qualimap.pdf");        
         QualimapJob qualimapJob = new QualimapJob(mergedBamFile, qualimapReport, globalConfiguration, "fedor8");
         
