@@ -33,8 +33,10 @@ public class CsFastaFilePair {
     private List<FastQChunk> fastQChunks;
     private FastQChunk currentChunk;
     
-    
-    BufferedWriter out;
+    //File readers and writers
+    private BufferedReader csFastaReader;
+    private BufferedReader qualReader;
+    private BufferedWriter out;
     
     private String readNameMask;
 
@@ -86,59 +88,86 @@ public class CsFastaFilePair {
         chunkCounter = 0;
         Integer chunkRecordCounter = 0;
 
-        //initalize the reader
-        BufferedReader csFastaReader = new BufferedReader(new FileReader(csFastaFile));
-        BufferedReader qualReader = new BufferedReader(new FileReader(qualFile));
-        String csFastaLine;
+        //initalize the readers and writer
+        initializeReaders();
+        setWriterToNextChunk(); 
+        
+      //  String csFastaLine;
 
-        //initialize the writer
-        setWriterToNextChunk();   
+        skipheader();
+       
         
         //initialize the counter to check if we are on a description or csvalues line
-        Long csFastLineCounter = new Long(0);
-        Long diveder = new Long(2);        
+       // Long csFastLineCounter = new Long(0);
+      //  Long diveder = new Long(2);        
         
-        String seqName = "";        
+        //String seqName = "";        
 
-        while ((csFastaLine = csFastaReader.readLine()) != null) {
-            String qualLine = qualReader.readLine();
-            
-            if(qualLine == null){throw new IOException("Cannot find qual entry in "+ qualFile.getAbsolutePath() +" at line "+csFastLineCounter);}
-            if (csFastaLine.charAt(0) == '#') {
-                continue;
-            }
-            csFastLineCounter++;
-
-            //if at the second and last line of a csfasta record
-            if (csFastLineCounter % diveder == 0) {                
-                
-               if(recordNr % chunkSize == 0 && recordNr != 0)
-               {
-                   closeWriter(chunkRecordCounter);
-                   chunkRecordCounter = 0;
-                   setWriterToNextChunk();
-               }
-                
-                seqName = readGroupId+":"+seqName;
-                
-                FastqEntry fastqEntry = new FastqEntry(seqName, csFastaLine, qualLine);
-                
-                out.write(fastqEntry.toString());
-                recordNr++; 
-                chunkRecordCounter++;
-            }
-            //if at the first line of a csfasta record
-            else
+//        while ((csFastaLine = csFastaReader.readLine()) != null) {
+//            String qualLine = qualReader.readLine();
+//            
+//            if(qualLine == null){throw new IOException("Cannot find qual entry in "+ qualFile.getAbsolutePath() +" at line "+csFastLineCounter);}
+//            if (csFastaLine.charAt(0) == '#') {
+//                continue;
+//            }
+//            csFastLineCounter++;
+//
+//            //if at the second and last line of a csfasta record
+//            if (csFastLineCounter % diveder == 0) {                
+//                
+//               if(recordNr % chunkSize == 0 && recordNr != 0)
+//               {
+//                   closeWriter(chunkRecordCounter);
+//                   chunkRecordCounter = 0;
+//                   setWriterToNextChunk();
+//               }
+//                
+//                seqName = readGroupId+":"+seqName;
+//                
+//                FastqEntry fastqEntry = new FastqEntry(seqName, csFastaLine, qualLine);
+//                
+//                out.write(fastqEntry.toString());
+//                recordNr++; 
+//                chunkRecordCounter++;
+//            }
+//            //if at the first line of a csfasta record
+//            else
+//            {
+//                //remove the leading > from the seqname
+//                seqName = csFastaLine.substring(1);
+//                
+//                //remove a string (for example F3 or F5-P2) from the seqname to make them identical for later pairing
+//                if(readNameMask != null)
+//                {
+//                    seqName = seqName.replace(readNameMask, "");
+//                }               
+//            }            
+//        }
+        
+        CSFastaEntry cSFastaEntry;
+        while((cSFastaEntry = readNextEntry()) != null)
+        {
+            String seqName =  cSFastaEntry.getDescription().substring(1);
+            if(readNameMask != null)
             {
-                //remove the leading > from the seqname
-                seqName = csFastaLine.substring(1);
-                
-                //remove a string (for example F3 or F5-P2) from the seqname to make them identical for later pairing
-                if(readNameMask != null)
-                {
-                    seqName = seqName.replace(readNameMask, "");
-                }               
-            }            
+                   seqName = seqName.replace(readNameMask, "");
+            }   
+            
+            seqName = readGroupId+":"+seqName;
+            
+            FastqEntry fastqEntry = new FastqEntry(seqName, cSFastaEntry.getCsValue(), cSFastaEntry.getQualValue());
+            
+             if(recordNr % chunkSize == 0 && recordNr != 0)
+             {
+                closeWriter(chunkRecordCounter);
+                chunkRecordCounter = 0;
+                setWriterToNextChunk();
+             }
+            
+            
+            out.write(fastqEntry.toString());
+            recordNr++; 
+            chunkRecordCounter++;
         }
         
         csFastaReader.close();
@@ -147,9 +176,38 @@ public class CsFastaFilePair {
         closeWriter(chunkRecordCounter);           
         
         return fastQChunks;
-
-
     }
+    
+    private void initializeReaders() throws FileNotFoundException
+    {
+        csFastaReader = new BufferedReader(new FileReader(csFastaFile));
+        qualReader = new BufferedReader(new FileReader(qualFile));    
+    }  
+    
+    
+    private CSFastaEntry readNextEntry() throws IOException
+    {
+        CSFastaEntry cSFastaEntry = new CSFastaEntry();
+             
+        String csFastaDescriptionLine = csFastaReader.readLine();
+        String csFastaValue = csFastaReader.readLine();
+        String qualDescriptionLine = qualReader.readLine();
+        String qualValue = qualReader.readLine();
+        
+        if(csFastaDescriptionLine == null || csFastaValue == null || qualDescriptionLine == null || qualValue == null )
+        {
+            return null;
+        }     
+        
+        if(!csFastaDescriptionLine.equalsIgnoreCase(qualDescriptionLine)){throw new IOException("csfasta and qual description line do not match. csfasta description line:\n"+csFastaDescriptionLine+"\n qual description line\n"+qualDescriptionLine);}
+        
+        cSFastaEntry.setDescription(csFastaDescriptionLine);
+        cSFastaEntry.setCsValue(csFastaValue);
+        cSFastaEntry.setQualValue(qualValue);
+        
+        return cSFastaEntry;   
+    }
+    
     
     
     private void setWriterToNextChunk() {
@@ -228,6 +286,38 @@ public class CsFastaFilePair {
 
         return sb.toString();
 
+    }
+
+    private void skipheader() throws IOException {
+        
+        csFastaReader.mark(8192);
+        
+        String csFastaLine;
+        while((csFastaLine = csFastaReader.readLine()) != null)
+        {
+            if (csFastaLine.charAt(0) == '#') {
+                csFastaReader.mark(8192);
+            }
+            else
+            {
+                csFastaReader.reset();
+                break;
+            }
+        }
+        
+        
+        String qualLine;
+        while((qualLine = qualReader.readLine()) != null)
+        {
+            if (qualLine.charAt(0) == '#') {
+                qualReader.mark(8192);
+            }
+            else
+            {
+                qualReader.reset();
+                break;
+            }
+        }      
     }
 
     
