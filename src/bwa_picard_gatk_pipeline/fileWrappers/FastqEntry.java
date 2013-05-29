@@ -19,25 +19,21 @@ public class FastqEntry {
     private String csValues;
     private String qualValues;
 
-    public FastqEntry(String seqName, String csFastaLine, String qualLine) {
+    public FastqEntry() {
 
-
-        this.seqName = seqName;
-        
+            
         csToBWACSMap = new HashMap<Character, Character>();
         csToBWACSMap.put('0', 'A');
         csToBWACSMap.put('1', 'C');
         csToBWACSMap.put('2', 'G');
         csToBWACSMap.put('3', 'T');
-        csToBWACSMap.put('.', 'N');
-
-
-        convertCsFastaLine(csFastaLine);
-        convertQualLine(qualLine);
+        csToBWACSMap.put('.', 'N');       
 
     }
 
-    private void convertCsFastaLine(String csFastaLine) {
+    
+
+    public void convertCsValuesFromCsFastaLine(String csFastaLine) {
 
         csFastaLine = csFastaLine.substring(2);
         
@@ -53,7 +49,7 @@ public class FastqEntry {
 
     }
 
-    private void convertQualLine(String qualLine) {
+    public void convertQualFromCsFastaQualLine(String qualLine) {
         
         String[] splitQualLine = qualLine.split(" ");
         
@@ -87,6 +83,38 @@ public class FastqEntry {
         
         
     }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }    
+    
+    public String getSeqName() {
+        return seqName;
+    }
+
+    public void setSeqName(String seqName) {
+        this.seqName = seqName;
+    }
+
+    public String getCsValues() {
+        return csValues;
+    }
+
+    public void setCsValues(String csValues) {
+        this.csValues = csValues;
+    }
+
+    public String getQualValues() {
+        return qualValues;
+    }
+
+    public void setQualValues(String qualValues) {
+        this.qualValues = qualValues;
+    }   
 
     @Override
     public String toString() {

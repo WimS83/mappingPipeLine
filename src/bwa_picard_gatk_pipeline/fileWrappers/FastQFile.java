@@ -27,6 +27,8 @@ public class FastQFile {
     
     private TagEnum tag;    
     
+    private BufferedReader fastqReader;
+    
     private BufferedWriter chunkOut = null;  
     private long chunkCounter = new Long(0);
     private String baseName;
@@ -54,7 +56,7 @@ public class FastQFile {
 
     public Long countNumberOfrecords() {
         
-         fastqFile = new File(path);
+        fastqFile = new File(path);
         
         if(fastqFile == null){ return new Long(0);}
         
@@ -78,61 +80,97 @@ public class FastQFile {
         return recordNr;               
     }
     
+    private void initializeFastqReader() throws FileNotFoundException
+    {
+         fastqReader = new BufferedReader(new FileReader(fastqFile));
+        
+    }
+    
     public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir, String readGroupId) throws FileNotFoundException, IOException
     {
         fastqFile = new File(path);
-        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());   
-        
-        Integer chunksizeInLines = 4 * chunkSize;
+        this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());  
         
         fastQChunks = new ArrayList<FastQChunk>();
         
-        long lineCounterIn = new Long(0);    
-        long lineCounterOut = new Long(0);   
+        long fastqEntriesRead = new Long(0);    
+        long fastqEntriesWritten = new Long(0);   
+        long fastqEntriesWrittenInChunk = new Long(0);   
         
+        initializeFastqReader();
         openNextChunk(outputDir);  
         
-        BufferedReader br = new BufferedReader(new FileReader(fastqFile));
-        String line;  
+       
+//        String line;  
+//        
+//        Integer lineInRecord = 1;
+
+//        while ((line = .readLine()) != null) {
+//
+//            //if linecounter is multiple of chunksize
+//            if(lineCounterIn % chunksizeInLines == 0 && lineCounterIn > 0)
+//            {
+//                //close the current chunk      
+//                closeCurrentChunk(lineCounterOut);
+//                lineCounterOut = new Long(0);
+//                openNextChunk(outputDir);
+//                
+//            }
+//            
+//            //do something special based on which line in the record this is
+//            if(lineInRecord == 1)
+//            {
+//                if(readNameMask != null){line = "@"+ readGroupId + ":" + line.replace(readNameMask, "");}               
+//            }
+//            lineInRecord++;
+//            
+//            //reset lineInRecord to 1 if the we are on a 5th line            
+//            if(lineInRecord == 5 )
+//            {     
+//                lineInRecord = 1;
+//            
+//            }
+//
+//            chunkOut.write(line);
+//            chunkOut.write("\n");
+//            lineCounterOut++;
+//            lineCounterIn++; 
+//
+//        }
         
-        Integer lineInRecord = 1;
-
-        while ((line = br.readLine()) != null) {
-
-            //if linecounter is multiple of chunksize
-            if(lineCounterIn % chunksizeInLines == 0 && lineCounterIn > 0)
+        FastqEntry fastqEntry;
+        while((fastqEntry = readNextEntry()) != null)
+        {
+            //reformat the seqname
+            String seqName = fastqEntry.getSeqName();
+            if(readNameMask != null)
             {
-                //close the current chunk      
-                closeCurrentChunk(lineCounterOut);
-                lineCounterOut = new Long(0);
+                 seqName = seqName.replace(readNameMask, "");
+            }            
+            seqName = readGroupId+":"+seqName;            
+            fastqEntry.setSeqName(seqName);
+            
+            //close old and open new chunk if chunksize is hit
+            if(fastqEntriesWritten % chunkSize == 0 && fastqEntriesWritten != 0)
+            {
+                closeCurrentChunk(fastqEntriesWrittenInChunk);
+                fastqEntriesWrittenInChunk = new Long(0);
                 openNextChunk(outputDir);
-                
             }
             
-            //do something special based on which line in the record this is
-            if(lineInRecord == 1)
-            {
-                if(readNameMask != null){line = "@"+ readGroupId + ":" + line.replace(readNameMask, "");}               
-            }
-            lineInRecord++;
+            chunkOut.write(fastqEntry.toString());
             
-            //reset lineInRecord to 1 if the we are on a 5th line            
-            if(lineInRecord == 5 )
-            {     
-                lineInRecord = 1;
             
-            }
-
-            chunkOut.write(line);
-            chunkOut.write("\n");
-            lineCounterOut++;
-            lineCounterIn++; 
-
+            fastqEntriesRead++;
+            fastqEntriesWritten++;
+            fastqEntriesWrittenInChunk++;        
         }
-        br.close();
-        closeCurrentChunk(lineCounterOut);       
         
-        recordNr = lineCounterIn / new Long(4); 
+        
+        fastqReader.close();
+        closeCurrentChunk(fastqEntriesWrittenInChunk);       
+        
+        recordNr = fastqEntriesRead;
         Long recordsInChunks = getRecordNrInChunks();
         
         
@@ -144,6 +182,29 @@ public class FastQFile {
         return fastQChunks;
         
         
+    }    
+    
+    private FastqEntry readNextEntry() throws IOException
+    {
+        FastqEntry fastqEntry = new FastqEntry();        
+             
+        String seqName = fastqReader.readLine();
+        String csValues = fastqReader.readLine();
+        String description = fastqReader.readLine();
+        String qualValue = fastqReader.readLine();  
+        
+        //if end of file is reached return null
+        if(seqName == null || csValues == null || description == null || qualValue == null )
+        {
+            return null;
+        }       
+        
+        fastqEntry.setSeqName(seqName);
+        fastqEntry.setCsValues(csValues);
+        fastqEntry.setDescription(description);
+        fastqEntry.setQualValues(qualValue);
+        
+        return fastqEntry;   
     }
     
     private void openNextChunk(File outputDir) throws IOException
@@ -158,10 +219,9 @@ public class FastQFile {
     
     }
     
-    private void closeCurrentChunk(Long lineCounterOut) throws IOException {
-        fastQChunks.get(fastQChunks.size() -1).setRecordNr(lineCounterOut / new Long(4));
-        chunkOut.close();
-        
+    private void closeCurrentChunk(Long fastqEntriesInChunk) throws IOException {
+        fastQChunks.get(fastQChunks.size() -1).setRecordNr(fastqEntriesInChunk);
+        chunkOut.close();        
     }   
     
 

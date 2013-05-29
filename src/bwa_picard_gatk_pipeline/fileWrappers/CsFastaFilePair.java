@@ -155,7 +155,13 @@ public class CsFastaFilePair {
             
             seqName = readGroupId+":"+seqName;
             
-            FastqEntry fastqEntry = new FastqEntry(seqName, cSFastaEntry.getCsValue(), cSFastaEntry.getQualValue());
+            FastqEntry fastqEntry  = new FastqEntry();
+            fastqEntry.setSeqName(seqName);
+            fastqEntry.convertCsValuesFromCsFastaLine(cSFastaEntry.getCsValue());
+            fastqEntry.convertQualFromCsFastaQualLine(cSFastaEntry.getQualValue());
+            
+            
+           // FastqEntry fastqEntry = new FastqEntry(seqName, cSFastaEntry.getCsValue(), cSFastaEntry.getQualValue());
             
              if(recordNr % chunkSize == 0 && recordNr != 0)
              {
