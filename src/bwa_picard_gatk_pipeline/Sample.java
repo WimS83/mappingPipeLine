@@ -9,7 +9,7 @@ import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
-import bwa_picard_gatk_pipeline.sge.PicardMergeBamJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
 import java.io.File;
 import java.io.IOException;

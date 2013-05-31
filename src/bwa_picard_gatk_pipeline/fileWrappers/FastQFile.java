@@ -54,9 +54,9 @@ public class FastQFile {
 
    
 
-    public Long countNumberOfrecords() {
+    public Long countNumberOfrecords() throws FileNotFoundException {
         
-        fastqFile = new File(path);
+        initializeFastqReader();
         
         if(fastqFile == null){ return new Long(0);}
         
@@ -80,15 +80,16 @@ public class FastQFile {
         return recordNr;               
     }
     
-    private void initializeFastqReader() throws FileNotFoundException
+    public void initializeFastqReader() throws FileNotFoundException
     {
-         fastqReader = new BufferedReader(new FileReader(fastqFile));
+        fastqFile = new File(path);
+        fastqReader = new BufferedReader(new FileReader(fastqFile));
         
     }
     
     public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir, String readGroupId) throws FileNotFoundException, IOException
     {
-        fastqFile = new File(path);
+       
         this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());  
         
         fastQChunks = new ArrayList<FastQChunk>();
@@ -199,7 +200,7 @@ public class FastQFile {
             return null;
         }       
         
-        fastqEntry.setSeqName(seqName);
+        fastqEntry.setSeqName(seqName.substring(1));
         fastqEntry.setCsValues(csValues);
         fastqEntry.setDescription(description);
         fastqEntry.setQualValues(qualValue);

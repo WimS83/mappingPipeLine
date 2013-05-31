@@ -8,7 +8,7 @@ import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.exceptions.TagProcessingException;
-import bwa_picard_gatk_pipeline.sge.PiclPairReadsJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads.PiclPairReadsJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
 import java.io.File;
 import java.io.IOException;
@@ -178,6 +178,10 @@ public class ReadGroup {
         return library;
     }
 
+    public void setLibrary(String library) {
+        this.library = library;
+    }    
+
     public String getSample() {
         return sample;
     }
@@ -211,4 +215,6 @@ public class ReadGroup {
         readGroupOutputDir.mkdir();
 
     }
+    
+    
 }

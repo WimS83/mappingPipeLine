@@ -2,9 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package bwa_picard_gatk_pipeline.sge;
+package bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob;
 
 import bwa_picard_gatk_pipeline.ReadGroup;
+import bwa_picard_gatk_pipeline.sge.Job;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FilenameUtils;

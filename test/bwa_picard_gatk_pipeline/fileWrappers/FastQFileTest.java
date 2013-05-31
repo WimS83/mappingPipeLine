@@ -66,7 +66,12 @@ public class FastQFileTest {
         fastQFileWrapper.setPath(fastqFile.getAbsolutePath());
         
         Long expectedCount = new Long(500);
-        Long foundCount = fastQFileWrapper.countNumberOfrecords();
+        Long foundCount = new Long(0);
+        try {
+            foundCount = fastQFileWrapper.countNumberOfrecords();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FastQFileTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         assertTrue("Found number of records does not match expected. Found: "+foundCount +" expedted: "+expectedCount, foundCount.equals(expectedCount));
         
@@ -80,11 +85,16 @@ public class FastQFileTest {
        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());  
        FastQFile fastQFileWrapper = new FastQFile();
        fastQFileWrapper.setPath(fastqFile.getAbsolutePath());
+        try {
+            fastQFileWrapper.initializeFastqReader();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FastQFileTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
        
        outputDir = new File(tmpDir, "tmpOutputDir");
        outputDir.mkdir();
        
-       fastQFileWrapper.countNumberOfrecords();          
+           
         try {
             fastQFileWrapper.splitFastQFile(new Integer(200), outputDir, "UnitTest_F1");
         } catch (FileNotFoundException ex) {
@@ -111,11 +121,16 @@ public class FastQFileTest {
        File fastqFile = new File(getClass().getResource("p1.solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000.fastq").getFile());  
        FastQFile fastQFileWrapper = new FastQFile();
        fastQFileWrapper.setPath(fastqFile.getAbsolutePath());
+        try {
+            fastQFileWrapper.initializeFastqReader();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FastQFileTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
        outputDir = new File(tmpDir, "tmpOutputDir");
        outputDir.mkdir();
         try {
-            fastQFileWrapper.setReadNameMask("@solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000:");
+            fastQFileWrapper.setReadNameMask("solid0042_20110504_PE_M520newPEkit_Nico_M520_F3_first1000:");
             fastQFileWrapper.splitFastQFile(10000, outputDir, "UnitTest_F1");
             List<FastQChunk> fastqChunks = fastQFileWrapper.getSplitFastQFiles();
             
