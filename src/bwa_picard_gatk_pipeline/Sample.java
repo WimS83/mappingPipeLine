@@ -6,19 +6,18 @@ package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
-import bwa_picard_gatk_pipeline.sge.GATKAnnotateVariantsJob;
-import bwa_picard_gatk_pipeline.sge.GATKCallRawVariantsJob;
-import bwa_picard_gatk_pipeline.sge.GATKRealignIndelsJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.gatkAnnotateSNP.GATKAnnotateVariantsJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.gatkCallRawSNP.GATKCallRawVariantsJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.realignJob.GATKRealignIndelsJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
+import bwa_picard_gatk_pipeline.sge.solid.BWA.dedupJob.PicardDedupBamJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.picard.sam.PicardBamMerger;
-import net.sf.picard.sam.PicardMarkDuplicates;
 import org.apache.commons.io.FilenameUtils;
 import org.ggf.drmaa.DrmaaException;
 
@@ -172,13 +171,23 @@ public class Sample {
     }
     
 
-    private void markDuplicates() throws IOException {
+    private void markDuplicates() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
         //if a merged bam file was created by processing the readgroups or was set by json 
         //deduplicate the bam
         if (mergedBamFile == null) {  return;   }
         
-        PicardMarkDuplicates picardMarkDuplicates = new PicardMarkDuplicates();
-        mergedBamFileDedup = picardMarkDuplicates.markDuplicates(mergedBamFile, globalConfiguration.getTmpDir());
+        mergedBamFileDedup = new File(sampleOutputDir, FilenameUtils.getBaseName(mergedBamFile.getName()) + "_dedup.bam");
+        
+        PicardDedupBamJob picardDedupBamJob = new PicardDedupBamJob(mergedBamFile, mergedBamFileDedup, globalConfiguration);
+        
+        if (globalConfiguration.getOffline()) {
+            picardDedupBamJob.executeOffline();
+            picardDedupBamJob.waitForOfflineExecution();
+            
+        } else {
+            picardDedupBamJob.submit();
+            picardDedupBamJob.waitFor();
+        }   
 
 
     }

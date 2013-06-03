@@ -49,7 +49,18 @@ public class PicardMergeBamJob extends Job {
         
         File logFile = new File(mergedBam.getParentFile(), baseName + "_PicardMergeBams.log");      
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
-        File tmpDir = gc.getTmpDir();
+        
+        File tmpDir;
+        
+        if(gc.getOffline())
+        {
+            tmpDir = gc.getTmpDir();
+        }
+        else
+        {
+            tmpDir = new File("/tmp/");
+        }    
+       
         File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
         
         

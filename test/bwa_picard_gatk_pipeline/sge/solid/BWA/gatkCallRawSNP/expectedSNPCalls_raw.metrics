@@ -1,0 +1,7 @@
+Visited bases                                1000001
+Callable bases                               951824
+Confidently called bases                     931640
+% callable bases of all loci                 95.182
+% confidently called bases of all loci       93.164
+% confidently called bases of callable loci  97.879
+Actual calls made                            705356

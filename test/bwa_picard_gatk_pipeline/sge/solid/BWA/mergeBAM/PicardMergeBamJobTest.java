@@ -78,6 +78,16 @@ public class PicardMergeBamJobTest {
         File fragmentBamFile = new File(getClass().getResource("LE_F1.bam").getFile());
         File expectedMergedBamFile = new File(getClass().getResource("LE_expectedMerged.bam").getFile());
         
+        File tmpFFile = new File(outputDir, fragmentBamFile.getName());     
+        File tmpPEFile = new File(outputDir, expectedPairedBamFile.getName()); 
+        try {
+            FileUtils.copyFile(fragmentBamFile, tmpFFile);            
+            FileUtils.copyFile(expectedPairedBamFile, tmpPEFile);     
+        } catch (IOException ex) {
+            Logger.getLogger(BwaSolidMappingJobTest.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+        
+        
         
         File foundMergedBamFile = new File(outputDir, "LE_foundMerged.bam");
         
@@ -86,11 +96,12 @@ public class PicardMergeBamJobTest {
         File picardCompareBam = new File(picardDir, "CompareSAMs.jar");
         
         gc.setPicardDirectory(picardDir);
+        gc.setOffline(true);
         gc.setTmpDir(tmpDir);        
         
         List<File> bamFiles = new ArrayList<File>();
-        bamFiles.add(fragmentBamFile);
-        bamFiles.add(expectedPairedBamFile);
+        bamFiles.add(tmpFFile);
+        bamFiles.add(tmpPEFile);
         try {
             PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamFiles, foundMergedBamFile, null, gc);
             picardMergeBamJob.executeOffline();
