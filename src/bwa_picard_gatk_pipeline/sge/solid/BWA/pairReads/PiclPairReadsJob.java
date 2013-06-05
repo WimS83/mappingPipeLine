@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads;
 
 import bwa_picard_gatk_pipeline.ReadGroup;
+import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.sge.Job;
 import java.io.File;
 import java.io.IOException;
@@ -18,26 +19,29 @@ public class PiclPairReadsJob extends Job {
     
     
     private String sgeName;    
-    private File F3Bam;
-    private File F5Bam;
+    private File firstBam;
+    private File secondBam;
     private File pairedBamFile;
     
     private ReadGroup readGroup;
+    private TagEnum secondTag;
+    
 
-    public PiclPairReadsJob(File F3Bam, File F5Bam, File pairedBamFile,  ReadGroup readGroup, String hostNameArg) throws IOException {
+    public PiclPairReadsJob(File firstBam, File secondBam, File pairedBamFile,  ReadGroup readGroup, String hostNameArg, TagEnum secondTag) throws IOException {
 
-        super(FilenameUtils.removeExtension(F3Bam.getAbsolutePath()) + "_pairBam.sh");
+        super(FilenameUtils.removeExtension(firstBam.getAbsolutePath()) + "_pairBam.sh");
 
-        this.F3Bam = F3Bam;
+        this.firstBam = firstBam;
         this.readGroup = readGroup;
-        this.F5Bam = F5Bam;
+        this.secondBam = secondBam;
         this.pairedBamFile = pairedBamFile;
+        this.secondTag = secondTag;
         
         hostName = hostNameArg;
 
         addCommands();
 
-        sgeName = "Pair" + F3Bam.getName();
+        sgeName = "Pair" + firstBam.getName();
         close();
     }
 
@@ -50,11 +54,11 @@ public class PiclPairReadsJob extends Job {
         String baseName = readGroup.getId();
         File tmpDir = new File("/tmp/" + baseName);
         
-//        File copiedF3Bam = new File(tmpDir, F3Bam.getName());
-//        File copiedF5Bam = new File(tmpDir, F5Bam.getName());
+//        File copiedF3Bam = new File(tmpDir, firstBam.getName());
+//        File copiedF5Bam = new File(tmpDir, secondBam.getName());
         
-        File F3BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(F3Bam.getAbsolutePath()) + "F3_queryNameSorted.bam");    
-        File F5BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(F5Bam.getAbsolutePath()) + "F5_queryNameSorted.bam"); 
+        File F3BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(firstBam.getAbsolutePath()) + "F3_queryNameSorted.bam");    
+        File F5BamSortedByQueryName = new File(tmpDir, FilenameUtils.getBaseName(secondBam.getAbsolutePath()) + "F5_queryNameSorted.bam"); 
        
         File F3_F5BamSortedByQueryName =  new File(tmpDir, baseName + "_F3_F5_queryNameSorted.bam");            
 //        File F3_F5BamSortedByCoordinate = new File(tmpDir, pairedBamFile.getName());    
@@ -68,6 +72,18 @@ public class PiclPairReadsJob extends Job {
         File picl = readGroup.getGlobalConfiguration().getPicl();
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        
+        String ori;
+        if(secondTag == TagEnum.F5)
+        {
+            ori = "ni";            
+        }
+        if(secondTag == TagEnum.R3)
+        {
+            ori = 
+        }
+        
+        
                
         
         //add sge hostname and date information to log
@@ -80,14 +96,14 @@ public class PiclPairReadsJob extends Job {
         addCommand("\n");
         //copy the fastQFile to the tmp dir 
         //addCommand("echo starting copying of first bam file " + appendAlloutputToLog);
-//        addCommand("cp " + F3Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        addCommand("cp " + firstBam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
 //        addCommand("\n");
 //        addCommand("echo starting copying of second bam file >> " + logFile.getAbsolutePath());
-//        addCommand("cp " + F5Bam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        addCommand("cp " + secondBam.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
 //        addCommand("\n");
         //sort the bam files by queryname
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F3Bam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
-        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+F5Bam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+firstBam.getAbsolutePath() +" O="+ F3BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardSortSam.getAbsolutePath() +" I="+secondBam.getAbsolutePath() +" O="+ F5BamSortedByQueryName.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT SO=queryname CREATE_INDEX=true " + appendAlloutputToLog);
         //pair the bam files
         addCommand(picl.getAbsolutePath()+" pairedbammaker -ori ni -first "+ F3BamSortedByQueryName.getAbsolutePath() + " -second "+ F5BamSortedByQueryName + " -output "+ F3_F5BamSortedByQueryName.getAbsolutePath() + appendAlloutputToLog);
         //sort the bam file
