@@ -8,6 +8,7 @@ import bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads.PiclPairReadsJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJobTest;
 import bwa_picard_gatk_pipeline.GlobalConfiguration;
 import bwa_picard_gatk_pipeline.ReadGroup;
+import bwa_picard_gatk_pipeline.enums.TagEnum;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
@@ -114,7 +115,7 @@ public class PiclPairReadsJobTest {
 
         File foundPairedBamFile = new File(outputDir, "foundPairedBamFile.bam");
         try {
-            PiclPairReadsJob pairReadsJob = new PiclPairReadsJob(tmpf3BamFile, tmpf5BamFile, foundPairedBamFile, rg, null);
+            PiclPairReadsJob pairReadsJob = new PiclPairReadsJob(tmpf3BamFile, tmpf5BamFile, foundPairedBamFile, rg, null, TagEnum.SOLID_F5);
             pairReadsJob.executeOffline();
             pairReadsJob.waitForOfflineExecution();
         } catch (IOException ex) {

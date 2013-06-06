@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline.fileWrappers;
 
+import bwa_picard_gatk_pipeline.enums.PlatformEnum;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -90,59 +91,9 @@ public class CsFastaFilePair {
 
         //initalize the readers and writer
         initializeReaders();
-        setWriterToNextChunk(); 
-        
-      //  String csFastaLine;
+        setWriterToNextChunk();  
 
         skipheader();
-       
-        
-        //initialize the counter to check if we are on a description or csvalues line
-       // Long csFastLineCounter = new Long(0);
-      //  Long diveder = new Long(2);        
-        
-        //String seqName = "";        
-
-//        while ((csFastaLine = csFastaReader.readLine()) != null) {
-//            String qualLine = qualReader.readLine();
-//            
-//            if(qualLine == null){throw new IOException("Cannot find qual entry in "+ qualFile.getAbsolutePath() +" at line "+csFastLineCounter);}
-//            if (csFastaLine.charAt(0) == '#') {
-//                continue;
-//            }
-//            csFastLineCounter++;
-//
-//            //if at the second and last line of a csfasta record
-//            if (csFastLineCounter % diveder == 0) {                
-//                
-//               if(recordNr % chunkSize == 0 && recordNr != 0)
-//               {
-//                   closeWriter(chunkRecordCounter);
-//                   chunkRecordCounter = 0;
-//                   setWriterToNextChunk();
-//               }
-//                
-//                seqName = readGroupId+":"+seqName;
-//                
-//                FastqEntry fastqEntry = new FastqEntry(seqName, csFastaLine, qualLine);
-//                
-//                out.write(fastqEntry.toString());
-//                recordNr++; 
-//                chunkRecordCounter++;
-//            }
-//            //if at the first line of a csfasta record
-//            else
-//            {
-//                //remove the leading > from the seqname
-//                seqName = csFastaLine.substring(1);
-//                
-//                //remove a string (for example F3 or F5-P2) from the seqname to make them identical for later pairing
-//                if(readNameMask != null)
-//                {
-//                    seqName = seqName.replace(readNameMask, "");
-//                }               
-//            }            
-//        }
         
         CSFastaEntry cSFastaEntry;
         while((cSFastaEntry = readNextEntry()) != null)

@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline;
 
+import bwa_picard_gatk_pipeline.enums.PlatformEnum;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
@@ -31,10 +32,12 @@ public class ReadGroup {
     private ReadGroupLogFile log;
     private List<Tag> tags;
     private GlobalConfiguration globalConfiguration;
-    private File mergedBam;
-    private File F3Bam;
-    private File F5Bam;
-    private File R3Bam;
+    private File readGroupBam;
+    private File SolidF3Bam;
+    private File SolidF5Bam;
+    private File SolidR3Bam;
+    private PlatformEnum platform;
+    
 
     public void startProcessing() {
         log = new ReadGroupLogFile(readGroupOutputDir, id);
@@ -84,29 +87,29 @@ public class ReadGroup {
         }
 
         if (tags.size() == 1) {
-            mergedBam = tags.get(0).getMergedBamFile();
+            readGroupBam = tags.get(0).getMergedBamFile();
         } 
         //if there were multiple tags merge them 
         else {
             for (Tag tag : tags) {
-                if (tag.getName() == TagEnum.F3) {
-                    F3Bam = tag.getMergedBamFile();
+                if (tag.getName() == TagEnum.SOLID_F3) {
+                    SolidF3Bam = tag.getMergedBamFile();
                 }
-                if (tag.getName() == TagEnum.F5) {
-                    F5Bam = tag.getMergedBamFile();
+                if (tag.getName() == TagEnum.SOLID_F5) {
+                    SolidF5Bam = tag.getMergedBamFile();
                 }
-                if (tag.getName() == TagEnum.R3) {
-                    R3Bam = tag.getMergedBamFile();
+                if (tag.getName() == TagEnum.SOLID_R3) {
+                    SolidR3Bam = tag.getMergedBamFile();
                 }
 
             }
 
-            if (F3Bam != null && F5Bam != null) {
-                mergedBam = mergeF3AndF5Bam();
+            if (SolidF3Bam != null && SolidF5Bam != null) {
+                readGroupBam = mergeF3AndF5Bam();
             }
 
-            if (F3Bam != null && R3Bam != null) {
-                mergedBam = mergeF3AndR3Bam();
+            if (SolidF3Bam != null && SolidR3Bam != null) {
+                readGroupBam = mergeF3AndR3Bam();
             }
 
         }
@@ -116,7 +119,7 @@ public class ReadGroup {
 
         File pairedBamFileSortedByCoordinate = new File(readGroupOutputDir, id + "_F3_F5_paired.bam");
 
-        PiclPairReadsJob piclPairReadsJob = new PiclPairReadsJob(F3Bam, F5Bam, pairedBamFileSortedByCoordinate, this, "fedor35");
+        PiclPairReadsJob piclPairReadsJob = new PiclPairReadsJob(SolidF3Bam, SolidF5Bam, pairedBamFileSortedByCoordinate, this, "fedor35", TagEnum.SOLID_F5);
 
         if (globalConfiguration.getOffline()) {
             piclPairReadsJob.executeOffline();
@@ -137,7 +140,7 @@ public class ReadGroup {
     private void runQualimap() throws IOException, InterruptedException, DrmaaException {
 
         File qualimapReport = new File(readGroupOutputDir, id+"_qualimap.pdf");        
-        QualimapJob qualimapJob = new QualimapJob(mergedBam, qualimapReport, globalConfiguration, "fedor8");
+        QualimapJob qualimapJob = new QualimapJob(readGroupBam, qualimapReport, globalConfiguration, "fedor8");
         
          qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node             
 //        if(globalConfiguration.getOffline())
@@ -207,14 +210,24 @@ public class ReadGroup {
     }
 
     public File getMergedBam() {
-        return mergedBam;
+        return readGroupBam;
     }
 
-    void createOutputDir(File sampleOutputDir) {
+    public void createOutputDir(File sampleOutputDir) {
         readGroupOutputDir = new File(sampleOutputDir, id);
         readGroupOutputDir.mkdir();
 
     }
+
+    public PlatformEnum getPlatform() {
+        return platform;
+    }
+
+    public void setPlatform(PlatformEnum platform) {
+        this.platform = platform;
+    }
+    
+    
     
     
 }

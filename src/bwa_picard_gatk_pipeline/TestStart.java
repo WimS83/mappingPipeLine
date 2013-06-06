@@ -25,8 +25,8 @@ public class TestStart {
         
         arguments.add("-i");
         //arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta_existinBamChunks.json");
-       // arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta.json");
-        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/M520_gatk.json");          
+        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/readGroupTestCSFasta.json");
+       // arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/M520_gatk.json");          
         arguments.add("-o");
         arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testOutput/");
         arguments.add("-t");
@@ -46,18 +46,16 @@ public class TestStart {
         arguments.add("/home/wim/qualimap_v0.7.1/qualimap");   
         arguments.add("-g");
         arguments.add("/home/wim/GenomeAnalysisTK-2.5-2-gf57256b/GenomeAnalysisTK.jar");   
-        arguments.add("-0"); //set gatk threads to 2 
+        arguments.add("gatk_threads"); //set gatk threads to 2 
         arguments.add("2");
-        arguments.add("-1"); //set gatk memory to 2  
+        arguments.add("gatk_mem"); //set gatk memory to 2  
         arguments.add("2");
-        arguments.add("-2"); //set qualimap threads to 2 
+        arguments.add("qualimap_threads"); //set qualimap threads to 2 
         arguments.add("2");
-        arguments.add("-3"); //set qualimap memory to 2  
+//      arguments.add("-3"); //set qualimap memory to 2  
+        arguments.add("qualimap_mem"); //set qualimap memory to 2  
         arguments.add("2");   
-        arguments.add("-x"); // call reference
-        
-        
-        
+        arguments.add("-x"); // call reference        
         
         CommandLineClass.main(arguments.toArray(new String[0]));
         

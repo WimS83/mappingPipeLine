@@ -39,6 +39,10 @@ public class FastQFile {
     
     private String path;
     
+    private String pathFirstInPair;
+    private String pathSecondInPair;
+    
+    
 
     public long getRecordNr() {
         return recordNr;
@@ -100,44 +104,6 @@ public class FastQFile {
         
         initializeFastqReader();
         openNextChunk(outputDir);  
-        
-       
-//        String line;  
-//        
-//        Integer lineInRecord = 1;
-
-//        while ((line = .readLine()) != null) {
-//
-//            //if linecounter is multiple of chunksize
-//            if(lineCounterIn % chunksizeInLines == 0 && lineCounterIn > 0)
-//            {
-//                //close the current chunk      
-//                closeCurrentChunk(lineCounterOut);
-//                lineCounterOut = new Long(0);
-//                openNextChunk(outputDir);
-//                
-//            }
-//            
-//            //do something special based on which line in the record this is
-//            if(lineInRecord == 1)
-//            {
-//                if(readNameMask != null){line = "@"+ readGroupId + ":" + line.replace(readNameMask, "");}               
-//            }
-//            lineInRecord++;
-//            
-//            //reset lineInRecord to 1 if the we are on a 5th line            
-//            if(lineInRecord == 5 )
-//            {     
-//                lineInRecord = 1;
-//            
-//            }
-//
-//            chunkOut.write(line);
-//            chunkOut.write("\n");
-//            lineCounterOut++;
-//            lineCounterIn++; 
-//
-//        }
         
         FastqEntry fastqEntry;
         while((fastqEntry = readNextEntry()) != null)
@@ -293,6 +259,24 @@ public class FastQFile {
     public void setReadNameMask(String readNameMask) {
         this.readNameMask = readNameMask;
     }
+
+    public String getPathFirstInPair() {
+        return pathFirstInPair;
+    }
+
+    public void setPathFirstInPair(String pathFirstInPair) {
+        this.pathFirstInPair = pathFirstInPair;
+    }
+
+    public String getPathSecondInPair() {
+        return pathSecondInPair;
+    }
+
+    public void setPathSecondInPair(String pathSecondInPair) {
+        this.pathSecondInPair = pathSecondInPair;
+    }
+    
+    
     
     
     

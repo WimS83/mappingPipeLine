@@ -14,27 +14,40 @@ import java.io.File;
 public class GlobalConfiguration {
     
     
-    private File baseOutputDir;    
-    private Integer ChunkSize;
+    //general options
+    private File baseOutputDir;   
+    private Boolean offline;
+    private TargetEnum targetEnum;
+    private Integer ChunkSize; 
     private File referenceFile;
-    private File colorSpaceBWA;
     private File tmpDir;
+    
+    //bwa options  
+    private File colorSpaceBWA;
+    
+    //picard options 
     private File picardDirectory;
+    
+    //picl options
     private File picl;
-    private File qualiMap;
+    
+    //tophat options 
+    private File tophat;
+   
+    //gatk options 
     private File gatk;
     private File knownIndels;
     private Integer gatkSGEThreads;
     private Integer gatkSGEMemory;
     private Boolean gatkCallReference;
+    
+    //qualimap options 
+    private File qualiMap;
     private Integer qualimapSGEThreads;
     private Integer qualimapSGEMemory;
             
+        
     
-    
-    
-    private TargetEnum targetEnum;
-    private Boolean offline;
     
 
     public File getBaseOutputDir() {
@@ -121,41 +134,12 @@ public class GlobalConfiguration {
         return gatk;
     }
 
-    public void setGatk(File gatk) {
-        this.gatk = gatk;
-    }
+   
 
-    public File getKnownIndels() {
-        return knownIndels;
-    }
-
-    public void setKnownIndels(File knownIndels) {
-        this.knownIndels = knownIndels;
-    }
-
-    public Integer getGatkSGEThreads() {
-        return gatkSGEThreads;
-    }
-
-    public void setGatkSGEThreads(Integer gatkSGEThreads) {
-        this.gatkSGEThreads = gatkSGEThreads;
-    }
-
-    public Integer getGatkSGEMemory() {
-        return gatkSGEMemory;
-    }
-
-    public void setGatkSGEMemory(Integer gatkSGEMemory) {
-        this.gatkSGEMemory = gatkSGEMemory;
-    }
-
-    public Integer getQualimapSGEThreads() {
-        return qualimapSGEThreads;
-    }
-
-    public void setQualimapSGEThreads(Integer qualimapSGEThreads) {
-        this.qualimapSGEThreads = qualimapSGEThreads;
-    }
+   
+  
+    
+   //qualimap getter and setters 
 
     public Integer getQualimapSGEMemory() {
         return qualimapSGEMemory;
@@ -164,7 +148,41 @@ public class GlobalConfiguration {
     public void setQualimapSGEMemory(Integer qualimapSGEMemory) {
         this.qualimapSGEMemory = qualimapSGEMemory;
     }
+    
+    public Integer getQualimapSGEThreads() {
+        return qualimapSGEThreads;
+    }        
 
+    public void setQualimapSGEThreads(Integer qualimapSGEThreads) {
+        this.qualimapSGEThreads = qualimapSGEThreads;
+    }
+    
+    
+    // gatk getters and setters 
+    public void setGatk(File gatk) {
+        this.gatk = gatk;
+    }
+    
+    public Integer getGatkSGEThreads() {
+        return gatkSGEThreads;
+    }
+
+    
+    public void setGatkSGEThreads(Integer gatkSGEThreads) {
+        this.gatkSGEThreads = gatkSGEThreads;
+    }
+
+    public Integer getGatkSGEMemory() {
+        return gatkSGEMemory;
+    }
+    
+    
+    public void setGatkSGEMemory(Integer gatkSGEMemory) {
+        this.gatkSGEMemory = gatkSGEMemory;
+    }
+
+   
+    
     public Boolean getGatkCallReference() {
         return gatkCallReference;
     }
@@ -172,6 +190,25 @@ public class GlobalConfiguration {
     public void setGatkCallReference(Boolean gatkCallReference) {
         this.gatkCallReference = gatkCallReference;
     }
+    
+    public File getKnownIndels() {
+        return knownIndels;
+    }
+
+    public void setKnownIndels(File knownIndels) {
+        this.knownIndels = knownIndels;
+    }
+    
+    //tophat getters and setters 
+    public File getTophat() {
+        return tophat;
+    }
+    
+    public void setTophat(File tophat) {
+        this.tophat = tophat;
+    }
+    
+    
 
    
     

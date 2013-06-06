@@ -6,8 +6,10 @@ package bwa_picard_gatk_pipeline.enums;
 
 /**
  *
- * @author Wim Spee
+ * @author wim
  */
-public enum TagEnum { SOLID_F3, SOLID_F5, SOLID_R3, ILUMINA_PE, ILUMINA_MP, ILUMINA_F3
+public enum PlatformEnum {
+    
+    SOLID, ILUMINA    
     
 }

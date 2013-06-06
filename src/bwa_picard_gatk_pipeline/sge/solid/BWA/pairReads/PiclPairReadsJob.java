@@ -74,13 +74,14 @@ public class PiclPairReadsJob extends Job {
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
         String ori;
-        if(secondTag == TagEnum.F5)
+        if(secondTag == TagEnum.SOLID_F5)
         {
             ori = "ni";            
         }
-        if(secondTag == TagEnum.R3)
+        if(secondTag == TagEnum.SOLID_R3)
         {
-            ori = 
+            ori = "";
+            throw new UnsupportedOperationException("R3 tag orientation to use for pairing has not been implemented");
         }
         
         
