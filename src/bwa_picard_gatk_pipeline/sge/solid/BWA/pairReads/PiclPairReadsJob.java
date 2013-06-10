@@ -4,8 +4,8 @@
  */
 package bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads;
 
-import bwa_picard_gatk_pipeline.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolid;
 import bwa_picard_gatk_pipeline.sge.Job;
 import java.io.File;
 import java.io.IOException;
@@ -23,11 +23,11 @@ public class PiclPairReadsJob extends Job {
     private File secondBam;
     private File pairedBamFile;
     
-    private ReadGroup readGroup;
+    private ReadGroupSolid readGroup;
     private TagEnum secondTag;
     
 
-    public PiclPairReadsJob(File firstBam, File secondBam, File pairedBamFile,  ReadGroup readGroup, String hostNameArg, TagEnum secondTag) throws IOException {
+    public PiclPairReadsJob(File firstBam, File secondBam, File pairedBamFile,  ReadGroupSolid readGroup, String hostNameArg, TagEnum secondTag) throws IOException {
 
         super(FilenameUtils.removeExtension(firstBam.getAbsolutePath()) + "_pairBam.sh");
 

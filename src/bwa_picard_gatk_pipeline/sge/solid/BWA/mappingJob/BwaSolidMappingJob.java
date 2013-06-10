@@ -4,7 +4,7 @@
  */
 package bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob;
 
-import bwa_picard_gatk_pipeline.ReadGroup;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolid;
 import bwa_picard_gatk_pipeline.sge.Job;
 import java.io.File;
 import java.io.IOException;
@@ -20,9 +20,9 @@ public class BwaSolidMappingJob extends Job {
     private File fastqFile;
     private File bamFile;
     
-    private ReadGroup readGroup;
+    private ReadGroupSolid readGroup;
 
-    public BwaSolidMappingJob(File fastqFile, File bamFile,  ReadGroup readGroup) throws IOException {
+    public BwaSolidMappingJob(File fastqFile, File bamFile,  ReadGroupSolid readGroup) throws IOException {
 
         super(FilenameUtils.removeExtension(fastqFile.getAbsolutePath()) + ".sh");
 

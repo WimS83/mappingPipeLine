@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline;
 
+import bwa_picard_gatk_pipeline.readGroup.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.gatkAnnotateSNP.GATKAnnotateVariantsJob;
@@ -127,7 +128,7 @@ public class Sample {
 
 
         for (ReadGroup readGroup : readGroups) {
-            readGroupBamFiles.add(readGroup.getMergedBam());
+            readGroupBamFiles.add(readGroup.getReadGroupBam());
         }
 
         if (readGroupBamFiles.size() == 1) {
@@ -141,7 +142,9 @@ public class Sample {
 //                PicardBamMerger picardBamMerger = new PicardBamMerger();
 //                picardBamMerger.mergeBamFilesUsingPicard(readGroupBamFiles, mergedBamFile, globalConfiguration.getTmpDir());
                 
-                PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration);
+                File picardMergeSam = new File(globalConfiguration.getPicardDirectory(), "MergeSamFiles.jar");
+                
+                PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration.getTmpDir(), picardMergeSam);
                 picardMergeBamJob.executeOffline();
                 picardMergeBamJob.waitForOfflineExecution();
             } catch (IOException ex) {

@@ -5,11 +5,9 @@
 package bwa_picard_gatk_pipeline.sge.solid.BWA.dedupJob;
 
 import bwa_picard_gatk_pipeline.GlobalConfiguration;
-import bwa_picard_gatk_pipeline.ReadGroup;
 import bwa_picard_gatk_pipeline.sge.Job;
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import org.apache.commons.io.FilenameUtils;
 
 /**

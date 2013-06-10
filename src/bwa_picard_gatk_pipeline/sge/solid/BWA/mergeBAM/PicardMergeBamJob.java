@@ -20,15 +20,17 @@ public class PicardMergeBamJob extends Job {
     private String sgeName;  
     private List<File> bamFilesToMerge;
     private File mergedBam;
-    private GlobalConfiguration gc;
+    private File tmpDir;
+    private File picardMerge;
     
-     public PicardMergeBamJob(List<File> bamFilesToMerge, File mergedBam, String hostNameArg, GlobalConfiguration gc) throws IOException {
+     public PicardMergeBamJob(List<File> bamFilesToMerge, File mergedBam, String hostNameArg, File tmpDir, File picardMerge) throws IOException {
 
         super(FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + "_mergeBam.sh");
 
         this.bamFilesToMerge = bamFilesToMerge;
         this.mergedBam = mergedBam;     
-        this.gc = gc;
+        this.tmpDir = tmpDir;
+        this.picardMerge = picardMerge;
         
         hostName = hostNameArg;
 
@@ -50,18 +52,18 @@ public class PicardMergeBamJob extends Job {
         File logFile = new File(mergedBam.getParentFile(), baseName + "_PicardMergeBams.log");      
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
-        File tmpDir;
-        
-        if(gc.getOffline())
-        {
-            tmpDir = gc.getTmpDir();
-        }
-        else
-        {
-            tmpDir = new File("/tmp/");
-        }    
+//        File tmpDir;
+//        
+//        if(gc.getOffline())
+//        {
+//            tmpDir = gc.getTmpDir();
+//        }
+//        else
+//        {
+//            tmpDir = new File("/tmp/");
+//        }    
        
-        File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
+      // File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
         
         
         //add sge hostname and date information to log
@@ -82,7 +84,7 @@ public class PicardMergeBamJob extends Job {
             inputString.append(" ");
         }
         
-        addCommand("java -jar "+picardMergeSam.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardMerge.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
         
     }
     

@@ -4,18 +4,17 @@
  */
 package bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads;
 
-import bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads.PiclPairReadsJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJobTest;
 import bwa_picard_gatk_pipeline.GlobalConfiguration;
-import bwa_picard_gatk_pipeline.ReadGroup;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.TagEnum;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolid;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidPE;
 import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.picard.sam.PicardCompareBam;
 import net.sf.picard.sam.PicardCompareBamViaCommandLine;
-import net.sf.picard.sam.PicardGetReadCount;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -33,7 +32,7 @@ public class PiclPairReadsJobTest {
 
     private static final File tmpDir = new File(System.getProperty("java.io.tmpdir"));
     private static File outputDir;
-    private static ReadGroup rg;
+    private static ReadGroupSolid rg;
 
     public PiclPairReadsJobTest() {
     }
@@ -90,7 +89,7 @@ public class PiclPairReadsJobTest {
             Logger.getLogger(BwaSolidMappingJobTest.class.getName()).log(Level.SEVERE, null, ex);
         }         
 
-        rg = new ReadGroup();
+        rg = new ReadGroupSolidPE();
         rg.setId("LE");
 
         GlobalConfiguration gc = new GlobalConfiguration();

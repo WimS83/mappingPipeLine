@@ -103,7 +103,9 @@ public class PicardMergeBamJobTest {
         bamFiles.add(tmpFFile);
         bamFiles.add(tmpPEFile);
         try {
-            PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamFiles, foundMergedBamFile, null, gc);
+            File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
+            
+            PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamFiles, foundMergedBamFile, null, gc.getTmpDir(), picardMergeSam);
             picardMergeBamJob.executeOffline();
             picardMergeBamJob.waitForOfflineExecution();                  
         } catch (IOException ex) {
