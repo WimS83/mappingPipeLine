@@ -8,11 +8,8 @@ import bwa_picard_gatk_pipeline.GlobalConfiguration;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.exceptions.MappingException;
-import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
-import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.Job;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
-import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
 import java.io.File;
 import java.io.IOException;
@@ -21,7 +18,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.picard.sam.PicardGetReadCount;
-import org.apache.commons.io.FileUtils;
 import org.ggf.drmaa.DrmaaException;
 
 /**

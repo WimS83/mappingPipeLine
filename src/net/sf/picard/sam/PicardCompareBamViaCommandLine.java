@@ -23,11 +23,14 @@ public class PicardCompareBamViaCommandLine {
     {
         
         List<String> command = new ArrayList<String>();
+        command.add("java");
+        command.add("-jar");
         command.add(picardCompareSam.getAbsolutePath());
         command.add(bam1.getAbsolutePath());
         command.add(bam2.getAbsolutePath());
 
         ProcessBuilder builder = new ProcessBuilder(command);
+        builder.redirectErrorStream(true);
         Process process = builder.start();
         //builder.w        
                 

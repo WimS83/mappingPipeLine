@@ -24,6 +24,7 @@ public class GlobalConfiguration {
     
     //bwa options  
     private File colorSpaceBWA;
+    private File BWA;
     
     //picard options 
     private File picardDirectory;
@@ -81,6 +82,14 @@ public class GlobalConfiguration {
     public void setReferenceFile(File referenceFile) {
         this.referenceFile = referenceFile;
     }
+
+    public File getBWA() {
+        return BWA;
+    }
+
+    public void setBWA(File BWA) {
+        this.BWA = BWA;
+    }    
 
     public File getColorSpaceBWA() {
         return colorSpaceBWA;

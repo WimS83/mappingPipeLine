@@ -87,6 +87,11 @@ public class PicardDedupBamJobTest {
         File picardDir = new File("/home/wim/NetBeansProjects/java_libs/picard-tools-1.89/");       
         File picardCompareBam = new File(picardDir, "CompareSAMs.jar");
         
+        if(!picardCompareBam.canExecute())
+        {
+            fail("Cannot execute Picard compare bam on location "+ picardCompareBam.getAbsolutePath());
+        }
+        
         gc.setOffline(true);
 
         gc.setPicardDirectory(picardDir);

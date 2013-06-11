@@ -10,11 +10,9 @@ import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.Job;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJob;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
 /**
@@ -75,6 +73,26 @@ public class ReadGroupSolidFragment extends ReadGroupSolid{
 
         return counter;
     }    
+    
+    //getters and setters 
+
+    public List<CsFastaFilePair> getCsfastaFiles() {
+        return csfastaFiles;
+    }
+
+    public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
+        this.csfastaFiles = csfastaFiles;
+    }
+
+    public List<FastQFile> getFastQFiles() {
+        return fastQFiles;
+    }
+
+    public void setFastQFiles(List<FastQFile> fastQFiles) {
+        this.fastQFiles = fastQFiles;
+    }
+    
+    
 
     
 

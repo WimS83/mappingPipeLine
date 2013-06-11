@@ -88,7 +88,12 @@ public class GATKAnnotateVariantsJobTest {
         } 
         
         GlobalConfiguration gc = new GlobalConfiguration();
-        File gatk = new File("/home/wim/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar");        
+        File gatk = new File("/home/wim/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar");     
+        
+          if(!gatk.canExecute())
+        {
+            fail("Cannot execute GATK on location "+ gatk.getAbsolutePath());
+        }
         
         gc.setReferenceFile(referenceFile);
         gc.setGatk(gatk);

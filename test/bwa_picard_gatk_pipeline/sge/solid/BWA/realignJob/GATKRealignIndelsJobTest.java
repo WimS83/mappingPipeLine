@@ -98,6 +98,19 @@ public class GATKRealignIndelsJobTest {
         File picardDir = new File("/home/wim/NetBeansProjects/java_libs/picard-tools-1.89/");        
         File picardCompareBam = new File(picardDir, "CompareSAMs.jar");
         
+        if(!gatk.canExecute())
+        {
+            fail("Cannot execute GATK on location "+ gatk.getAbsolutePath());
+        }
+        
+         
+        if(!picardCompareBam.canExecute())
+        {
+            fail("Cannot execute Picard compare bam on location "+ picardCompareBam.getAbsolutePath());
+        }
+        
+        
+        
         
         gc.setReferenceFile(referenceFile);
         gc.setPicardDirectory(picardDir);

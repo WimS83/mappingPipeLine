@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline.fileWrappers;
 
 import bwa_picard_gatk_pipeline.enums.TagEnum;
+import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -37,11 +38,7 @@ public class FastQFile {
     
     private String readNameMask;
     
-    private String path;
-    
-    private String pathFirstInPair;
-    private String pathSecondInPair;
-    
+    private String path;        
     
 
     public long getRecordNr() {
@@ -259,22 +256,7 @@ public class FastQFile {
     public void setReadNameMask(String readNameMask) {
         this.readNameMask = readNameMask;
     }
-
-    public String getPathFirstInPair() {
-        return pathFirstInPair;
-    }
-
-    public void setPathFirstInPair(String pathFirstInPair) {
-        this.pathFirstInPair = pathFirstInPair;
-    }
-
-    public String getPathSecondInPair() {
-        return pathSecondInPair;
-    }
-
-    public void setPathSecondInPair(String pathSecondInPair) {
-        this.pathSecondInPair = pathSecondInPair;
-    }
+   
     
     
     

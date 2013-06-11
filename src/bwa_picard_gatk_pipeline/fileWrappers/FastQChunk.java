@@ -17,7 +17,7 @@ public class FastQChunk {
     private File fastqChunkFile;
     private Long recordNr;
 
-    FastQChunk(File outputChunkFile) {
+    public FastQChunk(File outputChunkFile) {
         fastqChunkFile = outputChunkFile;
     }
     

@@ -14,12 +14,9 @@ import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads.PiclPairReadsJob;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.io.FilenameUtils;
 import org.ggf.drmaa.DrmaaException;
 
@@ -128,26 +125,25 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
     @Override
     protected void mergeBamChunks() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
         
-        if (bamChunksF3.isEmpty()) {
-            return;
-        } //return if there are no bamchunks        
         
         File mergedBamDir = new File(readGroupOutputDir, "MergedBam");
         mergedBamDir.mkdir();
         
-        
-        bamF3 = new File(mergedBamDir, id+ "_" +"F3"+ "_"+ ".bam");        
-        bamF5 = new File(mergedBamDir, id+ "_" +"F5"+ "_"+ ".bam");    
-        
         File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
-
-        PicardMergeBamJob picardMergeBamJobF3 = new PicardMergeBamJob(bamChunksF3, bamF3, null, gc.getTmpDir(), picardMergeSam);
-        PicardMergeBamJob picardMergeBamJobF5 = new PicardMergeBamJob(bamChunksF5, bamF5, null, gc.getTmpDir(), picardMergeSam);
         
-        picardMergeBamJobF3.executeOffline();
-        picardMergeBamJobF5.executeOffline();
-        picardMergeBamJobF3.waitForOfflineExecution();
-        picardMergeBamJobF5.waitForOfflineExecution();
+        if (!bamChunksF3.isEmpty()) {
+            bamF3 = new File(mergedBamDir, id+ "_" +"F3"+ "_"+ ".bam");
+            PicardMergeBamJob picardMergeBamJobF3 = new PicardMergeBamJob(bamChunksF3, bamF3, null, gc.getTmpDir(), picardMergeSam);
+            picardMergeBamJobF3.executeOffline();
+            picardMergeBamJobF3.waitForOfflineExecution();
+        } 
+        
+        if (!bamChunksF5.isEmpty()) {
+             bamF5 = new File(mergedBamDir, id+ "_" +"F5"+ "_"+ ".bam");    
+             PicardMergeBamJob picardMergeBamJobF5 = new PicardMergeBamJob(bamChunksF5, bamF5, null, gc.getTmpDir(), picardMergeSam);
+             picardMergeBamJobF5.executeOffline();        
+             picardMergeBamJobF5.waitForOfflineExecution();         
+        }         
         
         readGroupBam = new File(mergedBamDir, id+ "_" + ".bam");
         
@@ -162,7 +158,55 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
         }
         
     }
-    
+
+    //getters and setters 
+    public List<CsFastaFilePair> getCsfastaFilesF3() {
+        return csfastaFilesF3;
+    }
+
+    public void setCsfastaFilesF3(List<CsFastaFilePair> csfastaFilesF3) {
+        this.csfastaFilesF3 = csfastaFilesF3;
+    }
+
+    public List<CsFastaFilePair> getCsfastaFilesF5() {
+        return csfastaFilesF5;
+    }
+
+    public void setCsfastaFilesF5(List<CsFastaFilePair> csfastaFilesF5) {
+        this.csfastaFilesF5 = csfastaFilesF5;
+    }
+
+    public List<FastQFile> getFastQFilesF3() {
+        return fastQFilesF3;
+    }
+
+    public void setFastQFilesF3(List<FastQFile> fastQFilesF3) {
+        this.fastQFilesF3 = fastQFilesF3;
+    }
+
+    public List<FastQFile> getFastQFilesF5() {
+        return fastQFilesF5;
+    }
+
+    public void setFastQFilesF5(List<FastQFile> fastQFilesF5) {
+        this.fastQFilesF5 = fastQFilesF5;
+    }
+
+    public File getBamF3() {
+        return bamF3;
+    }
+
+    public void setBamF3(File bamF3) {
+        this.bamF3 = bamF3;
+    }
+
+    public File getBamF5() {
+        return bamF5;
+    }
+
+    public void setBamF5(File bamF5) {
+        this.bamF5 = bamF5;
+    }
     
     
     

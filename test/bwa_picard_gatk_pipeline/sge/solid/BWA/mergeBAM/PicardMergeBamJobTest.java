@@ -20,6 +20,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -94,6 +95,11 @@ public class PicardMergeBamJobTest {
         GlobalConfiguration gc = new GlobalConfiguration();
         File picardDir = new File("/home/wim/NetBeansProjects/java_libs/picard-tools-1.89/");
         File picardCompareBam = new File(picardDir, "CompareSAMs.jar");
+        
+        if(!picardCompareBam.canExecute())
+        {
+            fail("Cannot execute Picard compare bam on location "+ picardCompareBam.getAbsolutePath());
+        }
         
         gc.setPicardDirectory(picardDir);
         gc.setOffline(true);

@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline.fileWrappers;
 
 import bwa_picard_gatk_pipeline.enums.PlatformEnum;
+import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
