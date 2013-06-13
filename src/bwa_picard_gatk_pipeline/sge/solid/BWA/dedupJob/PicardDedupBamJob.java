@@ -47,8 +47,8 @@ public class PicardDedupBamJob extends Job{
         
         String baseName = FilenameUtils.getBaseName(dedupBam.getName());
         
-        File logFile = new File(mergedBam.getParentFile(), baseName + "_PicardDedupBam.log");    
-        File metricsFile = new File(mergedBam.getParentFile(), baseName + ".metrics");
+        File logFile = new File(dedupBam.getParentFile(), baseName + "_PicardDedupBam.log");    
+        File metricsFile = new File(dedupBam.getParentFile(), baseName + ".metrics");
         
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";

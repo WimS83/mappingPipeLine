@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline.fileWrappers.ilumina;
 
 import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
+import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJobTest;
 import java.io.File;
 import java.io.IOException;
@@ -81,7 +82,7 @@ public class FastQFileTest {
         }         
         
         FastQFile fastQFile = new FastQFile();
-        fastQFile.setPathFirstReads(tmpfirstReads.getAbsolutePath());
+        fastQFile.setPath(tmpfirstReads.getAbsolutePath());
         
         
         fastQFile.initializeFastqReader();
@@ -96,48 +97,10 @@ public class FastQFileTest {
             readsInChunks = readsInChunks + fastQChunk.countNumberOfrecords();
         }
         
-         assertTrue("Number of chunks is not equal to 250", readsInChunks==250);          
+         assertTrue("Number of reads is not equal to 250", readsInChunks==250);          
     }
     
-    
-    /**
-     * Test of splitFastQFile method, of class FastQFile.
-     */
-    @Test
-    public void testSplitFastQFilePE() throws Exception {
-      
-        File firstReads = new File(getClass().getResource("ERR111542_1_first1000.fastq").getFile());        
-        File secondReads = new File(getClass().getResource("ERR111542_2_first1000.fastq").getFile());      
-        
-        File tmpfirstReads = new File(outputDir, FilenameUtils.getBaseName(firstReads.getName())+"_PE.fastq");  
-        File tmpSecondReads = new File(outputDir, FilenameUtils.getBaseName(secondReads.getName())+"_PE.fastq"); 
-        try {
-            FileUtils.copyFile(firstReads, tmpfirstReads);           
-            FileUtils.copyFile(secondReads, tmpSecondReads);           
-        } catch (IOException ex) {
-            Logger.getLogger(BwaSolidMappingJobTest.class.getName()).log(Level.SEVERE, null, ex);
-        }         
-        
-        FastQFile fastQFile = new FastQFile();
-        fastQFile.setPathFirstReads(tmpfirstReads.getAbsolutePath());
-        fastQFile.setPathSecondReads(tmpSecondReads.getAbsolutePath());
-        
-        
-        fastQFile.initializeFastqReader();
-        List<FastQChunk> fastQChunks = fastQFile.splitFastQFile(100, outputDir, "ERR111542");
-        
-        assertTrue("Number of chunks is not equal to 5", fastQChunks.size()==5);
-        
-        Long readsInChunks = new Long(0);
-        
-        for(FastQChunk fastQChunk: fastQChunks)
-        {
-            readsInChunks = readsInChunks + fastQChunk.countNumberOfrecords();
-        }
-        
-         assertTrue("Number of chunks is not equal to 500", readsInChunks==500);          
-    }
-
+   
    
 
   

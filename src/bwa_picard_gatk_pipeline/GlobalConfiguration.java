@@ -25,6 +25,7 @@ public class GlobalConfiguration {
     //bwa options  
     private File colorSpaceBWA;
     private File BWA;
+    private File samtools;
     
     //picard options 
     private File picardDirectory;
@@ -98,6 +99,16 @@ public class GlobalConfiguration {
     public void setColorSpaceBWA(File colorSpaceBWA) {
         this.colorSpaceBWA = colorSpaceBWA;
     }
+
+    public File getSamtools() {
+        return samtools;
+    }
+
+    public void setSamtools(File samtools) {
+        this.samtools = samtools;
+    }
+    
+    
 
     public Boolean getOffline() {
         return offline;
@@ -216,6 +227,8 @@ public class GlobalConfiguration {
     public void setTophat(File tophat) {
         this.tophat = tophat;
     }
+    
+    
     
     
 

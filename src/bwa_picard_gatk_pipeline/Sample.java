@@ -7,6 +7,9 @@ package bwa_picard_gatk_pipeline;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupIluminaPE;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidFragment;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidPE;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.gatkAnnotateSNP.GATKAnnotateVariantsJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.gatkCallRawSNP.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.realignJob.GATKRealignIndelsJob;
@@ -29,10 +32,18 @@ import org.ggf.drmaa.DrmaaException;
 public class Sample {
 
     private String name;
-    private List<ReadGroup> readGroups;
-    private List<File> readGroupBamFiles;
-    private GlobalConfiguration globalConfiguration;
     private File sampleOutputDir;
+    private GlobalConfiguration globalConfiguration;
+    
+    
+    //the possible input readgroups
+    private List<ReadGroupSolidFragment> solidFragmentReadGroups;
+    private List<ReadGroupSolidPE> solidPEReadGroups;
+    private List<ReadGroupIluminaPE> iluminaPEReadGroups;
+    private List<ReadGroup> allReadGroups;
+    private List<File> readGroupBamFiles;   
+    
+    //the output  
     private File mergedBamFile;
     private File mergedBamFileDedup;
     private File mergedBamDedupRealigned;
@@ -46,8 +57,12 @@ public class Sample {
         sampleOutputDir = new File(globalConfiguration.getBaseOutputDir(), name);
         sampleOutputDir.mkdir();
         
+        allReadGroups.addAll(solidFragmentReadGroups);
+        allReadGroups.addAll(solidPEReadGroups);
+        allReadGroups.addAll(iluminaPEReadGroups);
+        
         //process the readGroups is any were set
-        for (ReadGroup readGroup : readGroups) {            
+        for (ReadGroup readGroup : allReadGroups) {            
 
             readGroup.createOutputDir(sampleOutputDir);
             readGroup.setGlobalConfiguration(globalConfiguration);
@@ -96,9 +111,18 @@ public class Sample {
     }
 
     private void initalizeUnsetList() {
-        if (readGroups == null) {
-            readGroups = new ArrayList<ReadGroup>();
+        if (solidFragmentReadGroups == null) {
+            solidFragmentReadGroups = new ArrayList<ReadGroupSolidFragment>();
         }
+        if (solidPEReadGroups == null) {
+            solidPEReadGroups = new ArrayList<ReadGroupSolidPE>();
+        }
+        if (iluminaPEReadGroups == null) {
+            iluminaPEReadGroups = new ArrayList<ReadGroupIluminaPE>();
+        }
+        if (allReadGroups == null) {
+            allReadGroups = new ArrayList<ReadGroup>();
+        } 
         if (readGroupBamFiles == null) {
             readGroupBamFiles = new ArrayList<File>();
         }
@@ -112,13 +136,7 @@ public class Sample {
         this.name = name;
     }
 
-    public List<ReadGroup> getReadGroups() {
-        return readGroups;
-    }
-
-    public void setReadGroups(List<ReadGroup> readGroups) {
-        this.readGroups = readGroups;
-    }
+   
 
     public void setGlobalConfiguration(GlobalConfiguration globalConfiguration) {
         this.globalConfiguration = globalConfiguration;
@@ -127,7 +145,7 @@ public class Sample {
     private void mergeReadGroupBamFiles() throws IOException, InterruptedException {
 
 
-        for (ReadGroup readGroup : readGroups) {
+        for (ReadGroup readGroup : allReadGroups) {
             readGroupBamFiles.add(readGroup.getReadGroupBam());
         }
 
@@ -288,6 +306,40 @@ public class Sample {
     public void setRawVCFFile(File rawVCFFile) {
         this.rawVCFFile = rawVCFFile;
     }
+
+    public List<ReadGroupSolidFragment> getSolidFragmentReadGroups() {
+        return solidFragmentReadGroups;
+    }
+
+    public void setSolidFragmentReadGroups(List<ReadGroupSolidFragment> solidFragmentReadGroups) {
+        this.solidFragmentReadGroups = solidFragmentReadGroups;
+    }
+
+    public List<ReadGroupSolidPE> getSolidPEReadGroups() {
+        return solidPEReadGroups;
+    }
+
+    public void setSolidPEReadGroups(List<ReadGroupSolidPE> solidPEReadGroups) {
+        this.solidPEReadGroups = solidPEReadGroups;
+    }
+
+    public List<ReadGroupIluminaPE> getIluminaPEReadGroups() {
+        return iluminaPEReadGroups;
+    }
+
+    public void setIluminaPEReadGroups(List<ReadGroupIluminaPE> iluminaPEReadGroups) {
+        this.iluminaPEReadGroups = iluminaPEReadGroups;
+    }
+
+    public List<ReadGroup> getAllReadGroups() {
+        return allReadGroups;
+    }
+
+    public void setAllReadGroups(List<ReadGroup> allReadGroups) {
+        this.allReadGroups = allReadGroups;
+    }
+    
+    
     
     
     

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.picard.sam.PicardGetReadCount;
+import org.apache.commons.io.FilenameUtils;
 import org.ggf.drmaa.DrmaaException;
 
 /**
@@ -70,7 +71,7 @@ public abstract class ReadGroup {
            
                 mergeBamChunks();               //merge the bam chunks
                 checkAllReadsAreAcountedFor();  //check all the reads are accounted for
-                runQualimap();
+                runQualimap(readGroupBam);
             }
 
         } catch (IOException ex) {
@@ -127,6 +128,7 @@ public abstract class ReadGroup {
         getLog().append("Executing " + mappingJobs.size() + " mapping jobs offline");
         for (Job bwaSolidMappingJob : mappingJobs) {
             bwaSolidMappingJob.executeOffline();
+            bwaSolidMappingJob.waitForOfflineExecution();
         }
     }
 
@@ -156,10 +158,10 @@ public abstract class ReadGroup {
 
     }
     
-     protected void runQualimap() throws IOException, InterruptedException, DrmaaException {
+     protected void runQualimap(File bam) throws IOException, InterruptedException, DrmaaException {
 
-        File qualimapReport = new File(readGroupOutputDir, id + "_qualimap.pdf");
-        QualimapJob qualimapJob = new QualimapJob(readGroupBam, qualimapReport, gc, "fedor8");
+        File qualimapReport = new File(bam.getParentFile(), FilenameUtils.getBaseName(bam.getName()) + "_qualimap.pdf");
+        QualimapJob qualimapJob = new QualimapJob(bam, qualimapReport, gc, "fedor8");
 
         qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node             
 //        if(globalConfiguration.getOffline())

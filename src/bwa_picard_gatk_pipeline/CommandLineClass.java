@@ -54,6 +54,7 @@ public class CommandLineClass {
         //bwa options
         options.addOption("cs_bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
         options.addOption("bwa", true, "Location of BWA. Default is /usr/local/bwa/0.5.9/bwa");
+        options.addOption("sam", true, "Location of samtools. Default is /usr/local/samtools/samtools");
         
         //gatk options
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
@@ -107,6 +108,8 @@ public class CommandLineClass {
 
         //bwa options
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("cs-bwa", "/usr/local/bwa/0.5.9/bwa")));
+        globalConfiguration.setBWA(new File(cmd.getOptionValue("bwa", "/home/sge_share_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa")));
+        globalConfiguration.setSamtools(new File(cmd.getOptionValue("bwa", "/usr/local/samtools/samtools")));
         
         //picl options
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));

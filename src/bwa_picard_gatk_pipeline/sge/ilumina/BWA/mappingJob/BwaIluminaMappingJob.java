@@ -28,10 +28,21 @@ public class BwaIluminaMappingJob extends Job{
         super(FilenameUtils.removeExtension(firstReadsFastqFile.getAbsolutePath()) + ".sh");
 
         this.firstReadsFastqFile = firstReadsFastqFile;
+        this.secondReadsFastqFile = secondReadsFastqFile;
         this.readGroup = readGroup;
         this.bamFile = bamFile;
+        
+        //if there is no second fastqFile (ie fragment data)
+        if(secondReadsFastqFile== null)
+        {
+            addCommandsFragment();
+        }
+        else // if there is a second fastFile (ie PE)
+        {
+            addCommandsPE();
+        }
 
-        addCommands();
+        
 
         sgeName = "BWA_" + firstReadsFastqFile.getName();
         close();
@@ -42,37 +53,28 @@ public class BwaIluminaMappingJob extends Job{
         return sgeName;
     }
 
-    private void addCommands() throws IOException {
+    private void addCommandsFragment() throws IOException {
         
-        String baseName = FilenameUtils.getBaseName(firstReadsFastqFile.getPath());
-        File tmpDir = new File("/tmp/" + baseName);
-        
-        File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
-        
-        if(secondReadsFastqFile != null)
-        {
-            File copiedSecondFastqFile = new File(tmpDir, secondReadsFastqFile.getName());
-        }
-        
-        
-        
-        
-        
-        
-        File bwaOutputFile = new File(tmpDir, baseName + ".out");
-        File samFile = new File(tmpDir, baseName + ".sam");
-        File tmpBamFile = new File(tmpDir, baseName + ".bam" );
-       
-        File bamFileSorted = new File(tmpDir, baseName + "_sorted.bam");
-
         File referenceFile = readGroup.getGlobalConfiguration().getReferenceFile();
         File referenceIndex = new File(referenceFile.getAbsolutePath() + ".fai");
-
-        File parentDir = firstReadsFastqFile.getParentFile();
-        File logFile = new File(parentDir, baseName + ".log");
-        File bwaFile = readGroup.getGlobalConfiguration().getBWA();
-        String bwaOptions = "aln -c -l 25 -k 2 -n 10";
         File samtoolsFile = new File("/usr/local/samtools/samtools");
+        File bwaFile = readGroup.getGlobalConfiguration().getBWA();      
+        String bwaOptions = "aln -l 25 -k 2 ";
+        
+        
+        String baseNameFirst = FilenameUtils.getBaseName(firstReadsFastqFile.getPath());
+        File tmpDir = new File("/tmp/" + baseNameFirst);
+        
+        File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
+        File bwaOutputFirstFile = new File(tmpDir, baseNameFirst + ".out");          
+        
+        File samFile = new File(tmpDir, baseNameFirst + ".sam");
+        File tmpBamFile = new File(tmpDir, baseNameFirst + ".bam" );
+       
+        File bamFileSorted = new File(tmpDir, baseNameFirst + "_sorted.bam");
+        
+        File parentDir = firstReadsFastqFile.getParentFile();
+        File logFile = new File(parentDir, baseNameFirst + ".log");
 
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
 
@@ -88,17 +90,17 @@ public class BwaIluminaMappingJob extends Job{
         addCommand("\n");
         //copy the fastQFile to the tmp dir
         addCommand("echo starting copying of fastq file " + appendAlloutputToLog);
-        addCommand("cp " + fastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+        addCommand("cp " + firstReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
         addCommand("\n");
         //map using bwa
         addCommand("echo starting mapping of fastq file " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
-        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + bwaOutputFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getAbsolutePath() + " " + copiedFirstFastqFile.getAbsolutePath() + " > " + bwaOutputFirstFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
         //create sam file from output
         addCommand("echo starting converting to sam " + appendAlloutputToLog);
         addCommand("date " + appendAlloutputToLog);
-        addCommand(bwaFile.getPath() + " samse -r \"@RG\\tID:" + readGroup.getId()+ "\\tPL:SOLID\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFile.getAbsolutePath() + " " + copiedFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand(bwaFile.getPath() + " samse -r \"@RG\\tID:" + readGroup.getId()+ "\\tPL:SOLID\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFirstFile.getAbsolutePath() + " " + copiedFirstFastqFile.getAbsolutePath() + " > " + samFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
         addCommand("\n");
         //create bam file from sam file
         addCommand("echo starting converting to bam " + appendAlloutputToLog);
@@ -121,6 +123,89 @@ public class BwaIluminaMappingJob extends Job{
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
     }
+    
+    
+    private void addCommandsPE() throws IOException {
+        
+        
+        File referenceFile = readGroup.getGlobalConfiguration().getReferenceFile();
+        File referenceIndex = new File(referenceFile.getAbsolutePath() + ".fai");
+        File samtoolsFile = new File("/usr/local/samtools/samtools");
+        File bwaFile = readGroup.getGlobalConfiguration().getBWA();        
+        String bwaOptions = "aln -l 25 -k 2 ";
+        
+        String baseNameFirst = FilenameUtils.getBaseName(firstReadsFastqFile.getPath());
+        String baseNameSecond = FilenameUtils.getBaseName(secondReadsFastqFile.getPath());
+        
+        File tmpDir = new File("/tmp/" + baseNameFirst);
+        
+        File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
+        File copiedSecondFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
+        File bwaOutputFirstFile = new File(tmpDir, baseNameFirst + ".out");          
+        File bwaOutputSecondFile = new File(tmpDir, baseNameSecond + ".out");  
+        
+        File pairedSamFile = new File(tmpDir, baseNameFirst + "paired.sam");
+        File tmpPairedBamFile = new File(tmpDir, baseNameFirst + "paired.bam" );
+       
+        File pairedBamFileSorted = new File(tmpDir, baseNameFirst + "paired_sorted.bam");        
+
+        File parentDir = firstReadsFastqFile.getParentFile();
+        File logFile = new File(parentDir, baseNameFirst + ".log");        
+
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+
+        //add sge hostname and date information to log
+        addCommand("uname -n " + appendAlloutputToLog);
+        addCommand("\n");
+        addCommand("date " + appendAlloutputToLog);
+        addCommand("\n");
+        //create a tmp dir
+        addCommand("mkdir " + tmpDir + appendAlloutputToLog);
+        addCommand("\n");
+        //copy the fastQFile to the tmp dir
+        addCommand("echo starting copying of fastq file " + appendAlloutputToLog);
+        addCommand("cp " + firstReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+        addCommand("cp " + secondReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+        
+        addCommand("\n");
+        //map using bwa
+        addCommand("echo starting mapping of first fastq file " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
+        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getAbsolutePath() + " " + copiedFirstFastqFile.getAbsolutePath() + " > " + bwaOutputFirstFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("\n");
+         addCommand("echo starting mapping of second fastq file " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
+        addCommand(bwaFile.getPath() + " " + bwaOptions + " " + referenceFile.getAbsolutePath() + " " + copiedSecondFastqFile.getAbsolutePath() + " > " + bwaOutputSecondFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("\n");
+        //create sam file from output
+        addCommand("echo starting converting to sam " + appendAlloutputToLog);
+        addCommand("date " + appendAlloutputToLog);
+        addCommand(bwaFile.getPath() + " sampe -r \"@RG\\tID:" + readGroup.getId()+ "\\tPL:SOLID\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" " +referenceFile.getAbsolutePath()+ " "  + bwaOutputFirstFile.getAbsolutePath() + " " + bwaOutputSecondFile.getAbsolutePath()+ " " + copiedFirstFastqFile.getAbsolutePath() + " "+ copiedSecondFastqFile.getAbsolutePath() +  " > " + pairedSamFile.getAbsolutePath() + " 2>> " + logFile.getAbsolutePath());
+        addCommand("\n");
+        //create bam file from sam file
+        addCommand("echo starting converting to bam " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog );
+        addCommand(samtoolsFile.getPath() + " import " + referenceIndex.getAbsolutePath() + " " + pairedSamFile.getAbsolutePath() + " " + tmpPairedBamFile.getAbsolutePath() + appendAlloutputToLog);
+        addCommand("\n");
+        //sort the bam file
+        addCommand("echo starting sorting of bam " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
+        addCommand(samtoolsFile.getPath() + " sort " + tmpPairedBamFile.getAbsolutePath() + " " + FilenameUtils.removeExtension(pairedBamFileSorted.getAbsolutePath()) + appendAlloutputToLog);
+        addCommand("\n");
+        //copy the bamFile back to the server
+        addCommand("echo starting copying of bam back to the server " + appendAlloutputToLog);
+        addCommand("date " + appendAlloutputToLog);
+        addCommand("cp " + pairedBamFileSorted.getAbsolutePath() + " " + bamFile.getAbsolutePath());
+        addCommand("\n");
+        //remove the tmp dir from the sge host
+        addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+        addCommand("\n");
+        addCommand("echo finished " + appendAlloutputToLog);
+        addCommand("date  " + appendAlloutputToLog);
+    }
+    
+    
+    
     
     
     

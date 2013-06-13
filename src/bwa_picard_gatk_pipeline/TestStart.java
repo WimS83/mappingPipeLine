@@ -32,20 +32,20 @@ public class TestStart {
         arguments.add("-t");
         arguments.add("SAMPLE_ANNOTATED_VCF");   
         arguments.add("-r");
-        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/Rnor5.0_chr1and2/Rattus_norvegicus.Rnor_5.0.71.dna.chromosome.1and2.fa");
+        arguments.add("/home/wim/Analysis/BWA_Picard_GATK_pipeline_test/testInput/Rnor_chr1_10000000_11000000/colorspace/Rnor_chr1_10000000_11000000.fa");
         arguments.add("-f");
         arguments.add("-c");
         arguments.add("2000");
         arguments.add("-m");
         arguments.add("/tmp/blaat");       
-        arguments.add("-s");
-        arguments.add("/home/wim/NetBeansProjects/java_libs/picard-tools-1.89/picard-tools-1.89/");       
-        arguments.add("-p");
-        arguments.add("/usr/local/Picl/picl ");   
-        arguments.add("-q");
-        arguments.add("/home/wim/qualimap_v0.7.1/qualimap");   
-        arguments.add("-g");
-        arguments.add("/home/wim/GenomeAnalysisTK-2.5-2-gf57256b/GenomeAnalysisTK.jar");   
+      //  arguments.add("-s");
+       // arguments.add("/home/wim/NetBeansProjects/java_libs/picard-tools-1.89/picard-tools-1.89/");       
+       // arguments.add("-p");
+      //  arguments.add("/usr/local/Picl/picl ");   
+       // arguments.add("-q");
+       // arguments.add("/home/wim/qualimap_v0.7.1/qualimap");   
+        //arguments.add("-g");
+        //arguments.add("/home/wim/GenomeAnalysisTK-2.5-2-gf57256b/GenomeAnalysisTK.jar");   
         arguments.add("gatk_threads"); //set gatk threads to 2 
         arguments.add("2");
         arguments.add("gatk_mem"); //set gatk memory to 2  

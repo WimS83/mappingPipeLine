@@ -28,10 +28,10 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
 
    
     //the possible input for the processing of the tag
-    private List<CsFastaFilePair> csfastaFilesF3;    
-    private List<CsFastaFilePair> csfastaFilesF5;  
-    private List<FastQFile> fastQFilesF3;
-    private List<FastQFile> fastQFilesF5;
+    private CsFastaFilePair csfastaFileF3;    
+    private CsFastaFilePair csfastaFileF5;  
+    private FastQFile fastQFileF3;
+    private FastQFile fastQFileF5;
     private List<FastQChunk> fastQChunksF3;
     private List<FastQChunk> fastQChunksF5;
     
@@ -48,37 +48,34 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
     @Override
     protected void prepareReadsForMapping() throws IOException {
         
-        if (csfastaFilesF3 == null) {
-            csfastaFilesF3 = new ArrayList<CsFastaFilePair>();
+       fastQChunksF3 = new ArrayList<FastQChunk>();
+       fastQChunksF5 = new ArrayList<FastQChunk>();
+       bamChunksF3 = new ArrayList<File>();
+       bamChunksF5 = new ArrayList<File>();
+        
+        if(csfastaFileF3 != null)
+        {
+             lookupCsFastaAndQualFiles(csfastaFileF3 );        //lookup the csfasta and qual files for given csfasta paths
+             convertCSFastaToFastQChunks(csfastaFileF3, fastQChunksF3);      //convert csfasta to fastq chunks
         }
         
-         if (csfastaFilesF5 == null) {
-            csfastaFilesF5 = new ArrayList<CsFastaFilePair>();
+        if(csfastaFileF5 != null)
+        {
+              lookupCsFastaAndQualFiles(csfastaFileF5 );        //lookup the csfasta and qual files for given csfasta paths
+              convertCSFastaToFastQChunks(csfastaFileF5, fastQChunksF5);      //convert csfasta to fastq chunks
+        }            
+               
+        if(fastQFileF3 != null)
+        {
+            fastQFileF3.initializeFastqReader();
+            convertFastQFilesToFastQChunks(fastQFileF3, fastQChunksF3);   //if fastq files were given split them to fastq chunks
         }
         
-        if (fastQFilesF3 == null) {
-            fastQFilesF3 = new ArrayList<FastQFile>();
-        }
-        
-        if (fastQFilesF5 == null) {
-            fastQFilesF5 = new ArrayList<FastQFile>();
-        }
-        
-        if (fastQChunksF3 == null) {
-            fastQChunksF3 = new ArrayList<FastQChunk>();
-        }
-        
-        if (fastQChunksF5 == null) {
-            fastQChunksF5 = new ArrayList<FastQChunk>();
-        }
-        
-        lookupCsFastaAndQualFiles(csfastaFilesF3 );        //lookup the csfasta and qual files for given csfasta paths
-        lookupCsFastaAndQualFiles(csfastaFilesF5 );        //lookup the csfasta and qual files for given csfasta paths
-        convertCSFastaToFastQChunks(csfastaFilesF3, fastQChunksF3);      //convert csfasta to fastq chunks
-        convertCSFastaToFastQChunks(csfastaFilesF5, fastQChunksF5);      //convert csfasta to fastq chunks
-        convertFastQFilesToFastQChunks(fastQFilesF3, fastQChunksF3);   //if fastq files were given split them to fastq chunks
-        convertFastQFilesToFastQChunks(fastQFilesF5, fastQChunksF5);   //if fastq files were given split them to fastq chunks
-       
+        if(fastQFileF5 != null)
+        {
+            fastQFileF5.initializeFastqReader();
+            convertFastQFilesToFastQChunks(fastQFileF5, fastQChunksF5);   //if fastq files were given split them to fastq chunks
+        }  
     }   
     
 
@@ -132,20 +129,22 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
         File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
         
         if (!bamChunksF3.isEmpty()) {
-            bamF3 = new File(mergedBamDir, id+ "_" +"F3"+ "_"+ ".bam");
+            bamF3 = new File(mergedBamDir, id+ "_" +"F3"+  ".bam");
             PicardMergeBamJob picardMergeBamJobF3 = new PicardMergeBamJob(bamChunksF3, bamF3, null, gc.getTmpDir(), picardMergeSam);
             picardMergeBamJobF3.executeOffline();
             picardMergeBamJobF3.waitForOfflineExecution();
+            runQualimap(bamF3);
         } 
         
         if (!bamChunksF5.isEmpty()) {
-             bamF5 = new File(mergedBamDir, id+ "_" +"F5"+ "_"+ ".bam");    
+             bamF5 = new File(mergedBamDir, id+ "_" +"F5"+ ".bam");    
              PicardMergeBamJob picardMergeBamJobF5 = new PicardMergeBamJob(bamChunksF5, bamF5, null, gc.getTmpDir(), picardMergeSam);
              picardMergeBamJobF5.executeOffline();        
-             picardMergeBamJobF5.waitForOfflineExecution();         
+             picardMergeBamJobF5.waitForOfflineExecution();   
+             runQualimap(bamF5);
         }         
         
-        readGroupBam = new File(mergedBamDir, id+ "_" + ".bam");
+        readGroupBam = new File(mergedBamDir, id+ ".bam");
         
         PiclPairReadsJob piclPairReadsJob = new PiclPairReadsJob(bamF3, bamF5, readGroupBam, this, "fedor35", TagEnum.SOLID_F5);
 
@@ -160,37 +159,56 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
     }
 
     //getters and setters 
-    public List<CsFastaFilePair> getCsfastaFilesF3() {
-        return csfastaFilesF3;
+    public CsFastaFilePair getCsfastaFileF3() {
+        return csfastaFileF3;
     }
 
-    public void setCsfastaFilesF3(List<CsFastaFilePair> csfastaFilesF3) {
-        this.csfastaFilesF3 = csfastaFilesF3;
+    public void setCsfastaFileF3(CsFastaFilePair csfastaFileF3) {
+        this.csfastaFileF3 = csfastaFileF3;
     }
 
-    public List<CsFastaFilePair> getCsfastaFilesF5() {
-        return csfastaFilesF5;
+    public CsFastaFilePair getCsfastaFileF5() {
+        return csfastaFileF5;
     }
 
-    public void setCsfastaFilesF5(List<CsFastaFilePair> csfastaFilesF5) {
-        this.csfastaFilesF5 = csfastaFilesF5;
+    public void setCsfastaFileF5(CsFastaFilePair csfastaFileF5) {
+        this.csfastaFileF5 = csfastaFileF5;
     }
 
-    public List<FastQFile> getFastQFilesF3() {
-        return fastQFilesF3;
+    public FastQFile getFastQFilesF3() {
+        return fastQFileF3;
     }
 
-    public void setFastQFilesF3(List<FastQFile> fastQFilesF3) {
-        this.fastQFilesF3 = fastQFilesF3;
+    public void setFastQFilesF3(FastQFile fastQFilesF3) {
+        this.fastQFileF3 = fastQFilesF3;
     }
 
-    public List<FastQFile> getFastQFilesF5() {
-        return fastQFilesF5;
+    public FastQFile getFastQFilesF5() {
+        return fastQFileF5;
     }
 
-    public void setFastQFilesF5(List<FastQFile> fastQFilesF5) {
-        this.fastQFilesF5 = fastQFilesF5;
+    public void setFastQFilesF5(FastQFile fastQFilesF5) {
+        this.fastQFileF5 = fastQFilesF5;
     }
+
+    public FastQFile getFastQFileF3() {
+        return fastQFileF3;
+    }
+
+    public void setFastQFileF3(FastQFile fastQFileF3) {
+        this.fastQFileF3 = fastQFileF3;
+    }
+
+    public FastQFile getFastQFileF5() {
+        return fastQFileF5;
+    }
+
+    public void setFastQFileF5(FastQFile fastQFileF5) {
+        this.fastQFileF5 = fastQFileF5;
+    }
+    
+    
+   
 
     public File getBamF3() {
         return bamF3;

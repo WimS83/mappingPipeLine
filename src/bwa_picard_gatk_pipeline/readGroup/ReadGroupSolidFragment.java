@@ -23,29 +23,25 @@ public class ReadGroupSolidFragment extends ReadGroupSolid{
 
            
     //the possible input for the processing of the tag
-    private List<CsFastaFilePair> csfastaFiles;    
-    private List<FastQFile> fastQFiles;
+    private CsFastaFilePair csfastaFilePair;    
+    private FastQFile fastQFile;
     private List<FastQChunk> fastQChunks;
   
 
     @Override
     protected void prepareReadsForMapping() throws IOException {
         
-        if (csfastaFiles == null) {
-            csfastaFiles = new ArrayList<CsFastaFilePair>();
+        fastQChunks = new ArrayList<FastQChunk>();
+        
+        if (csfastaFilePair != null) {
+             lookupCsFastaAndQualFiles(csfastaFilePair);        //lookup the csfasta and qual files for given csfasta paths
+             convertCSFastaToFastQChunks(csfastaFilePair, fastQChunks);      //convert csfasta to fastq chunks
         }
         
-        if (fastQFiles == null) {
-            fastQFiles = new ArrayList<FastQFile>();
-        }
+        if (fastQFile != null) {
+           convertFastQFilesToFastQChunks(fastQFile, fastQChunks);   //if fastq files were given split them to fastq chunks
+        }   
         
-        if (fastQChunks == null) {
-            fastQChunks = new ArrayList<FastQChunk>();
-        }
-        
-        lookupCsFastaAndQualFiles(csfastaFiles);        //lookup the csfasta and qual files for given csfasta paths
-        convertCSFastaToFastQChunks(csfastaFiles, fastQChunks);      //convert csfasta to fastq chunks
-        convertFastQFilesToFastQChunks(fastQFiles, fastQChunks);   //if fastq files were given split them to fastq chunks
     }   
 
     
@@ -72,25 +68,26 @@ public class ReadGroupSolidFragment extends ReadGroupSolid{
         }
 
         return counter;
-    }    
-    
+    }
+
     //getters and setters 
-
-    public List<CsFastaFilePair> getCsfastaFiles() {
-        return csfastaFiles;
+    public CsFastaFilePair getCsfastaFilePair() {
+        return csfastaFilePair;
     }
 
-    public void setCsfastaFiles(List<CsFastaFilePair> csfastaFiles) {
-        this.csfastaFiles = csfastaFiles;
+    public void setCsfastaFilePair(CsFastaFilePair csfastaFilePair) {
+        this.csfastaFilePair = csfastaFilePair;
     }
 
-    public List<FastQFile> getFastQFiles() {
-        return fastQFiles;
+    public FastQFile getFastQFile() {
+        return fastQFile;
     }
 
-    public void setFastQFiles(List<FastQFile> fastQFiles) {
-        this.fastQFiles = fastQFiles;
+    public void setFastQFile(FastQFile fastQFile) {
+        this.fastQFile = fastQFile;
     }
+
+    
     
     
 
