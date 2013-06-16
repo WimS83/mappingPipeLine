@@ -11,7 +11,7 @@ import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.Job;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJob;
-import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
+import bwa_picard_gatk_pipeline.sge.picard.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.pairReads.PiclPairReadsJob;
 import java.io.File;
 import java.io.IOException;

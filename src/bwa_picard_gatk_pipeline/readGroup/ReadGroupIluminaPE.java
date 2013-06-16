@@ -31,8 +31,15 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
     @Override
     protected void prepareReadsForMapping() throws IOException {
         
+        firstReadsChunks = new ArrayList<FastQChunk>();
+        secondReadsChunks = new ArrayList<FastQChunk>();
+        
+        
         if(firstReadsFastQFile != null)
         {
+            firstReadsFastQFile.initializeFastqReader();
+            secondReadsFastQFile.initializeFastqReader();
+            
             firstReadsChunks = firstReadsFastQFile.splitFastQFile(gc.getChunkSize(), readGroupOutputDir,id);
             secondReadsChunks = secondReadsFastQFile.splitFastQFile(gc.getChunkSize(), readGroupOutputDir,id);
         }  
@@ -70,6 +77,24 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
 
         return counter;
     }  
+
+    public FastQFile getFirstReadsFastQFile() {
+        return firstReadsFastQFile;
+    }
+
+    public void setFirstReadsFastQFile(FastQFile firstReadsFastQFile) {
+        this.firstReadsFastQFile = firstReadsFastQFile;
+    }
+
+    public FastQFile getSecondReadsFastQFile() {
+        return secondReadsFastQFile;
+    }
+
+    public void setSecondReadsFastQFile(FastQFile secondReadsFastQFile) {
+        this.secondReadsFastQFile = secondReadsFastQFile;
+    }
+    
+    
     
     
     

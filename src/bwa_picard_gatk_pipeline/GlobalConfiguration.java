@@ -4,6 +4,7 @@
  */
 package bwa_picard_gatk_pipeline;
 
+import bwa_picard_gatk_pipeline.enums.GATKVariantCallers;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import java.io.File;
 
@@ -42,6 +43,7 @@ public class GlobalConfiguration {
     private Integer gatkSGEThreads;
     private Integer gatkSGEMemory;
     private Boolean gatkCallReference;
+    private GATKVariantCallers gATKVariantCaller;
     
     //qualimap options 
     private File qualiMap;
@@ -227,6 +229,16 @@ public class GlobalConfiguration {
     public void setTophat(File tophat) {
         this.tophat = tophat;
     }
+
+    public GATKVariantCallers getgATKVariantCaller() {
+        return gATKVariantCaller;
+    }
+
+    public void setgATKVariantCaller(GATKVariantCallers gATKVariantCaller) {
+        this.gATKVariantCaller = gATKVariantCaller;
+    }
+    
+    
     
     
     

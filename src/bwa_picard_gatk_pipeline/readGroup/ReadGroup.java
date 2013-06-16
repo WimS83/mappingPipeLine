@@ -10,7 +10,7 @@ import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.exceptions.MappingException;
 import bwa_picard_gatk_pipeline.sge.Job;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
-import bwa_picard_gatk_pipeline.sge.solid.BWA.mergeBAM.PicardMergeBamJob;
+import bwa_picard_gatk_pipeline.sge.picard.mergeBAM.PicardMergeBamJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

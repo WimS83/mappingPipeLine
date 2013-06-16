@@ -5,6 +5,7 @@
 package bwa_picard_gatk_pipeline;
 
 import bwa_picard_gatk_pipeline.GSON.JSONConfig;
+import bwa_picard_gatk_pipeline.enums.GATKVariantCallers;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
@@ -59,6 +60,7 @@ public class CommandLineClass {
         //gatk options
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
         options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
+        options.addOption("gatk_vc", true, "GATK variant caller. Either UnifiedGenotyper or HaplotypeCaller . Default is UnifiedGenotyper");
         options.addOption("gatk_threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("gatk_mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         options.addOption("x", "call-reference", false, "Have GATK also output all the reference calls to VCF. Default is false");
@@ -119,7 +121,7 @@ public class CommandLineClass {
         
         //gakt options
         globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));
-        globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("qualimap-threads", "8")));
+        globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("gatk_threads", "8")));
         globalConfiguration.setGatkSGEMemory(new Integer(cmd.getOptionValue("gatk-mem", "32")));
         if (cmd.hasOption("x")) {
             globalConfiguration.setGatkCallReference(true);
@@ -130,6 +132,17 @@ public class CommandLineClass {
         if (cmd.hasOption("k")) {
             globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));
         }      
+        
+        GATKVariantCallers  caller;
+        if(cmd.hasOption("gatk_vc"))
+        {
+            caller = GATKVariantCallers.valueOf(cmd.getOptionValue("gatk_vc"));
+        }
+        else
+        {
+            caller = GATKVariantCallers.UnifiedGenotyper;
+        }
+        globalConfiguration.setgATKVariantCaller(caller);
 
         //qualimap options
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
