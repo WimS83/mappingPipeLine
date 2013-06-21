@@ -10,13 +10,9 @@ import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupIluminaPE;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidFragment;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidPE;
-import bwa_picard_gatk_pipeline.sge.Job;
-import bwa_picard_gatk_pipeline.sge.gatk.gatkAnnotateSNP.GATKAnnotateVariantsJob;
-import bwa_picard_gatk_pipeline.sge.gatk.gatkCallRawSNP.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.sge.gatk.realignJob.GATKRealignIndelsJob;
 import bwa_picard_gatk_pipeline.sge.picard.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
-import bwa_picard_gatk_pipeline.sge.gatk.gatkAnnotateSNP.gatkCombineVariants.GATKCombineVariants;
 import bwa_picard_gatk_pipeline.sge.picard.dedupJob.PicardDedupBamJob;
 import java.io.File;
 import java.io.IOException;
@@ -24,8 +20,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.sf.samtools.SAMFileReader;
-import net.sf.samtools.SAMSequenceRecord;
 import org.apache.commons.io.FilenameUtils;
 import org.ggf.drmaa.DrmaaException;
 
@@ -48,11 +42,8 @@ public class Sample {
     //bam
     private File mergedBamFile;
     private File mergedBamFileDedup;
-    private File mergedBamDedupRealigned;
-    //vcf
-    private List<File> rawVCFFileChunks;
-    private File rawVCFFile;
-    private File annotatedVCFFile;
+    private File mergedBamDedupRealigned;    
+   
 
     public void startProcessing() {
 
@@ -88,12 +79,7 @@ public class Sample {
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.REALIGN_BAM.getRank()) {
                 realignBam();
             }
-            if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_RAW_VCF.getRank()) {
-                callRawSNPs();
-            }
-            if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_ANNOTATED_VCF.getRank()) {
-                annotateRawSNPs();
-            }
+           
 
 
         } catch (IOException ex) {
@@ -129,10 +115,7 @@ public class Sample {
         }
         if (readGroupBamFiles == null) {
             readGroupBamFiles = new ArrayList<File>();
-        }
-        if (rawVCFFileChunks == null) {
-            rawVCFFileChunks = new ArrayList<File>();
-        }
+        }      
     }
 
     public String getName() {
@@ -241,102 +224,7 @@ public class Sample {
         }
     }
 
-    private void callRawSNPs() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
-
-        if (mergedBamDedupRealigned == null) {
-            return;
-        }
-
-        File vcfOutputDir = new File(sampleOutputDir, "vcfOutput");
-        vcfOutputDir.mkdir();
-
-        List<Job> callRawSNPJobs = createSNPCallingJobs(mergedBamDedupRealigned, vcfOutputDir, rawVCFFileChunks, globalConfiguration);
-
-
-        if (globalConfiguration.getOffline()) {
-
-            executeSNPCallingOffline(callRawSNPJobs);
-
-        } else {
-            executeSNPcallingOnline(callRawSNPJobs);
-            waitForOnlineExecution(callRawSNPJobs);   
-        }
-
-        //combine the vcf chunks
-        GATKCombineVariants combineVariants = new GATKCombineVariants(rawVCFFileChunks, rawVCFFile, globalConfiguration);
-        combineVariants.executeOffline();
-        combineVariants.waitForOfflineExecution();
-
-    }
-
-    private void executeSNPCallingOffline(List<Job> callRawSNPJobs) throws IOException, InterruptedException {
-        for (Job job : callRawSNPJobs) {
-            job.executeOffline();
-            job.waitForOfflineExecution();
-        }
-    }
-    
-    private void executeSNPcallingOnline(List<Job> callRawSNPJobs) throws DrmaaException {
-         for (Job job : callRawSNPJobs) {
-                job.submit();
-            }
-    }
-    
-     private void waitForOnlineExecution(List<Job> callRawSNPJobs) throws DrmaaException, JobFaillureException {
-        for (Job job : callRawSNPJobs) {
-                job.waitFor();
-         }
-    }
-    
-    
-    
-    
-    
-
-    protected List<Job> createSNPCallingJobs(File inputBam, File outputDir, List<File> rawVCFFileChunks, GlobalConfiguration gc ) throws IOException {
-        List<Job> callRawSNPJobs = new ArrayList<Job>();
-
-        SAMFileReader in = new SAMFileReader(inputBam);
-
-        List<SAMSequenceRecord> sequences = in.getFileHeader().getSequenceDictionary().getSequences();
-        System.out.println("Number of sequences is " + sequences.size());
-
-        for (SAMSequenceRecord sequence : sequences) {
-            File rawVCFChromFile = new File(outputDir, FilenameUtils.getBaseName(inputBam.getName()) + "_" + sequence.getSequenceName() + "_raw.vcf");
-            rawVCFFileChunks.add(rawVCFChromFile);
-            GATKCallRawVariantsJob gATKCallRawVariants = new GATKCallRawVariantsJob(inputBam, rawVCFChromFile, gc, sequence);
-
-            callRawSNPJobs.add(gATKCallRawVariants);
-        }
-
-        System.out.println("Number of snp call jobs  is " + callRawSNPJobs.size());
-        System.out.println("Number of snp call chunks  is " + rawVCFFileChunks.size());
-
-        return callRawSNPJobs;
-
-
-
-    }
-
-    private void annotateRawSNPs() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
-
-        if (rawVCFFile == null) {
-            return;
-        }
-
-        annotatedVCFFile = new File(sampleOutputDir, FilenameUtils.getBaseName(mergedBamDedupRealigned.getName()) + "_annotated.vcf");
-
-        GATKAnnotateVariantsJob gATKAnnotateVariantsJob = new GATKAnnotateVariantsJob(rawVCFFile, annotatedVCFFile, globalConfiguration);
-
-        if (globalConfiguration.getOffline()) {
-            gATKAnnotateVariantsJob.executeOffline();
-            gATKAnnotateVariantsJob.waitForOfflineExecution();
-        } else {
-            gATKAnnotateVariantsJob.submit();
-            gATKAnnotateVariantsJob.waitFor();
-        }
-
-    }
+   
 
     public List<File> getReadGroupBamFiles() {
         return readGroupBamFiles;
@@ -368,15 +256,7 @@ public class Sample {
 
     public void setMergedBamDedupRealigned(File mergedBamDedupRealigned) {
         this.mergedBamDedupRealigned = mergedBamDedupRealigned;
-    }
-
-    public File getRawVCFFile() {
-        return rawVCFFile;
-    }
-
-    public void setRawVCFFile(File rawVCFFile) {
-        this.rawVCFFile = rawVCFFile;
-    }
+    }   
 
     public List<ReadGroupSolidFragment> getSolidFragmentReadGroups() {
         return solidFragmentReadGroups;
@@ -409,6 +289,10 @@ public class Sample {
     public void setAllReadGroups(List<ReadGroup> allReadGroups) {
         this.allReadGroups = allReadGroups;
     }
+
+    
+    
+    
 
    
 

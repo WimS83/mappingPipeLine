@@ -140,7 +140,7 @@ public class BwaIluminaMappingJob extends Job{
         File tmpDir = new File("/tmp/" + baseNameFirst);
         
         File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
-        File copiedSecondFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
+        File copiedSecondFastqFile = new File(tmpDir, secondReadsFastqFile.getName());
         File bwaOutputFirstFile = new File(tmpDir, baseNameFirst + ".out");          
         File bwaOutputSecondFile = new File(tmpDir, baseNameSecond + ".out");  
         

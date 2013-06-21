@@ -4,12 +4,13 @@
  */
 package bwa_picard_gatk_pipeline.sge.gatk.gatkCallRawSNP;
 
-import bwa_picard_gatk_pipeline.sge.gatk.gatkCallRawSNP.GATKCallRawVariantsJob;
 import bwa_picard_gatk_pipeline.GlobalConfiguration;
 import bwa_picard_gatk_pipeline.enums.GATKVariantCallers;
 import bwa_picard_gatk_pipeline.sge.solid.BWA.mappingJob.BwaSolidMappingJobTest;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.sf.samtools.SAMFileReader;
@@ -107,10 +108,16 @@ public class GATKCallRawVariantsJobTest {
         try {
 
             SAMFileReader in = new SAMFileReader(tmpRealignBamFile);
+            List<File> inputFiles = new ArrayList<File>();
+            inputFiles.add(tmpRealignBamFile);
+            
+            
+            
+            
             for (SAMSequenceRecord chromosome : in.getFileHeader().getSequenceDictionary().getSequences()) {
                 
                 File rawVCFChromFile = new File(outputDir, FilenameUtils.getBaseName(tmpRealignBamFile.getName()) +"_"+chromosome.getSequenceName()+ "_raw.vcf");
-                GATKCallRawVariantsJob gATKCallRawVariantsJob = new GATKCallRawVariantsJob(tmpRealignBamFile, rawVCFChromFile, gc, chromosome);
+                GATKCallRawVariantsJob gATKCallRawVariantsJob = new GATKCallRawVariantsJob(inputFiles, rawVCFChromFile, gc, chromosome);
                 gATKCallRawVariantsJob.executeOffline();
                 gATKCallRawVariantsJob.waitForOfflineExecution();
                 

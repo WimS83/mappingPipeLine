@@ -64,6 +64,7 @@ public class CommandLineClass {
         options.addOption("gatk_threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("gatk_mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         options.addOption("x", "call-reference", false, "Have GATK also output all the reference calls to VCF. Default is false");
+        options.addOption("gatk_ms", false, "Have GATK do multi-sample calling. Default is false");
         
         //qualimap options
         options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
@@ -143,6 +144,15 @@ public class CommandLineClass {
             caller = GATKVariantCallers.UnifiedGenotyper;
         }
         globalConfiguration.setgATKVariantCaller(caller);
+        
+        if(cmd.hasOption("gatk_ms"))
+        {
+            globalConfiguration.setMultiSampleCalling(true);
+        }
+        else
+        {
+            globalConfiguration.setMultiSampleCalling(false);
+        }
 
         //qualimap options
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
@@ -164,6 +174,15 @@ public class CommandLineClass {
                 sample.setGlobalConfiguration(globalConfiguration);
                 sample.startProcessing();
             }
+            
+            Variants variants = new Variants(samples, globalConfiguration);
+            
+            if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_RAW_VCF.getRank()) {
+                variants.callRawSNPs();
+            }
+            if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.SAMPLE_ANNOTATED_VCF.getRank()) {
+                //variants.annotateRawSNPs();
+            }                    
 
 
         } catch (IOException ex) {

@@ -44,6 +44,7 @@ public class GlobalConfiguration {
     private Integer gatkSGEMemory;
     private Boolean gatkCallReference;
     private GATKVariantCallers gATKVariantCaller;
+    private Boolean multiSampleCalling;
     
     //qualimap options 
     private File qualiMap;
@@ -220,6 +221,17 @@ public class GlobalConfiguration {
     public void setKnownIndels(File knownIndels) {
         this.knownIndels = knownIndels;
     }
+
+    public Boolean getMultiSampleCalling() {
+        return multiSampleCalling;
+    }
+
+    public void setMultiSampleCalling(Boolean multiSampleCalling) {
+        this.multiSampleCalling = multiSampleCalling;
+    }
+    
+    
+    
     
     //tophat getters and setters 
     public File getTophat() {

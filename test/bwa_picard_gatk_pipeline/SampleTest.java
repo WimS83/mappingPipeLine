@@ -95,12 +95,12 @@ public class SampleTest {
         
         
         Sample sample = new Sample();
-        try {
-           List<Job> snpCallJobs =  sample.createSNPCallingJobs(inputBam, outputDir, vcfChunks, gc);
-           String blaat = "blaat";
-        } catch (IOException ex) {
-            Logger.getLogger(SampleTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+//        try {
+//           List<Job> snpCallJobs =  sample.createSNPCallingJobs(inputBam, outputDir, vcfChunks, gc);
+//           String blaat = "blaat";
+//        } catch (IOException ex) {
+//            Logger.getLogger(SampleTest.class.getName()).log(Level.SEVERE, null, ex);
+//        }
         
         
        

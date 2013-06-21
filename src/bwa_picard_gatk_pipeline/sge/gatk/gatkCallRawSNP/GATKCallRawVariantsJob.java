@@ -11,6 +11,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
 import net.sf.samtools.SAMSequenceRecord;
 import org.apache.commons.io.FilenameUtils;
 
@@ -22,7 +23,9 @@ public class GATKCallRawVariantsJob extends Job {
     
     
     private String sgeName;   
-    private File inputBam;   
+    private List<File> sampleBams;   
+    private String sampleNames;
+    
     private File rawVCF;
     private SAMSequenceRecord chromosome;
     private File bedFile;
@@ -30,9 +33,9 @@ public class GATKCallRawVariantsJob extends Job {
     
     private GlobalConfiguration gc;
 
-    public GATKCallRawVariantsJob(File inputBam, File rawVCF, GlobalConfiguration gc, SAMSequenceRecord chromosome) throws IOException {
+    public GATKCallRawVariantsJob(List<File> sampleBams, File rawVCF, GlobalConfiguration gc, SAMSequenceRecord chromosome) throws IOException {
         super(FilenameUtils.removeExtension(rawVCF.getAbsolutePath()) + "_callRawVariants.sh");     
-        this.inputBam = inputBam;
+        this.sampleBams = sampleBams;
         this.rawVCF = rawVCF;
         this.gc = gc;
         this.chromosome = chromosome;
@@ -43,7 +46,7 @@ public class GATKCallRawVariantsJob extends Job {
         
         addCommands();        
         
-        sgeName = "callRawVariants_"+inputBam.getName();
+        sgeName = "callRawVariants_"+rawVCF.getName();
         close();
         
     }
@@ -54,8 +57,8 @@ public class GATKCallRawVariantsJob extends Job {
         Integer bedStart = 0;
         Integer bedEnd = chromosome.getSequenceLength()-1;
         
-        String inputFileBaseName = FilenameUtils.getBaseName(inputBam.getName());
-        String bedFileName = inputFileBaseName +"_"+ chromName+".bed";
+        String rawVCFBaseName = FilenameUtils.getBaseName(rawVCF.getName());
+        String bedFileName = rawVCFBaseName+".bed";
         
         bedFile = new File(rawVCF.getParentFile(), bedFileName);
         
@@ -116,9 +119,14 @@ public class GATKCallRawVariantsJob extends Job {
         
         
        
+       StringBuilder inputString = new StringBuilder();
        
-         
-        
+       for(File sampleBamFile : sampleBams)
+       {
+           inputString.append(" -I ");
+           inputString.append(sampleBamFile.getAbsoluteFile());
+           inputString.append(" ");
+       }        
            
         //call the raw variants 
         addCommand("java "+
@@ -126,7 +134,7 @@ public class GATKCallRawVariantsJob extends Job {
                     " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T "+gc.getgATKVariantCaller()+" -A AlleleBalance -A Coverage -stand_call_conf 30.0 -stand_emit_conf 10 "+
                     " -R "+gc.getReferenceFile().getAbsolutePath()+                    
-                    " -I "+inputBam.getAbsolutePath()+
+                    inputString.toString()+
                     " -o "+rawVCF.getAbsolutePath()+
                     " -L "+bedFile.getAbsolutePath()+
                     multiThread+
