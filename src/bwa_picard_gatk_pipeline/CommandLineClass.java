@@ -54,11 +54,11 @@ public class CommandLineClass {
         
         //bwa options
         options.addOption("cs_bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
-        options.addOption("bwa", true, "Location of BWA. Default is /usr/local/bwa/0.5.9/bwa");
+        options.addOption("bwa", true, "Location of BWA. Default is /home/sge_share_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa");
         options.addOption("sam", true, "Location of samtools. Default is /usr/local/samtools/samtools");
         
         //gatk options
-        options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar ");
+        options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar ");
         options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("gatk_vc", true, "GATK variant caller. Either UnifiedGenotyper or HaplotypeCaller . Default is UnifiedGenotyper");
         options.addOption("gatk_threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
@@ -67,7 +67,7 @@ public class CommandLineClass {
         options.addOption("gatk_ms", false, "Have GATK do multi-sample calling. Default is false");
         
         //qualimap options
-        options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap ");
+        options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap ");
         options.addOption("qualimap_threads", true, "Number of threads that Qualimap should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("qualimap_mem", true, "Max memory that Qualimap should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         
@@ -121,7 +121,7 @@ public class CommandLineClass {
         globalConfiguration.setPicardDirectory(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/")));        
         
         //gakt options
-        globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GenomeAnalysisTK-2.4-7-g5e89f01/GenomeAnalysisTK.jar")));
+        globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar")));
         globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("gatk_threads", "8")));
         globalConfiguration.setGatkSGEMemory(new Integer(cmd.getOptionValue("gatk-mem", "32")));
         if (cmd.hasOption("x")) {
@@ -155,7 +155,7 @@ public class CommandLineClass {
         }
 
         //qualimap options
-        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap_v0.7.1/qualimap")));
+        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setQualimapSGEThreads(new Integer(cmd.getOptionValue("qualimap-threads", "8")));
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("qualimap-mem", "32")));
                 
