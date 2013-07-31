@@ -24,64 +24,49 @@ import org.ggf.drmaa.DrmaaException;
  *
  * @author wim
  */
-public class ReadGroupSolidPE extends ReadGroupSolid{
+public class ReadGroupSolidPE extends ReadGroupSolid {
 
-   
     //the possible input for the processing of the tag
-    private CsFastaFilePair csfastaFileF3;    
-    private CsFastaFilePair csfastaFileF5;  
+    private CsFastaFilePair csfastaFileF3;
+    private CsFastaFilePair csfastaFileF5;
     private FastQFile fastQFileF3;
     private FastQFile fastQFileF5;
     private List<FastQChunk> fastQChunksF3;
     private List<FastQChunk> fastQChunksF5;
-    
     //intermediate output
     private List<File> bamChunksF3;
     private List<File> bamChunksF5;
     private File bamF3;
     private File bamF5;
-    
-            
-    
-    
-    
+
     @Override
     protected void prepareReadsForMapping() throws IOException {
-        
-       fastQChunksF3 = new ArrayList<FastQChunk>();
-       fastQChunksF5 = new ArrayList<FastQChunk>();
-       bamChunksF3 = new ArrayList<File>();
-       bamChunksF5 = new ArrayList<File>();
-        
-        if(csfastaFileF3 != null)
-        {
-             lookupCsFastaAndQualFiles(csfastaFileF3 );        //lookup the csfasta and qual files for given csfasta paths
-             convertCSFastaToFastQChunks(csfastaFileF3, fastQChunksF3);      //convert csfasta to fastq chunks
+
+        fastQChunksF3 = new ArrayList<FastQChunk>();
+        fastQChunksF5 = new ArrayList<FastQChunk>();
+        bamChunksF3 = new ArrayList<File>();
+        bamChunksF5 = new ArrayList<File>();
+
+        if (csfastaFileF3 != null) {
+            lookupCsFastaAndQualFiles(csfastaFileF3);        //lookup the csfasta and qual files for given csfasta paths
+            convertCSFastaToFastQChunks(csfastaFileF3, fastQChunksF3);      //convert csfasta to fastq chunks
         }
-        
-        if(csfastaFileF5 != null)
-        {
-              lookupCsFastaAndQualFiles(csfastaFileF5 );        //lookup the csfasta and qual files for given csfasta paths
-              convertCSFastaToFastQChunks(csfastaFileF5, fastQChunksF5);      //convert csfasta to fastq chunks
-        }            
-               
-        if(fastQFileF3 != null)
-        {
+
+        if (csfastaFileF5 != null) {
+            lookupCsFastaAndQualFiles(csfastaFileF5);        //lookup the csfasta and qual files for given csfasta paths
+            convertCSFastaToFastQChunks(csfastaFileF5, fastQChunksF5);      //convert csfasta to fastq chunks
+        }
+
+        if (fastQFileF3 != null) {
             fastQFileF3.initializeFastqReader();
             convertFastQFilesToFastQChunks(fastQFileF3, fastQChunksF3);   //if fastq files were given split them to fastq chunks
         }
-        
-        if(fastQFileF5 != null)
-        {
+
+        if (fastQFileF5 != null) {
             fastQFileF5.initializeFastqReader();
             convertFastQFilesToFastQChunks(fastQFileF5, fastQChunksF5);   //if fastq files were given split them to fastq chunks
-        }  
-    }   
-    
-
-   
-
-   
+        }
+    }
 
     @Override
     protected List<Job> createMappingJobs() throws IOException {
@@ -94,7 +79,7 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
             Job bwaMappingJob = new BwaSolidMappingJob(fastQChunk.getFastqFile(), bamFile, this);
             bwaMappingJobs.add(bwaMappingJob);
         }
-        
+
         for (FastQChunk fastQChunk : fastQChunksF5) {
             File bamFile = new File(readGroupOutputDir, FilenameUtils.getBaseName(fastQChunk.getFastqFile().getPath()) + ".bam");
             bamChunksF5.add(bamFile);
@@ -104,58 +89,68 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
         }
         return bwaMappingJobs;
     }
-    
+
     @Override
     protected Long getReadsInChunks() {
         Long counter = new Long(0);
         for (FastQChunk fastQChunk : fastQChunksF3) {
             counter = counter + fastQChunk.getRecordNr();
         }
-        
+
         for (FastQChunk fastQChunk : fastQChunksF5) {
             counter = counter + fastQChunk.getRecordNr();
         }
 
         return counter;
-    }    
+    }
 
     @Override
     protected void mergeBamChunks() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
-        
-        
+
+
         File mergedBamDir = new File(readGroupOutputDir, "MergedBam");
         mergedBamDir.mkdir();
-        
+
         File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
-        
+
         if (!bamChunksF3.isEmpty()) {
-            bamF3 = new File(mergedBamDir, id+ "_" +"F3"+  ".bam");
+            bamF3 = new File(mergedBamDir, id + "_" + "F3" + ".bam");
             PicardMergeBamJob picardMergeBamJobF3 = new PicardMergeBamJob(bamChunksF3, bamF3, null, gc.getTmpDir(), picardMergeSam);
-            picardMergeBamJobF3.executeOffline();
-            picardMergeBamJobF3.waitForOfflineExecution();
+            if (gc.getOffline()) {
+                picardMergeBamJobF3.executeOffline();
+                picardMergeBamJobF3.waitForOfflineExecution();
+            } else {
+                picardMergeBamJobF3.submit();
+                picardMergeBamJobF3.waitFor();
+            }
             runQualimap(bamF3);
-        } 
-        
+        }
+
         if (!bamChunksF5.isEmpty()) {
-             bamF5 = new File(mergedBamDir, id+ "_" +"F5"+ ".bam");    
-             PicardMergeBamJob picardMergeBamJobF5 = new PicardMergeBamJob(bamChunksF5, bamF5, null, gc.getTmpDir(), picardMergeSam);
-             picardMergeBamJobF5.executeOffline();        
-             picardMergeBamJobF5.waitForOfflineExecution();   
-             runQualimap(bamF5);
-        }         
-        
-        readGroupBam = new File(mergedBamDir, id+ ".bam");
-        
+            bamF5 = new File(mergedBamDir, id + "_" + "F5" + ".bam");
+            PicardMergeBamJob picardMergeBamJobF5 = new PicardMergeBamJob(bamChunksF5, bamF5, null, gc.getTmpDir(), picardMergeSam);
+            if (gc.getOffline()) {
+                picardMergeBamJobF5.executeOffline();
+                picardMergeBamJobF5.waitForOfflineExecution();
+            } else {
+                picardMergeBamJobF5.submit();
+                picardMergeBamJobF5.waitFor();
+            }
+            runQualimap(bamF5);
+        }
+
+        readGroupBam = new File(mergedBamDir, id + ".bam");
+
         PiclPairReadsJob piclPairReadsJob = new PiclPairReadsJob(bamF3, bamF5, readGroupBam, this, "fedor35", TagEnum.SOLID_F5);
 
         if (gc.getOffline()) {
             piclPairReadsJob.executeOffline();
             piclPairReadsJob.waitForOfflineExecution();
         } else {
-            piclPairReadsJob.submit();           
+            piclPairReadsJob.submit();
             piclPairReadsJob.waitFor();
         }
-        
+
     }
 
     //getters and setters 
@@ -206,9 +201,6 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
     public void setFastQFileF5(FastQFile fastQFileF5) {
         this.fastQFileF5 = fastQFileF5;
     }
-    
-    
-   
 
     public File getBamF3() {
         return bamF3;
@@ -225,12 +217,4 @@ public class ReadGroupSolidPE extends ReadGroupSolid{
     public void setBamF5(File bamF5) {
         this.bamF5 = bamF5;
     }
-    
-    
-    
-    
-    
-    
-    
-    
 }

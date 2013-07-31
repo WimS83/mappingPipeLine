@@ -26,49 +26,42 @@ import org.ggf.drmaa.DrmaaException;
  * @author wim
  */
 public abstract class ReadGroup {
-    
+
     protected String id;
     protected String library;
     protected String sample;
     protected String description;
-    
-        
     //the output of the processing    
     protected List<File> bamChunks;
-    protected File readGroupBam;  
-    
+    protected File readGroupBam;
     //the file extensions    
     protected String[] bamExtension = new String[]{"bam"};
     protected String[] fastqExtension = new String[]{"fastq"};
-    
     protected GlobalConfiguration gc;
     protected File readGroupOutputDir;
     protected ReadGroupLogFile log;
-    
-    
-    
+
     public void createOutputDir(File sampleOutputDir) {
         readGroupOutputDir = new File(sampleOutputDir, id);
         readGroupOutputDir.mkdir();
 
     }
-    
-    
+
     public void startProcessing() {
 
         log = new ReadGroupLogFile(readGroupOutputDir, id);
 
         initalizeUnsetList();           //initialize the unset list to empty list  
-        try {         
-            
-            prepareReadsForMapping();            
+        try {
+
+            prepareReadsForMapping();
 
             if (gc.getTargetEnum().getRank() >= TargetEnum.CHUNKS_BAM.getRank()) {
                 mapFastqFiles();     //map fastq chunks to bam files     
             }
 
             if (gc.getTargetEnum().getRank() >= TargetEnum.READGROUP_BAM.getRank()) {
-           
+
                 mergeBamChunks();               //merge the bam chunks
                 checkAllReadsAreAcountedFor();  //check all the reads are accounted for
                 runQualimap(readGroupBam);
@@ -88,20 +81,17 @@ public abstract class ReadGroup {
 
         log.close();
     }
-    
-    
-      private void initalizeUnsetList() {
-        
-               
+
+    private void initalizeUnsetList() {
+
+
         if (bamChunks == null) {
             bamChunks = new ArrayList<File>();
-        }        
+        }
     }
-    
-    
-    protected abstract void prepareReadsForMapping() throws IOException; 
-     
-    
+
+    protected abstract void prepareReadsForMapping() throws IOException;
+
     protected void mapFastqFiles() throws MappingException, InterruptedException, IOException, DrmaaException, JobFaillureException {
 
         System.out.println("Starting submitting of mapping jobs");
@@ -114,9 +104,9 @@ public abstract class ReadGroup {
             waitForMappingJobs(bwaMappingJobs);
         }
     }
-    
+
     protected abstract List<Job> createMappingJobs() throws IOException;
-    
+
     protected void submitMappingJobs(List<Job> mappingJobs) throws DrmaaException {
         getLog().append("Submitting " + mappingJobs.size() + " mapping jobs");
         for (Job bwaMappingJob : mappingJobs) {
@@ -138,50 +128,53 @@ public abstract class ReadGroup {
             bwaMappingJob.waitFor();
         }
     }
-    
+
     protected void mergeBamChunks() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
 
         if (bamChunks.isEmpty()) {
             return;
         } //return if there are no bamchunks 
 
-        
+
         File mergedBamDir = new File(readGroupOutputDir, "MergedBam");
         mergedBamDir.mkdir();
-        readGroupBam = new File(mergedBamDir, id+ "_" + ".bam");        
-        
+        readGroupBam = new File(mergedBamDir, id + "_" + ".bam");
+
         File picardMergeSam = new File(gc.getPicardDirectory(), "MergeSamFiles.jar");
 
         PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(bamChunks, readGroupBam, null, gc.getTmpDir(), picardMergeSam);
-        picardMergeBamJob.executeOffline();
-        picardMergeBamJob.waitForOfflineExecution();
+        if (gc.getOffline()) {
+            picardMergeBamJob.executeOffline();
+            picardMergeBamJob.waitForOfflineExecution();
+        } else {
+            picardMergeBamJob.submit();
+            picardMergeBamJob.waitFor();
+        }
 
     }
-    
-     protected void runQualimap(File bam) throws IOException, InterruptedException, DrmaaException {
+
+    protected void runQualimap(File bam) throws IOException, InterruptedException, DrmaaException {
 
         File qualimapReport = new File(bam.getParentFile(), FilenameUtils.getBaseName(bam.getName()) + "_qualimap.pdf");
-        QualimapJob qualimapJob = new QualimapJob(bam, qualimapReport, gc, "fedor8");
-
-        qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node             
-//        if(globalConfiguration.getOffline())
-//        {
-//            qualimapJob.executeOffline();
-//        }
-//        else
-//        {
-//            qualimapJob.submit();
-//        }              
+        QualimapJob qualimapJob = new QualimapJob(bam, qualimapReport, gc, null);
+        
+        if(gc.getOffline())
+        {
+            qualimapJob.executeOffline();
+        }
+        else
+        {
+            qualimapJob.submit();
+        }              
     }
-     
-     
-     
-     
-     protected void checkAllReadsAreAcountedFor() throws MappingException {
+
+    protected void checkAllReadsAreAcountedFor() throws MappingException {
 
         Long inputReadsNr = getReadsInChunks();
-        
-        if(inputReadsNr == new Long(-1)){return;}   //return if processing did not start with reads
+
+        if (inputReadsNr == new Long(-1)) {
+            return;
+        }   //return if processing did not start with reads
         PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
         Long readInBamFile = picardGetReadCount.getReadCount(readGroupBam);
 
@@ -193,11 +186,9 @@ public abstract class ReadGroup {
 
         }
     }
-     
+
     protected abstract Long getReadsInChunks();
 
-    
-    
     public File getReadGroupOutputDir() {
         return readGroupOutputDir;
     }
@@ -212,13 +203,12 @@ public abstract class ReadGroup {
 
     public void setGlobalConfiguration(GlobalConfiguration globalConfiguration) {
         this.gc = globalConfiguration;
-    }    
-    
-    
+    }
+
     public File getReadGroupBam() {
         return readGroupBam;
-    }    
-    
+    }
+
     //getters and setters
     public String getId() {
         return id;
@@ -251,10 +241,4 @@ public abstract class ReadGroup {
     public void setSample(String sample) {
         this.sample = sample;
     }
-
-    
-
-   
-    
-    
 }

@@ -29,6 +29,7 @@ public class QualimapJob extends Job {
         sgeName = "qualimap_"+bam.getName();
         
         hostName = hostNameArg;
+        this.sgeThreads = 8;
         
         sgeThreads = gc.getQualimapSGEThreads();
         

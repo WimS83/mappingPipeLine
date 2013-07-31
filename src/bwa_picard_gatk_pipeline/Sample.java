@@ -136,7 +136,7 @@ public class Sample {
         this.globalConfiguration = globalConfiguration;
     }
 
-    private void mergeReadGroupBamFiles() throws IOException, InterruptedException {
+    private void mergeReadGroupBamFiles() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
 
 
         for (ReadGroup readGroup : allReadGroups) {
@@ -157,8 +157,19 @@ public class Sample {
                 File picardMergeSam = new File(globalConfiguration.getPicardDirectory(), "MergeSamFiles.jar");
 
                 PicardMergeBamJob picardMergeBamJob = new PicardMergeBamJob(readGroupBamFiles, mergedBamFile, null, globalConfiguration.getTmpDir(), picardMergeSam);
-                picardMergeBamJob.executeOffline();
-                picardMergeBamJob.waitForOfflineExecution();
+                if(globalConfiguration.getOffline())
+                {
+                    picardMergeBamJob.executeOffline();
+                    picardMergeBamJob.waitForOfflineExecution();
+                }
+                else
+                {
+                    picardMergeBamJob.submit();
+                    picardMergeBamJob.waitFor();
+                }               
+              
+                
+              
             } catch (IOException ex) {
                 Logger.getLogger(Sample.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -174,17 +185,16 @@ public class Sample {
         }
 
         File qualimapReport = new File(sampleOutputDir, name + "_qualimap.pdf");
-        QualimapJob qualimapJob = new QualimapJob(mergedBamFile, qualimapReport, globalConfiguration, "fedor8");
+        QualimapJob qualimapJob = new QualimapJob(mergedBamFile, qualimapReport, globalConfiguration, null);
 
-        qualimapJob.executeOffline(); // temporary always execute oflline, untill I know to execute via SGE on fedor8 or another suitable node    
-//        if(globalConfiguration.getOffline())
-//        {
-//            qualimapJob.executeOffline();
-//        }
-//        else
-//        {
-//            qualimapJob.submit();
-//        }              
+        if(globalConfiguration.getOffline())
+        {
+            qualimapJob.executeOffline();
+        }
+        else
+        {
+            qualimapJob.submit();
+        }              
     }
 
     private void markDuplicates() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
