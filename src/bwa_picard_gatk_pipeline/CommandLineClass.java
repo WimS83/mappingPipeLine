@@ -55,6 +55,7 @@ public class CommandLineClass {
         //bwa options
         options.addOption("cs_bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
         options.addOption("bwa", true, "Location of BWA. Default is /home/sge_share_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa");
+        options.addOption("bwa_mem", false, "Use bwa-mem for aligning instead of bwa-aln. Default is false (ie use bwa aln)");
         options.addOption("sam", true, "Location of samtools. Default is /usr/local/samtools/samtools");
         
         //gatk options
@@ -113,6 +114,13 @@ public class CommandLineClass {
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("cs-bwa", "/usr/local/bwa/0.5.9/bwa")));
         globalConfiguration.setBWA(new File(cmd.getOptionValue("bwa", "/home/sge_share_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa")));
         globalConfiguration.setSamtools(new File(cmd.getOptionValue("bwa", "/usr/local/samtools/samtools")));
+        if (cmd.hasOption("bwa_mem")) {
+            globalConfiguration.setUseBWAMEM(true);
+        }
+        else{
+            globalConfiguration.setUseBWAMEM(false);
+        }
+        
         
         //picl options
         globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));

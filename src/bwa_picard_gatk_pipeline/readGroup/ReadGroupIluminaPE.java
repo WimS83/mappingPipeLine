@@ -4,10 +4,12 @@
  */
 package bwa_picard_gatk_pipeline.readGroup;
 
+import bwa_picard_gatk_pipeline.GlobalConfiguration;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQChunk;
 import bwa_picard_gatk_pipeline.fileWrappers.FastQFile;
 import bwa_picard_gatk_pipeline.sge.Job;
 import bwa_picard_gatk_pipeline.sge.ilumina.BWA.mappingJob.BwaIluminaMappingJob;
+import bwa_picard_gatk_pipeline.sge.ilumina.BWAmem.mappingJob.BwaMemIluminaMappingJob;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -54,8 +56,17 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
         for(int x = 0; x < firstReadsChunks.size(); x++) {
             
             File bamFile = new File(readGroupOutputDir, FilenameUtils.getBaseName(firstReadsChunks.get(x).getFastqFile().getPath()) + ".bam");
-            bamChunks.add(bamFile);        
-            BwaIluminaMappingJob bwaIluminaMappingJob = new BwaIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this);      
+            bamChunks.add(bamFile);
+            Job bwaIluminaMappingJob = null;
+            if(gc.getUseBWAMEM())
+            {
+                 bwaIluminaMappingJob = new BwaMemIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this);      
+            }
+            else
+            {
+                 bwaIluminaMappingJob = new BwaIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this);      
+            }     
+           
             bwaMappingJobs.add(bwaIluminaMappingJob);
         }
        

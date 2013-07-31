@@ -27,6 +27,7 @@ public class GlobalConfiguration {
     private File colorSpaceBWA;
     private File BWA;
     private File samtools;
+    private Boolean useBWAMEM;
     
     //picard options 
     private File picardDirectory;
@@ -103,6 +104,17 @@ public class GlobalConfiguration {
         this.colorSpaceBWA = colorSpaceBWA;
     }
 
+    public Boolean getUseBWAMEM() {
+        return useBWAMEM;
+    }
+
+    public void setUseBWAMEM(Boolean useBWAMEM) {
+        this.useBWAMEM = useBWAMEM;
+    }
+    
+    
+
+    
     public File getSamtools() {
         return samtools;
     }

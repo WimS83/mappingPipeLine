@@ -23,14 +23,16 @@ public class PicardDedupBamJob extends Job{
     private GlobalConfiguration gc;    
     
     public PicardDedupBamJob(File mergedBam, File dedupBam,  GlobalConfiguration gc) throws IOException {
-        super(FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + ".sh");
+        super(FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + "_dedup.sh");
         
 
         this.mergedBam = mergedBam;
         this.dedupBam = dedupBam;
         this.gc = gc;
+        
+        sgeThreads = gc.getGatkSGEThreads();
 
-        addCommands();
+        addCommands();      
 
         sgeName = "dedup_" + mergedBam.getName();
         close();
@@ -77,7 +79,9 @@ public class PicardDedupBamJob extends Job{
         
       
         
-        addCommand( " java -jar "+picardMarkDuplicates.getAbsolutePath() +
+        addCommand( " java " +
+                    " -Xmx"+gc.getGatkSGEMemory()+"G"+
+                    " -jar " +picardMarkDuplicates.getAbsolutePath() +                  
                     " I="+mergedBam.getAbsolutePath() +
                     " O="+dedupBam.getAbsolutePath() +
                     " M="+ metricsFile.getAbsolutePath() + 
