@@ -40,6 +40,7 @@ public class GlobalConfiguration {
    
     //gatk options 
     private File gatk;
+    private File knownSNP;
     private File knownIndels;
     private Integer gatkSGEThreads;
     private Integer gatkSGEMemory;
@@ -225,6 +226,14 @@ public class GlobalConfiguration {
     public void setGatkCallReference(Boolean gatkCallReference) {
         this.gatkCallReference = gatkCallReference;
     }
+
+    public File getKnownSNP() {
+        return knownSNP;
+    }
+
+    public void setKnownSNP(File knownSNP) {
+        this.knownSNP = knownSNP;
+    }    
     
     public File getKnownIndels() {
         return knownIndels;

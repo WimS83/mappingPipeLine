@@ -40,7 +40,7 @@ public class CommandLineClass {
         options.addOption("i", "input", true, "the Json config file describing the samples, read groups, tags and files to process. ");
         options.addOption("o", "output", true, "base output directory. Subdirectories will be created in this dir for each sample, read group and tag. ");
         options.addOption("h", "help", false, "print this message");
-        options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, DEDUP_BAM, REALIGN_BAM, SAMPLE_RAW_VCF, SAMPLE_ANNOTATED_VCF ");
+        options.addOption("t", "target", true, "target point of the pipeline. One of the following:  FASTQ, CHUNKS_BAM, TAG_BAM, READGROUP_BAM, DEDUP_BAM, REALIGN_BAM, BQSR_BAM, SAMPLE_RAW_VCF, SAMPLE_ANNOTATED_VCF ");
         options.addOption("r", "reference", true, "reference file. fai and BWA indexes should be next to this file.");
         options.addOption("c", "chunk size", true, "chunk size for mapping. Default is 1.000.000 .");
         options.addOption("f", "offline", false, "do all the processing without using the Sun Grid Engine Cluster. This option is mainly for development and debugging purposes, running a real dataset offline will take to long. Default is false");
@@ -60,7 +60,8 @@ public class CommandLineClass {
         
         //gatk options
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar ");
-        options.addOption("k", "known-indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
+        options.addOption("known_indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
+        options.addOption("known_snps", true, "Location of a vcf or bed file with known snps which is needed for GATK BQSR. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("gatk_vc", true, "GATK variant caller. Either UnifiedGenotyper or HaplotypeCaller . Default is UnifiedGenotyper");
         options.addOption("gatk_threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("gatk_mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
@@ -138,8 +139,11 @@ public class CommandLineClass {
         else{
             globalConfiguration.setGatkCallReference(false);
         }
-        if (cmd.hasOption("k")) {
-            globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("k")));
+        if (cmd.hasOption("known_indels")) {
+            globalConfiguration.setKnownIndels(new File(cmd.getOptionValue("known-indels")));
+        }      
+         if (cmd.hasOption("known_snps")) {
+            globalConfiguration.setKnownSNP(new File(cmd.getOptionValue("known-snps")));
         }      
         
         GATKVariantCallers  caller;

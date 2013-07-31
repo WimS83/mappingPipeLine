@@ -66,8 +66,32 @@ public class GATKBaseQualRecalJob extends Job {
 //        //create a tmp dir
 //        addCommand("mkdir " + tmpDir);
 //        addCommand("\n");
+          StringBuilder knownSitesSB = new StringBuilder();
+         
+          if(gc.getKnownSNP() != null)
+          {
+              knownSitesSB.append(" -knownSites ");
+              knownSitesSB.append(gc.getKnownSNP().getAbsolutePath());              
+          }
+          if(gc.getKnownIndels()!= null)
+          {
+              knownSitesSB.append(" -knownSites ");
+              knownSitesSB.append(gc.getKnownIndels().getAbsolutePath());              
+          }        
 //       
-
+        addCommand( "java "+
+                    " -Xmx"+gc.getGatkSGEMemory()+"G"+
+                    " -jar "+gc.getGatk().getAbsolutePath() +
+                    " -T BaseRecalibrator " +
+                    " -R "+gc.getReferenceFile().getAbsolutePath()+                  
+                    " -I "+realignedBam.getAbsolutePath()+ 
+                    " -o "+recalibrationReport.getAbsolutePath()+   
+                    knownSitesSB.toString()+        
+                    appendAlloutputToLog);        
+        
+    
+        
+        addCommand("\n");
         
        
         

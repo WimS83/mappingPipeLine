@@ -13,6 +13,7 @@ import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidPE;
 import bwa_picard_gatk_pipeline.sge.gatk.realignJob.GATKRealignIndelsJob;
 import bwa_picard_gatk_pipeline.sge.picard.mergeBAM.PicardMergeBamJob;
 import bwa_picard_gatk_pipeline.sge.QualimapJob;
+import bwa_picard_gatk_pipeline.sge.gatk.baseQualRecalJob.GATKBaseQualRecalJob;
 import bwa_picard_gatk_pipeline.sge.picard.dedupJob.PicardDedupBamJob;
 import java.io.File;
 import java.io.IOException;
@@ -43,6 +44,7 @@ public class Sample {
     private File mergedBamFile;
     private File mergedBamFileDedup;
     private File mergedBamDedupRealigned;    
+    private File mergedBamDedupRealignedRecalibrated;    
    
 
     public void startProcessing() {
@@ -79,6 +81,10 @@ public class Sample {
             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.REALIGN_BAM.getRank()) {
                 realignBam();
             }
+             if (globalConfiguration.getTargetEnum().getRank() >= TargetEnum.BQSR_BAM.getRank()) {
+                recalibrateBam();
+            }
+            
            
 
 
@@ -223,6 +229,25 @@ public class Sample {
             gATKRealignIndelsJob.waitFor();
         }
     }
+    
+    private void recalibrateBam() throws IOException, InterruptedException, DrmaaException, JobFaillureException {
+         if (mergedBamDedupRealigned == null) {
+            return;
+        }
+
+        mergedBamDedupRealignedRecalibrated = new File(sampleOutputDir, FilenameUtils.getBaseName(mergedBamFileDedup.getName()) + "_recalibrated.bam");
+
+        GATKBaseQualRecalJob gATKBQSRJob = new GATKBaseQualRecalJob(mergedBamDedupRealigned, mergedBamDedupRealignedRecalibrated, globalConfiguration);
+
+        if (globalConfiguration.getOffline()) {
+            gATKBQSRJob.executeOffline();
+            gATKBQSRJob.waitForOfflineExecution();
+
+        } else {
+            gATKBQSRJob.submit();
+            gATKBQSRJob.waitFor();
+        }
+    }
 
    
 
@@ -289,6 +314,8 @@ public class Sample {
     public void setAllReadGroups(List<ReadGroup> allReadGroups) {
         this.allReadGroups = allReadGroups;
     }
+
+    
 
     
     
