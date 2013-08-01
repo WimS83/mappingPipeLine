@@ -25,7 +25,7 @@ public class GATKRealignIndelsJob extends Job {
 
     public GATKRealignIndelsJob(File dedupBam, File realignedBam, GlobalConfiguration gc) throws IOException {        
         
-        super(FilenameUtils.removeExtension(dedupBam.getPath()) + "_realignIndels.sh");        
+        super(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignIndels.sh");        
         this.gc = gc;
         this.dedupBam = dedupBam;
         this.realignedBam = realignedBam;
@@ -49,18 +49,18 @@ public class GATKRealignIndelsJob extends Job {
     
     private void addCommands() throws IOException 
     {
-        String baseName = FilenameUtils.getBaseName(dedupBam.getPath()); 
+        String baseName = FilenameUtils.getBaseName(dedupBam.getAbsolutePath()); 
         File logFile = new File(dedupBam.getParentFile(), baseName + "_realign.log");  
        // File tmpDir = new File("/tmp", baseName);          
         
-        File realignTargets = new File(FilenameUtils.removeExtension(dedupBam.getPath()) + "_realignTargets.intervals"); 
+        File realignTargets = new File(FilenameUtils.removeExtension(dedupBam.getAbsolutePath()) + "_realignTargets.intervals"); 
         
-        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
                
         //add sge hostname and date information to log
-        addCommand("uname -n >> " + logFile.getPath());
+        addCommand("uname -n >> " + logFile.getAbsolutePath());
         addCommand("\n");
-        addCommand("date >> " + logFile.getPath());
+        addCommand("date >> " + logFile.getAbsolutePath());
         addCommand("\n");
         
 //        //create a tmp dir
@@ -72,32 +72,32 @@ public class GATKRealignIndelsJob extends Job {
         String knownIndels = "";
         if(gc.getKnownIndels()!= null)
         {
-            knownIndels = "-known "+gc.getKnownIndels().getPath();
+            knownIndels = "-known "+gc.getKnownIndels().getAbsolutePath();
         }        
         
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+
-                    " -jar "+gc.getGatk().getPath() +
+                    " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T RealignerTargetCreator " +
-                    " -R "+gc.getReferenceFile().getPath()+
-                    " -I "+dedupBam.getPath()+ 
-                    " -o "+realignTargets.getPath()+knownIndels +
+                    " -R "+gc.getReferenceFile().getAbsolutePath()+
+                    " -I "+dedupBam.getAbsolutePath()+ 
+                    " -o "+realignTargets.getAbsolutePath()+knownIndels +
                     appendAlloutputToLog);
         
         
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G " +
-                    " -jar "+gc.getGatk().getPath() +
+                    " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T IndelRealigner "+
-                    " -R "+gc.getReferenceFile().getPath()+
-                    " -I "+dedupBam.getPath()+
-                    " -targetIntervals "+realignTargets.getPath() + 
-                    " -o "+realignedBam.getPath()+knownIndels +
+                    " -R "+gc.getReferenceFile().getAbsolutePath()+
+                    " -I "+dedupBam.getAbsolutePath()+
+                    " -targetIntervals "+realignTargets.getAbsolutePath() + 
+                    " -o "+realignedBam.getAbsolutePath()+knownIndels +
                     appendAlloutputToLog);
         
         addCommand("\n");
         //remove the tmp dir from the sge host
-      //  addCommand("rm -rf " + tmpDir.getPath() + appendAlloutputToLog);
+      //  addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
     //    addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date " + appendAlloutputToLog);

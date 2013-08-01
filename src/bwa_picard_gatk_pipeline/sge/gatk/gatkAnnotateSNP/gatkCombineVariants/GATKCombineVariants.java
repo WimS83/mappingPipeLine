@@ -26,7 +26,7 @@ public class GATKCombineVariants extends Job{
     
     
       public GATKCombineVariants(List<File> chromosomeVCFFiles, File concatenatedVCF, GlobalConfiguration gc) throws IOException {
-        super(FilenameUtils.removeExtension(chromosomeVCFFiles.get(0).getPath()) + "concatenateVCF.sh");     
+        super(FilenameUtils.removeExtension(chromosomeVCFFiles.get(0).getAbsolutePath()) + "concatenateVCF.sh");     
         this.chromosomeVCFFiles = chromosomeVCFFiles;
         this.concatenatedVCF = concatenatedVCF;
         this.gc = gc;     
@@ -45,16 +45,16 @@ public class GATKCombineVariants extends Job{
 
     private void addCommands() throws IOException {
         
-        String baseName = FilenameUtils.getBaseName(chromosomeVCFFiles.get(0).getPath()); 
+        String baseName = FilenameUtils.getBaseName(chromosomeVCFFiles.get(0).getAbsolutePath()); 
         File logFile = new File(chromosomeVCFFiles.get(0).getParentFile(), baseName + "_concatVariants.log");  
         //File tmpDir = new File("/tmp", baseName);           
         
-      //  File metricsFile = new File(rawVCF.getParent(), FilenameUtils.getBaseName(rawVCF.getPath())+ ".metrics");
+      //  File metricsFile = new File(rawVCF.getParent(), FilenameUtils.getBaseName(rawVCF.getAbsolutePath())+ ".metrics");
                
 //        File localVCF = new File(tmpDir, rawVCF.getName());
 //        File localVCFMetrics = new File(tmpDir, FilenameUtils.removeExtension(baseName)+".metrics");       
         
-        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
         //add sge hostname and date information to log
         addCommand("uname -n " + appendAlloutputToLog);
@@ -69,24 +69,24 @@ public class GATKCombineVariants extends Job{
         for(File chromVCF : chromosomeVCFFiles)
         {
             inputString.append("-V ");
-            inputString.append(chromVCF.getPath());
+            inputString.append(chromVCF.getAbsolutePath());
             inputString.append(" ");
         }
            
         //concat the raw variants 
         addCommand("java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+  
-                    " -jar "+gc.getGatk().getPath() +
+                    " -jar "+gc.getGatk().getAbsolutePath() +
                     " -T CombineVariants "+
-                    " -R "+gc.getReferenceFile().getPath()+
-                    " -o "+concatenatedVCF.getPath()+
+                    " -R "+gc.getReferenceFile().getAbsolutePath()+
+                    " -o "+concatenatedVCF.getAbsolutePath()+
                     inputString.toString()+
                     " -assumeIdenticalSamples"+
                     appendAlloutputToLog);
         addCommand("\n");             
         
         //remove the tmp dir from the sge host
-       // addCommand("rm -rf " + tmpDir.getPath() + appendAlloutputToLog);
+       // addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);

@@ -23,7 +23,7 @@ public class PicardDedupBamJob extends Job{
     private GlobalConfiguration gc;    
     
     public PicardDedupBamJob(File mergedBam, File dedupBam,  GlobalConfiguration gc) throws IOException {
-        super(FilenameUtils.removeExtension(mergedBam.getPath()) + "_dedup.sh");
+        super(FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + "_dedup.sh");
         
 
         this.mergedBam = mergedBam;
@@ -53,7 +53,7 @@ public class PicardDedupBamJob extends Job{
         File metricsFile = new File(dedupBam.getParentFile(), baseName + ".metrics");
         
         
-        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
         
         File tmpDir;
         
@@ -81,11 +81,11 @@ public class PicardDedupBamJob extends Job{
         
         addCommand( " java " +
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+
-                    " -jar " +picardMarkDuplicates.getPath() +                  
-                    " I="+mergedBam.getPath() +
-                    " O="+dedupBam.getPath() +
-                    " M="+ metricsFile.getPath() + 
-                    " TMP_DIR="+tmpDir.getPath()+
+                    " -jar " +picardMarkDuplicates.getAbsolutePath() +                  
+                    " I="+mergedBam.getAbsolutePath() +
+                    " O="+dedupBam.getAbsolutePath() +
+                    " M="+ metricsFile.getAbsolutePath() + 
+                    " TMP_DIR="+tmpDir.getAbsolutePath()+
                     " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true " + appendAlloutputToLog);
         
         
