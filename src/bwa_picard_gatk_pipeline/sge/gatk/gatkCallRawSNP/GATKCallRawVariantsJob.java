@@ -34,7 +34,7 @@ public class GATKCallRawVariantsJob extends Job {
     private GlobalConfiguration gc;
 
     public GATKCallRawVariantsJob(List<File> sampleBams, File rawVCF, GlobalConfiguration gc, SAMSequenceRecord chromosome) throws IOException {
-        super(FilenameUtils.removeExtension(rawVCF.getAbsolutePath()) + "_callRawVariants.sh");     
+        super(FilenameUtils.removeExtension(rawVCF.getPath()) + "_callRawVariants.sh");     
         this.sampleBams = sampleBams;
         this.rawVCF = rawVCF;
         this.gc = gc;
@@ -79,16 +79,16 @@ public class GATKCallRawVariantsJob extends Job {
 
     private void addCommands() throws IOException {
         
-        String baseName = FilenameUtils.getBaseName(rawVCF.getAbsolutePath()); 
+        String baseName = FilenameUtils.getBaseName(rawVCF.getPath()); 
         File logFile = new File(rawVCF.getParentFile(), baseName + "_callRawVariants.log");  
         //File tmpDir = new File("/tmp", baseName);           
         
-        File metricsFile = new File(rawVCF.getParent(), FilenameUtils.getBaseName(rawVCF.getAbsolutePath())+ ".metrics");
+        File metricsFile = new File(rawVCF.getParent(), FilenameUtils.getBaseName(rawVCF.getPath())+ ".metrics");
                
 //        File localVCF = new File(tmpDir, rawVCF.getName());
 //        File localVCFMetrics = new File(tmpDir, FilenameUtils.removeExtension(baseName)+".metrics");       
         
-        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
         
         //add sge hostname and date information to log
         addCommand("uname -n " + appendAlloutputToLog);
@@ -113,7 +113,7 @@ public class GATKCallRawVariantsJob extends Job {
         if(gc.getgATKVariantCaller() == GATKVariantCallers.UnifiedGenotyper)
         {
             slodString = " -slod ";
-            metrics = " -metrics "+metricsFile.getAbsolutePath();
+            metrics = " -metrics "+metricsFile.getPath();
             multiThread = " -nt "+ gc.getGatkSGEThreads();
         }             
         
@@ -124,19 +124,19 @@ public class GATKCallRawVariantsJob extends Job {
        for(File sampleBamFile : sampleBams)
        {
            inputString.append(" -I ");
-           inputString.append(sampleBamFile.getAbsoluteFile());
+           inputString.append(sampleBamFile.getPath());
            inputString.append(" ");
        }        
            
         //call the raw variants 
         addCommand("java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+  
-                    " -jar "+gc.getGatk().getAbsolutePath() +
+                    " -jar "+gc.getGatk().getPath() +
                     " -T "+gc.getgATKVariantCaller()+" -A AlleleBalance -A Coverage -stand_call_conf 30.0 -stand_emit_conf 10 "+
-                    " -R "+gc.getReferenceFile().getAbsolutePath()+                    
+                    " -R "+gc.getReferenceFile().getPath()+                    
                     inputString.toString()+
-                    " -o "+rawVCF.getAbsolutePath()+
-                    " -L "+bedFile.getAbsolutePath()+
+                    " -o "+rawVCF.getPath()+
+                    " -L "+bedFile.getPath()+
                     multiThread+
                     metrics+      
                     slodString +
@@ -145,13 +145,13 @@ public class GATKCallRawVariantsJob extends Job {
         addCommand("\n");
         
         //copy the resutls back
-//        addCommand("cp "+localVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);
-//        addCommand("cp "+localVCFMetrics.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath()+ appendAlloutputToLog);
+//        addCommand("cp "+localVCF.getPath() +" " + rawVCF.getParentFile().getPath() + appendAlloutputToLog);
+//        addCommand("cp "+localVCFMetrics.getPath() +" " + rawVCF.getParentFile().getPath()+ appendAlloutputToLog);
 //        addCommand("\n");
         
         
         //remove the tmp dir from the sge host
-       // addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+       // addCommand("rm -rf " + tmpDir.getPath() + appendAlloutputToLog);
         addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);

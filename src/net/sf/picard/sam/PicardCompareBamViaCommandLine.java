@@ -25,9 +25,9 @@ public class PicardCompareBamViaCommandLine {
         List<String> command = new ArrayList<String>();
         command.add("java");
         command.add("-jar");
-        command.add(picardCompareSam.getAbsolutePath());
-        command.add(bam1.getAbsolutePath());
-        command.add(bam2.getAbsolutePath());
+        command.add(picardCompareSam.getPath());
+        command.add(bam1.getPath());
+        command.add(bam2.getPath());
 
         ProcessBuilder builder = new ProcessBuilder(command);
         builder.redirectErrorStream(true);

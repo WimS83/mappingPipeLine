@@ -25,7 +25,7 @@ public class PicardMergeBamJob extends Job {
     
      public PicardMergeBamJob(List<File> bamFilesToMerge, File mergedBam, String hostNameArg, File tmpDir, File picardMerge) throws IOException {
 
-        super(FilenameUtils.removeExtension(mergedBam.getAbsolutePath()) + "_mergeBam.sh");
+        super(FilenameUtils.removeExtension(mergedBam.getPath()) + "_mergeBam.sh");
 
         this.bamFilesToMerge = bamFilesToMerge;
         this.mergedBam = mergedBam;     
@@ -50,7 +50,7 @@ public class PicardMergeBamJob extends Job {
         String baseName = FilenameUtils.getBaseName(mergedBam.getName());
         
         File logFile = new File(mergedBam.getParentFile(), baseName + "_PicardMergeBams.log");      
-        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
         
 //        File tmpDir;
 //        
@@ -80,11 +80,11 @@ public class PicardMergeBamJob extends Job {
         for(File bamFile : bamFilesToMerge)
         {
             inputString.append("I=");
-            inputString.append(bamFile.getAbsolutePath());
+            inputString.append(bamFile.getPath());
             inputString.append(" ");
         }
         
-        addCommand("java -jar "+picardMerge.getAbsolutePath() +inputString.toString() +" O="+ mergedBam.getAbsolutePath() + " TMP_DIR="+tmpDir.getAbsolutePath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
+        addCommand("java -jar "+picardMerge.getPath() +inputString.toString() +" O="+ mergedBam.getPath() + " TMP_DIR="+tmpDir.getPath()+ " VALIDATION_STRINGENCY=LENIENT CREATE_INDEX=true USE_THREADING=true " + appendAlloutputToLog);
         
     }
     

@@ -25,7 +25,7 @@ public class GATKBaseQualRecalJob extends Job {
 
     public GATKBaseQualRecalJob(File realignedBam, File bqsrBam, GlobalConfiguration gc) throws IOException {        
         
-        super(FilenameUtils.removeExtension(realignedBam.getAbsolutePath()) + "_bqsr.sh");        
+        super(FilenameUtils.removeExtension(realignedBam.getPath()) + "_bqsr.sh");        
         this.gc = gc;        
         this.realignedBam = realignedBam;
         this.bqsrBam = bqsrBam;
@@ -49,18 +49,18 @@ public class GATKBaseQualRecalJob extends Job {
     
     private void addCommands() throws IOException 
     {
-        String baseName = FilenameUtils.getBaseName(realignedBam.getAbsolutePath()); 
+        String baseName = FilenameUtils.getBaseName(realignedBam.getPath()); 
         File logFile = new File(realignedBam.getParentFile(), baseName + "_bqsr.log");  
        // File tmpDir = new File("/tmp", baseName);          
         
-        File recalibrationReport = new File(FilenameUtils.removeExtension(realignedBam.getAbsolutePath()) + "_ recalibration_report.grp"); 
+        File recalibrationReport = new File(FilenameUtils.removeExtension(realignedBam.getPath()) + "_ recalibration_report.grp"); 
         
-        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
                
         //add sge hostname and date information to log
-        addCommand("uname -n >> " + logFile.getAbsolutePath());
+        addCommand("uname -n >> " + logFile.getPath());
         addCommand("\n");
-        addCommand("date >> " + logFile.getAbsolutePath());
+        addCommand("date >> " + logFile.getPath());
         addCommand("\n");
         
 //        //create a tmp dir
@@ -71,21 +71,21 @@ public class GATKBaseQualRecalJob extends Job {
           if(gc.getKnownSNP() != null)
           {
               knownSitesSB.append(" -knownSites ");
-              knownSitesSB.append(gc.getKnownSNP().getAbsolutePath());              
+              knownSitesSB.append(gc.getKnownSNP().getPath());              
           }
           if(gc.getKnownIndels()!= null)
           {
               knownSitesSB.append(" -knownSites ");
-              knownSitesSB.append(gc.getKnownIndels().getAbsolutePath());              
+              knownSitesSB.append(gc.getKnownIndels().getPath());              
           }        
 //       
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+
-                    " -jar "+gc.getGatk().getAbsolutePath() +
+                    " -jar "+gc.getGatk().getPath() +
                     " -T BaseRecalibrator " +
-                    " -R "+gc.getReferenceFile().getAbsolutePath()+                  
-                    " -I "+realignedBam.getAbsolutePath()+ 
-                    " -o "+recalibrationReport.getAbsolutePath()+   
+                    " -R "+gc.getReferenceFile().getPath()+                  
+                    " -I "+realignedBam.getPath()+ 
+                    " -o "+recalibrationReport.getPath()+   
                     knownSitesSB.toString()+        
                     appendAlloutputToLog);        
         
@@ -97,19 +97,19 @@ public class GATKBaseQualRecalJob extends Job {
         
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+
-                    " -jar "+gc.getGatk().getAbsolutePath() +
+                    " -jar "+gc.getGatk().getPath() +
                     " -T PrintReads " +
-                    " -R "+gc.getReferenceFile().getAbsolutePath()+                  
-                    " -I "+realignedBam.getAbsolutePath()+ 
-                    " -BQSR "+recalibrationReport.getAbsolutePath()+
-                    " -o "+bqsrBam.getAbsolutePath()+
+                    " -R "+gc.getReferenceFile().getPath()+                  
+                    " -I "+realignedBam.getPath()+ 
+                    " -BQSR "+recalibrationReport.getPath()+
+                    " -o "+bqsrBam.getPath()+
                     appendAlloutputToLog);        
         
     
         
         addCommand("\n");
         //remove the tmp dir from the sge host
-      //  addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+      //  addCommand("rm -rf " + tmpDir.getPath() + appendAlloutputToLog);
     //    addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date " + appendAlloutputToLog);

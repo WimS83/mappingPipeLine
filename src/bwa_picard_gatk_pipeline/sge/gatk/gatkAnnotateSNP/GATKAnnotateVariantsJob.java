@@ -23,7 +23,7 @@ public class GATKAnnotateVariantsJob extends Job{
     private GlobalConfiguration gc;
     
     public GATKAnnotateVariantsJob(File rawVCF, File annotatedVCF, GlobalConfiguration gc ) throws IOException {
-        super(FilenameUtils.removeExtension(rawVCF.getAbsolutePath()) + "_annotateVariants.sh");     
+        super(FilenameUtils.removeExtension(rawVCF.getPath()) + "_annotateVariants.sh");     
         this.rawVCF = rawVCF;
         this.annotatedVCF = annotatedVCF;
         this.gc = gc;
@@ -43,13 +43,13 @@ public class GATKAnnotateVariantsJob extends Job{
 
     private void addCommands() throws IOException {
         
-        String baseName = FilenameUtils.getBaseName(rawVCF.getAbsolutePath()); 
+        String baseName = FilenameUtils.getBaseName(rawVCF.getPath()); 
         File logFile = new File(rawVCF.getParentFile(), baseName + "_annotateVariants.log");  
       //  File tmpDir = new File("/tmp", baseName);           
                
        // File localAnnotatedVCF = new File(tmpDir, annotatedVCF.getName());          
         
-        String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
+        String appendAlloutputToLog = " >> "+ logFile.getPath() + " 2>&1";
         
         //add sge hostname and date information to log
         addCommand("uname -n " + appendAlloutputToLog);
@@ -71,11 +71,11 @@ public class GATKAnnotateVariantsJob extends Job{
         //annotate raw variants 
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+  
-                    " -jar "+gc.getGatk().getAbsolutePath() +
+                    " -jar "+gc.getGatk().getPath() +
                     " -T VariantFiltration "+
-                    " -R "+gc.getReferenceFile().getAbsolutePath()+                  
-                    " -V "+rawVCF.getAbsolutePath()+
-                    " -o "+annotatedVCF.getAbsolutePath()+
+                    " -R "+gc.getReferenceFile().getPath()+                  
+                    " -V "+rawVCF.getPath()+
+                    " -o "+annotatedVCF.getPath()+
                     clusterAnnotation+                    
                     " --filterExpression \"MQ0 >= 4 && ((MQ0 / (1.0 * DP)) > 0.1)\" --filterName \"HARD_TO_VALIDATE\" "+
                     " --filterExpression \"DP < 5 \" --filterName \"LowCoverage\" "+
@@ -87,12 +87,12 @@ public class GATKAnnotateVariantsJob extends Job{
         addCommand("\n");
         
         //copy the resutls back
-//        addCommand("cp "+localAnnotatedVCF.getAbsolutePath() +" " + rawVCF.getParentFile().getAbsolutePath() + appendAlloutputToLog);        
+//        addCommand("cp "+localAnnotatedVCF.getPath() +" " + rawVCF.getParentFile().getPath() + appendAlloutputToLog);        
 //        addCommand("\n");
         
         
         //remove the tmp dir from the sge host
-        //addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
+        //addCommand("rm -rf " + tmpDir.getPath() + appendAlloutputToLog);
         addCommand("\n");
         addCommand("echo finished " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
