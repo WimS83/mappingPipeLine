@@ -33,6 +33,8 @@ public class BwaMemIluminaMappingJob extends Job{
         this.readGroup = readGroup;
         this.bamFile = bamFile;
         
+        sgeThreads = 8;
+        
        
         addCommands();
         
@@ -55,7 +57,7 @@ public class BwaMemIluminaMappingJob extends Job{
         File referenceIndex = new File(referenceFile.getAbsolutePath() + ".fai");
         File samtoolsFile = new File("/usr/local/samtools/samtools");
         File bwaFile = readGroup.getGlobalConfiguration().getBWA();      
-        String bwaOptions = "mem -M ";
+        String bwaOptions = "mem -M -t 8";
         String readGroupOption = " -R \"@RG\\tID:" + readGroup.getId()+ "\\tPL:ILLUMINA\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" ";
         bwaOptions = bwaOptions + readGroupOption;
          
@@ -64,14 +66,14 @@ public class BwaMemIluminaMappingJob extends Job{
         
         String fastqFiles = "";
         
-        File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
-        fastqFiles = copiedFirstFastqFile.getAbsolutePath();
+        //File copiedFirstFastqFile = new File(tmpDir, firstReadsFastqFile.getName());
+        fastqFiles = firstReadsFastqFile.getAbsolutePath();
        
         //if there also is a second read file
         if(secondReadsFastqFile  != null)
         {
-            File copiedSecondFastqFile = new File(tmpDir, secondReadsFastqFile.getName());
-            fastqFiles = fastqFiles + " " + copiedSecondFastqFile.getAbsolutePath();
+            //File copiedSecondFastqFile = new File(tmpDir, secondReadsFastqFile.getName());
+            fastqFiles = fastqFiles + " " + secondReadsFastqFile.getAbsolutePath();
         }
         
         
@@ -99,12 +101,12 @@ public class BwaMemIluminaMappingJob extends Job{
         addCommand("mkdir " + tmpDir + appendAlloutputToLog);
         addCommand("\n");
         //copy the fastQFile to the tmp dir
-        addCommand("echo starting copying of fastq file " + appendAlloutputToLog);
-        addCommand("cp " + firstReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
-        if(secondReadsFastqFile != null)
-        {
-            addCommand("cp " + secondReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
-        }       
+//        addCommand("echo starting copying of fastq file " + appendAlloutputToLog);
+//        addCommand("cp " + firstReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        if(secondReadsFastqFile != null)
+//        {
+//            addCommand("cp " + secondReadsFastqFile.getAbsolutePath()+ " " + tmpDir.getAbsolutePath());
+//        }       
         
         addCommand("\n");
         //map using bwa
@@ -121,13 +123,13 @@ public class BwaMemIluminaMappingJob extends Job{
         //sort the bam file
         addCommand("echo starting sorting of bam " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
-        addCommand(samtoolsFile.getPath() + " sort " + tmpBamFile.getAbsolutePath() + " " + FilenameUtils.removeExtension(bamFileSorted.getAbsolutePath()) + appendAlloutputToLog);
+        addCommand(samtoolsFile.getPath() + " sort " + tmpBamFile.getAbsolutePath() + " " + FilenameUtils.removeExtension(bamFile.getAbsolutePath()) + appendAlloutputToLog);
         addCommand("\n");
         //copy the bamFile back to the server
-        addCommand("echo starting copying of bam back to the server " + appendAlloutputToLog);
-        addCommand("date " + appendAlloutputToLog);
-        addCommand("cp " + bamFileSorted.getAbsolutePath() + " " + bamFile.getAbsolutePath());
-        addCommand("\n");
+//        addCommand("echo starting copying of bam back to the server " + appendAlloutputToLog);
+//        addCommand("date " + appendAlloutputToLog);
+//        addCommand("cp " + bamFileSorted.getAbsolutePath() + " " + bamFile.getAbsolutePath());
+//        addCommand("\n");
         //remove the tmp dir from the sge host
         addCommand("rm -rf " + tmpDir.getAbsolutePath() + appendAlloutputToLog);
         addCommand("\n");

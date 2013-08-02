@@ -59,7 +59,15 @@ public abstract class Job extends File {
      */
     public final void submit() throws DrmaaException {
         sgeID = JobController.getInstance().submitJob(this, hostName, sgeThreads);
-        System.out.println("Submitted job " + getSGEName() + "ID: " + sgeID);
+        String hostNameToPrint = "none";        
+        String sgeThreadToPrint = "none";      
+        if(hostName != null){ hostNameToPrint = hostName; }
+        if(sgeThreads != null){ sgeThreadToPrint = sgeThreads.toString(); }
+        
+        System.out.println("Submitted job " + getSGEName() + "ID: " + sgeID + " hostname: " + hostNameToPrint + " SGE_slots: " + sgeThreadToPrint);
+        
+        
+        
     }
 
     /**
