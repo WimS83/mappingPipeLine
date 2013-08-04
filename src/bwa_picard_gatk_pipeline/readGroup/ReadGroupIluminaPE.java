@@ -28,6 +28,8 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
     private FastQFile secondReadsFastQFile;
     
     private File fastqChunkDir;
+    private String fastqChunkDirFileNameToMatch;    
+    
     
     private List<FastQChunk> firstReadsChunks;
     private List<FastQChunk> secondReadsChunks;
@@ -65,6 +67,9 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
            List<File> existingSecondFileChunks = new ArrayList<File>();               
            for (File fastqFile : fastqFiles)  
            {
+                //skip files not matching the filename part, in the case that multiple readGroups or lanes are in the same fastqChunkDir
+                if(!fastqFile.getName().contains(fastqChunkDirFileNameToMatch)){ continue;}
+               
                 if(fastqFile.getName().contains("_R1_"))
                 {
                     existingFirstFileChunks.add(fastqFile);
