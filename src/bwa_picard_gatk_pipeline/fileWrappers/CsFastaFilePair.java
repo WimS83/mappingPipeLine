@@ -249,6 +249,7 @@ public class CsFastaFilePair {
     private void skipheader() throws IOException {
         
         csFastaReader.mark(8192);
+        qualReader.mark(8192);
         
         String csFastaLine;
         while((csFastaLine = csFastaReader.readLine()) != null)
