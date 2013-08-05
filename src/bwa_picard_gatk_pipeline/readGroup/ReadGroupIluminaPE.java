@@ -161,6 +161,15 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
     public void setFastqChunkDir(File fastqChunkDir) {
         this.fastqChunkDir = fastqChunkDir;
     }
+
+    public String getFastqChunkDirFileNameToMatch() {
+        return fastqChunkDirFileNameToMatch;
+    }
+
+    public void setFastqChunkDirFileNameToMatch(String fastqChunkDirFileNameToMatch) {
+        this.fastqChunkDirFileNameToMatch = fastqChunkDirFileNameToMatch;
+    }
+    
     
     
     

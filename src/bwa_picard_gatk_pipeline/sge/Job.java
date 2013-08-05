@@ -64,7 +64,7 @@ public abstract class Job extends File {
         if(hostName != null){ hostNameToPrint = hostName; }
         if(sgeThreads != null){ sgeThreadToPrint = sgeThreads.toString(); }
         
-        System.out.println("Submitted job " + getSGEName() + "ID: " + sgeID + " hostname: " + hostNameToPrint + " SGE_slots: " + sgeThreadToPrint);
+        System.out.println("Submitted job " + getSGEName() + " ID: " + sgeID + " hostname: " + hostNameToPrint + " SGE_slots: " + sgeThreadToPrint);
         
         
         

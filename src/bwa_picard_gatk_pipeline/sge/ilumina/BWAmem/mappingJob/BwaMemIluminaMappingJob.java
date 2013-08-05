@@ -26,7 +26,7 @@ public class BwaMemIluminaMappingJob extends Job{
 
     public BwaMemIluminaMappingJob(File firstReadsFastqFile, File secondReadsFastqFile,  File bamFile,  ReadGroupIlumina readGroup) throws IOException {
 
-        super(FilenameUtils.removeExtension(firstReadsFastqFile.getAbsolutePath()) + ".sh");
+        super(FilenameUtils.removeExtension(bamFile.getAbsolutePath()) + ".sh");
           
         this.firstReadsFastqFile = firstReadsFastqFile;
         this.secondReadsFastqFile = secondReadsFastqFile;
@@ -61,8 +61,8 @@ public class BwaMemIluminaMappingJob extends Job{
         String readGroupOption = " -R \"@RG\\tID:" + readGroup.getId()+ "\\tPL:ILLUMINA\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" ";
         bwaOptions = bwaOptions + readGroupOption;
          
-        String baseNameFirst = FilenameUtils.getBaseName(firstReadsFastqFile.getPath());
-        File tmpDir = new File("/tmp/" + baseNameFirst);
+        String baseName = FilenameUtils.getBaseName(bamFile.getPath());
+        File tmpDir = new File("/tmp/" + baseName);
         
         String fastqFiles = "";
         
@@ -80,13 +80,13 @@ public class BwaMemIluminaMappingJob extends Job{
        
         //File bwaOutputFirstFile = new File(tmpDir, baseNameFirst + ".out");          
         
-        File samFile = new File(tmpDir, baseNameFirst + ".sam");
-        File tmpBamFile = new File(tmpDir, baseNameFirst + ".bam" );
+        File samFile = new File(tmpDir, baseName + ".sam");
+        File tmpBamFile = new File(tmpDir, baseName + ".bam" );
        
-        File bamFileSorted = new File(tmpDir, baseNameFirst + "_sorted.bam");
+      
         
-        File parentDir = firstReadsFastqFile.getParentFile();
-        File logFile = new File(parentDir, baseNameFirst + ".log");
+        File parentDir = bamFile.getParentFile();
+        File logFile = new File(parentDir, baseName + ".log");
 
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
 
