@@ -114,7 +114,7 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
         Long counter = new Long(-1);
 
         //only try to count reads in chunks when there is no existing chunks dir. Otherwise return -1
-        if (fastqChunkDir != null) 
+        if (fastqChunkDir == null) 
         {
             for (FastQChunk fastQChunk : firstReadsChunks) {
                 counter = counter + fastQChunk.getRecordNr();
