@@ -123,7 +123,7 @@ public class BwaMemIluminaMappingJob extends Job{
         //sort the bam file
         addCommand("echo starting sorting of bam " + appendAlloutputToLog);
         addCommand("date  " + appendAlloutputToLog);
-        addCommand(samtoolsFile.getPath() + " sort " + tmpBamFile.getAbsolutePath() + " " + FilenameUtils.removeExtension(bamFile.getAbsolutePath()) + appendAlloutputToLog);
+        addCommand(samtoolsFile.getPath() + " sort -m 30000000000" + tmpBamFile.getAbsolutePath() + " " + FilenameUtils.removeExtension(bamFile.getAbsolutePath()) + appendAlloutputToLog);
         addCommand("\n");
         //copy the bamFile back to the server
 //        addCommand("echo starting copying of bam back to the server " + appendAlloutputToLog);
