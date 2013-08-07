@@ -56,6 +56,9 @@ public class BwaMemIluminaMappingJob extends Job{
         File referenceFile = readGroup.getGlobalConfiguration().getReferenceFile();
         File referenceIndex = new File(referenceFile.getAbsolutePath() + ".fai");
         File samtoolsFile = new File("/usr/local/samtools/samtools");
+        
+        
+        
         File bwaFile = readGroup.getGlobalConfiguration().getBWA();      
         String bwaOptions = "mem -M -t 8";
         String readGroupOption = " -R \"@RG\\tID:" + readGroup.getId()+ "\\tPL:ILLUMINA\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" ";

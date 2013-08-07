@@ -172,7 +172,7 @@ public abstract class ReadGroup {
 
         Long inputReadsNr = getReadsInChunks();
 
-        if (inputReadsNr == new Long(-1)) {
+        if (inputReadsNr.equals(new Long(-1))) {
             return;
         }   //return if processing did not start with reads
         PicardGetReadCount picardGetReadCount = new PicardGetReadCount();
