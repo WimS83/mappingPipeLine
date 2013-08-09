@@ -24,9 +24,8 @@ import org.apache.commons.io.FilenameUtils;
 public class FastQFile {
     
     private Long recordNr;
-    private File fastqFile;
-    
-    private TagEnum tag;    
+    private File fastqFile;    
+   
     
     private BufferedReader fastqReader;
     
@@ -90,7 +89,7 @@ public class FastQFile {
     
     public List<FastQChunk> splitFastQFile(Integer chunkSize, File outputDir, String readGroupId) throws FileNotFoundException, IOException
     {
-       
+        initializeFastqReader();
         this.baseName = FilenameUtils.getBaseName(fastqFile.getPath());  
         
         fastQChunks = new ArrayList<FastQChunk>();
@@ -99,7 +98,7 @@ public class FastQFile {
         long fastqEntriesWritten = new Long(0);   
         long fastqEntriesWrittenInChunk = new Long(0);   
         
-        initializeFastqReader();
+        
         openNextChunk(outputDir);  
         
         FastqEntry fastqEntry;
@@ -193,17 +192,14 @@ public class FastQFile {
         return fastQChunks;
     }
 
-    public void setTag(TagEnum tag) {
-        this.tag = tag;
-    }
+    
 
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         
         sb.append("FastQ: "+fastqFile.getPath());
-        sb.append("\n");      
-        sb.append("tag: "+tag);
+        sb.append("\n");            
         sb.append("\n");
         
         if(recordNr == null)
