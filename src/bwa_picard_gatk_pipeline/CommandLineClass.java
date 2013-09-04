@@ -73,6 +73,8 @@ public class CommandLineClass {
         options.addOption("qualimap_threads", true, "Number of threads that Qualimap should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("qualimap_mem", true, "Max memory that Qualimap should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         
+        //fastqc options
+         options.addOption("fastQC", true, "Location of fastQC. Default is /home/sge_share_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc ");
         
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -82,6 +84,11 @@ public class CommandLineClass {
             ex.printStackTrace();
             System.out.println("Could not parse arguments");
         }
+        
+        if (cmd.getOptions().length == 0) {
+            printHelp(options);
+        }            
+        
 
         if (cmd.hasOption("h")) {
             printHelp(options);
@@ -184,8 +191,9 @@ public class CommandLineClass {
         globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setQualimapSGEThreads(new Integer(cmd.getOptionValue("qualimap-threads", "8")));
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("qualimap-mem", "32")));
-                
-
+        
+        //fastqc
+        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("fastQC", "/home/sge_share_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc")));
         
 
         List<Sample> samples = new ArrayList<Sample>();

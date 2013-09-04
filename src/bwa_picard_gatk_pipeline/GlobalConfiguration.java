@@ -56,6 +56,9 @@ public class GlobalConfiguration {
     private File qualiMap;
     private Integer qualimapSGEThreads;
     private Integer qualimapSGEMemory;
+    
+    //fastqc
+    private File fastqQCFile;
             
         
     
@@ -276,6 +279,16 @@ public class GlobalConfiguration {
     public void setgATKVariantCaller(GATKVariantCallers gATKVariantCaller) {
         this.gATKVariantCaller = gATKVariantCaller;
     }
+
+    public File getFastqQCFile() {
+        return fastqQCFile;
+    }
+
+    public void setFastqQCFile(File fastqQCFile) {
+        this.fastqQCFile = fastqQCFile;
+    }
+    
+    
     
     
     
