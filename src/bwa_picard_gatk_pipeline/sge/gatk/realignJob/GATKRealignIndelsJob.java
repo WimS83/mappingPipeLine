@@ -70,9 +70,13 @@ public class GATKRealignIndelsJob extends Job {
 
         
         String knownIndels = "";
-        if(gc.getKnownIndels()!= null)
+        if(gc.getRealignKnownIndels()!= null)
         {
-            knownIndels = "-known "+gc.getKnownIndels().getAbsolutePath();
+            for(File knownIndelFile : gc.getRealignKnownIndels())
+            {
+                knownIndels = knownIndels + " -known "+knownIndelFile.getAbsolutePath();
+            }
+            
         }        
         
         addCommand( "java "+
@@ -81,7 +85,8 @@ public class GATKRealignIndelsJob extends Job {
                     " -T RealignerTargetCreator " +
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
                     " -I "+dedupBam.getAbsolutePath()+ 
-                    " -o "+realignTargets.getAbsolutePath()+knownIndels +
+                    " -o "+realignTargets.getAbsolutePath()+
+                    knownIndels +
                     appendAlloutputToLog);
         
         
@@ -92,7 +97,8 @@ public class GATKRealignIndelsJob extends Job {
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
                     " -I "+dedupBam.getAbsolutePath()+
                     " -targetIntervals "+realignTargets.getAbsolutePath() + 
-                    " -o "+realignedBam.getAbsolutePath()+knownIndels +
+                    " -o "+realignedBam.getAbsolutePath()+
+                    knownIndels +
                     appendAlloutputToLog);
         
         addCommand("\n");

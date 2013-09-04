@@ -66,18 +66,21 @@ public class GATKBaseQualRecalJob extends Job {
 //        //create a tmp dir
 //        addCommand("mkdir " + tmpDir);
 //        addCommand("\n");
-          StringBuilder knownSitesSB = new StringBuilder();
+          
+          
+          String knownVariants = "";
+            if(gc.getBqsrKnownVariants()!= null)
+            {
+                for(File knownVariantFile : gc.getBqsrKnownVariants())
+                {
+                 knownVariants = knownVariants + " -knownSites "+knownVariantFile.getAbsolutePath();
+                }
+            
+            }        
+          
+          
          
-          if(gc.getKnownSNP() != null)
-          {
-              knownSitesSB.append(" -knownSites ");
-              knownSitesSB.append(gc.getKnownSNP().getAbsolutePath());              
-          }
-          if(gc.getKnownIndels()!= null)
-          {
-              knownSitesSB.append(" -knownSites ");
-              knownSitesSB.append(gc.getKnownIndels().getAbsolutePath());              
-          }        
+          
 //       
         addCommand( "java "+
                     " -Xmx"+gc.getGatkSGEMemory()+"G"+
@@ -86,7 +89,7 @@ public class GATKBaseQualRecalJob extends Job {
                     " -R "+gc.getReferenceFile().getAbsolutePath()+                  
                     " -I "+realignedBam.getAbsolutePath()+ 
                     " -o "+recalibrationReport.getAbsolutePath()+   
-                    knownSitesSB.toString()+        
+                    knownVariants+        
                     appendAlloutputToLog);        
         
     

@@ -7,6 +7,7 @@ package bwa_picard_gatk_pipeline;
 import bwa_picard_gatk_pipeline.enums.GATKVariantCallers;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import java.io.File;
+import java.util.List;
 
 /**
  *
@@ -40,13 +41,16 @@ public class GlobalConfiguration {
    
     //gatk options 
     private File gatk;
-    private File knownSNP;
-    private File knownIndels;
+   
     private Integer gatkSGEThreads;
     private Integer gatkSGEMemory;
     private Boolean gatkCallReference;
     private GATKVariantCallers gATKVariantCaller;
     private Boolean multiSampleCalling;
+    
+    private List<File> realignKnownIndels;
+    private List<File> bqsrKnownVariants;   
+    
     
     //qualimap options 
     private File qualiMap;
@@ -217,6 +221,24 @@ public class GlobalConfiguration {
         this.gatkSGEMemory = gatkSGEMemory;
     }
 
+    public List<File> getRealignKnownIndels() {
+        return realignKnownIndels;
+    }
+
+    public void setRealignKnownIndels(List<File> realignKnownIndels) {
+        this.realignKnownIndels = realignKnownIndels;
+    }
+
+    public List<File> getBqsrKnownVariants() {
+        return bqsrKnownVariants;
+    }
+
+    public void setBqsrKnownVariants(List<File> bqsrKnownVariants) {
+        this.bqsrKnownVariants = bqsrKnownVariants;
+    }
+    
+    
+
    
     
     public Boolean getGatkCallReference() {
@@ -225,23 +247,7 @@ public class GlobalConfiguration {
 
     public void setGatkCallReference(Boolean gatkCallReference) {
         this.gatkCallReference = gatkCallReference;
-    }
-
-    public File getKnownSNP() {
-        return knownSNP;
-    }
-
-    public void setKnownSNP(File knownSNP) {
-        this.knownSNP = knownSNP;
-    }    
-    
-    public File getKnownIndels() {
-        return knownIndels;
-    }
-
-    public void setKnownIndels(File knownIndels) {
-        this.knownIndels = knownIndels;
-    }
+    }  
 
     public Boolean getMultiSampleCalling() {
         return multiSampleCalling;
