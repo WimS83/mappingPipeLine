@@ -63,7 +63,7 @@ public abstract class ReadGroup {
             if (gc.getTargetEnum().getRank() >= TargetEnum.READGROUP_BAM.getRank()) {
 
                 mergeBamChunks();               //merge the bam chunks
-                checkAllReadsAreAcountedFor();  //check all the reads are accounted for
+             //   checkAllReadsAreAcountedFor();  //check all the reads are accounted for
                 runQualimap(readGroupBam);
             }
 
