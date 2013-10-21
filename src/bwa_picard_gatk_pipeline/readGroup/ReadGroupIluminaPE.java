@@ -28,6 +28,10 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
     private FastQFile secondReadsFastQFile;
     private File fastqChunkDir;
     private String fastqChunkDirFileNameToMatch;
+    private String forward_identifier;
+    private String reverse_identifier;
+    
+    
     private List<FastQChunk> firstReadsChunks;
     private List<FastQChunk> secondReadsChunks;
 
@@ -64,10 +68,10 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
                 continue;
             }
 
-            if (fastqFile.getName().contains("_R1_")) {
+            if (fastqFile.getName().contains(forward_identifier)) {
                 existingFirstFileChunks.add(fastqFile);
             }
-            if (fastqFile.getName().contains("_R2_")) {
+            if (fastqFile.getName().contains(reverse_identifier)) {
                 existingSecondFileChunks.add(fastqFile);
             }
         }
