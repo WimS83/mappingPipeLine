@@ -47,10 +47,10 @@ public class CommandLineClass {
         options.addOption("m", "tmp-dir", true, "Temporary directory to use for merging bam files. To save IO  and network traffic it is wise to use a directory on the cluster master were the pipeline controller is running. Default is /tmp/ ");
         
         //picl options
-        options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is home/sge_share_fedor8/common_scripts/Picl/picl");
+        options.addOption("p", "picl", true, "Locatoin of Picl on the SGE cluster for pairing SOLID bam files. Default is /data_fedor8/common_scripts/Picl/picl");
         
         //picard options
-        options.addOption("s", "picard", true, "Location on the SGE cluster of the Picard. Default is /home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/");
+        options.addOption("s", "picard", true, "Location on the SGE cluster of the Picard. Default is /data_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/");
         
         //bwa options
         options.addOption("cs_bwa", true, "Location of the last version of BWA that supports color space (0.5.9). Default is /usr/local/bwa/0.5.9/bwa");
@@ -59,7 +59,7 @@ public class CommandLineClass {
         options.addOption("sam", true, "Location of samtools. Default is /usr/local/samtools/samtools");
         
         //gatk options
-        options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar ");
+        options.addOption("g", "gatk", true, "Location of GATK. Default is /data_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar ");
         options.addOption("realign_known_indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. Can be supplied multiple times. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("bqsr_known_variants", true, "Location of a vcf or bed file with known snp or indel variants for GATK BQSR. Can be supplied multiple times.  The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("gatk_vc", true, "GATK variant caller. Either UnifiedGenotyper or HaplotypeCaller . Default is UnifiedGenotyper");
@@ -69,12 +69,12 @@ public class CommandLineClass {
         options.addOption("gatk_ms", false, "Have GATK do multi-sample calling. Default is false");
         
         //qualimap options
-        options.addOption("q", "qualimap", true, "Location of qualimap. Default is /home/sge_share_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap ");
+        options.addOption("q", "qualimap", true, "Location of qualimap. Default is /data_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap ");
         options.addOption("qualimap_threads", true, "Number of threads that Qualimap should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("qualimap_mem", true, "Max memory that Qualimap should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
         
         //fastqc options
-         options.addOption("fastQC", true, "Location of fastQC. Default is /home/sge_share_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc ");
+         options.addOption("fastQC", true, "Location of fastQC. Default is /data_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc ");
         
         CommandLineParser parser = new GnuParser();
         CommandLine cmd = null;
@@ -120,7 +120,7 @@ public class CommandLineClass {
 
         //bwa options
         globalConfiguration.setColorSpaceBWA(new File(cmd.getOptionValue("cs-bwa", "/usr/local/bwa/0.5.9/bwa")));
-        globalConfiguration.setBWA(new File(cmd.getOptionValue("bwa", "/home/sge_share_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa")));
+        globalConfiguration.setBWA(new File(cmd.getOptionValue("bwa", "/data_fedor8/common_scripts/bwa/bwa-0.7.5a/bwa")));
         globalConfiguration.setSamtools(new File(cmd.getOptionValue("bwa", "/usr/local/samtools/samtools")));
         if (cmd.hasOption("bwa_mem")) {
             globalConfiguration.setUseBWAMEM(true);
@@ -131,13 +131,13 @@ public class CommandLineClass {
         
         
         //picl options
-        globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/home/sge_share_fedor8/common_scripts/Picl/picl")));
+        globalConfiguration.setPicl(new File(cmd.getOptionValue("p", "/data_fedor8/common_scripts/Picl/picl")));
         
         //picard options
-        globalConfiguration.setPicardDirectory(new File(cmd.getOptionValue("s", "/home/sge_share_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/")));        
+        globalConfiguration.setPicardDirectory(new File(cmd.getOptionValue("s", "/data_fedor8/common_scripts/picard/picard-tools-1.89/picard-tools-1.89/")));        
         
         //gakt options
-        globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar")));
+        globalConfiguration.setGatk(new File(cmd.getOptionValue("g", "/data_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar")));
         globalConfiguration.setGatkSGEThreads(new Integer(cmd.getOptionValue("gatk_threads", "8")));
         globalConfiguration.setGatkSGEMemory(new Integer(cmd.getOptionValue("gatk-mem", "32")));
         if (cmd.hasOption("x")) {
@@ -188,12 +188,12 @@ public class CommandLineClass {
         }
 
         //qualimap options
-        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/home/sge_share_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap")));
+        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("q", "/data_fedor8/common_scripts/qualimap/qualimap_v0.7.1/qualimap")));
         globalConfiguration.setQualimapSGEThreads(new Integer(cmd.getOptionValue("qualimap-threads", "8")));
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("qualimap-mem", "32")));
         
         //fastqc
-        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("fastQC", "/home/sge_share_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc")));
+        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("fastQC", "/data_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc")));
         
 
         List<Sample> samples = new ArrayList<Sample>();
