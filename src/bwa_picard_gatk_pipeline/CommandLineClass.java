@@ -193,7 +193,7 @@ public class CommandLineClass {
         globalConfiguration.setQualimapSGEMemory(new Integer(cmd.getOptionValue("qualimap-mem", "32")));
         
         //fastqc
-        globalConfiguration.setQualiMap(new File(cmd.getOptionValue("fastQC", "/data_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc")));
+        globalConfiguration.setFastqQCFile(new File(cmd.getOptionValue("fastQC", "/data_fedor8/common_scripts/FastQC/FastQC_v0.10.1/fastqc")));
         
 
         List<Sample> samples = new ArrayList<Sample>();
