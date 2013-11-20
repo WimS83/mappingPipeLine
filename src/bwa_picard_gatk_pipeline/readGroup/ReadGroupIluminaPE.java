@@ -163,4 +163,22 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
     public void setFastqChunkDirFileNameToMatch(String fastqChunkDirFileNameToMatch) {
         this.fastqChunkDirFileNameToMatch = fastqChunkDirFileNameToMatch;
     }
+
+    public String getForward_identifier() {
+        return forward_identifier;
+    }
+
+    public void setForward_identifier(String forward_identifier) {
+        this.forward_identifier = forward_identifier;
+    }
+
+    public String getReverse_identifier() {
+        return reverse_identifier;
+    }
+
+    public void setReverse_identifier(String reverse_identifier) {
+        this.reverse_identifier = reverse_identifier;
+    }
+    
+    
 }

@@ -61,7 +61,7 @@ public class CommandLineClass {
         //gatk options
         options.addOption("g", "gatk", true, "Location of GATK. Default is /home/sge_share_fedor8/common_scripts/GATK/GATK_2.6_3/GenomeAnalysisTK-2.6-3-gdee51c4/GenomeAnalysisTK.jar ");
         options.addOption("realign_known_indels", true, "Optional location of a vcf file with known indels which can be used to improve indel realignment. Can be supplied multiple times. The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
-        options.addOption("bqsr_known_variants", true, "Location of a vcf file with known snp or indel variants for GATK BQSR. Can be supplied multiple times.  The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
+        options.addOption("bqsr_known_variants", true, "Location of a vcf or bed file with known snp or indel variants for GATK BQSR. Can be supplied multiple times.  The chromosome names and lenght should exaclty match the chromosomes in the reference that was used for mapping.  ");
         options.addOption("gatk_vc", true, "GATK variant caller. Either UnifiedGenotyper or HaplotypeCaller . Default is UnifiedGenotyper");
         options.addOption("gatk_threads", true, "Number of threads that GATK should use on a SGE compute node. Default is 8, when doing offline processing number of threads is always set to 1.");
         options.addOption("gatk_mem", true, "Max memory that GATK should use on a SGE compute node. Default is 32, when doing offline processing max memory is always set to 2.");
