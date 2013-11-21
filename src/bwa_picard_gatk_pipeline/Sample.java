@@ -37,6 +37,7 @@ public class Sample {
     private List<ReadGroupSolidFragment> solidFragmentReadGroups;
     private List<ReadGroupSolidPE> solidPEReadGroups;
     private List<ReadGroupIluminaPE> iluminaPEReadGroups;
+    private List<ReadGroupIluminaPE> iluminaFragmentReadGroups;
     private List<ReadGroup> allReadGroups;
     private List<File> readGroupBamFiles;
     //the output  
@@ -57,6 +58,7 @@ public class Sample {
         allReadGroups.addAll(solidFragmentReadGroups);
         allReadGroups.addAll(solidPEReadGroups);
         allReadGroups.addAll(iluminaPEReadGroups);
+        allReadGroups.addAll(iluminaFragmentReadGroups);
 
         //process the readGroups is any were set
         for (ReadGroup readGroup : allReadGroups) {
@@ -116,6 +118,11 @@ public class Sample {
         if (iluminaPEReadGroups == null) {
             iluminaPEReadGroups = new ArrayList<ReadGroupIluminaPE>();
         }
+        
+        if (iluminaFragmentReadGroups == null) {
+            iluminaFragmentReadGroups = new ArrayList<ReadGroupIluminaPE>();
+        }
+        
         if (allReadGroups == null) {
             allReadGroups = new ArrayList<ReadGroup>();
         }
@@ -316,6 +323,16 @@ public class Sample {
     public void setIluminaPEReadGroups(List<ReadGroupIluminaPE> iluminaPEReadGroups) {
         this.iluminaPEReadGroups = iluminaPEReadGroups;
     }
+
+    public List<ReadGroupIluminaPE> getIluminaFragmentReadGroups() {
+        return iluminaFragmentReadGroups;
+    }
+
+    public void setIluminaFragmentReadGroups(List<ReadGroupIluminaPE> iluminaFragmentReadGroups) {
+        this.iluminaFragmentReadGroups = iluminaFragmentReadGroups;
+    }
+    
+    
 
     public List<ReadGroup> getAllReadGroups() {
         return allReadGroups;
