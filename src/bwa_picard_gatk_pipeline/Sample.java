@@ -7,6 +7,7 @@ package bwa_picard_gatk_pipeline;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroup;
 import bwa_picard_gatk_pipeline.enums.TargetEnum;
 import bwa_picard_gatk_pipeline.exceptions.JobFaillureException;
+import bwa_picard_gatk_pipeline.readGroup.ReadGroupIluminaFragment;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupIluminaPE;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidFragment;
 import bwa_picard_gatk_pipeline.readGroup.ReadGroupSolidPE;
@@ -37,7 +38,7 @@ public class Sample {
     private List<ReadGroupSolidFragment> solidFragmentReadGroups;
     private List<ReadGroupSolidPE> solidPEReadGroups;
     private List<ReadGroupIluminaPE> iluminaPEReadGroups;
-    private List<ReadGroupIluminaPE> iluminaFragmentReadGroups;
+    private List<ReadGroupIluminaFragment> iluminaFragmentReadGroups;
     private List<ReadGroup> allReadGroups;
     private List<File> readGroupBamFiles;
     //the output  
@@ -120,7 +121,7 @@ public class Sample {
         }
         
         if (iluminaFragmentReadGroups == null) {
-            iluminaFragmentReadGroups = new ArrayList<ReadGroupIluminaPE>();
+            iluminaFragmentReadGroups = new ArrayList<ReadGroupIluminaFragment>();
         }
         
         if (allReadGroups == null) {
@@ -324,13 +325,15 @@ public class Sample {
         this.iluminaPEReadGroups = iluminaPEReadGroups;
     }
 
-    public List<ReadGroupIluminaPE> getIluminaFragmentReadGroups() {
+    public List<ReadGroupIluminaFragment> getIluminaFragmentReadGroups() {
         return iluminaFragmentReadGroups;
     }
 
-    public void setIluminaFragmentReadGroups(List<ReadGroupIluminaPE> iluminaFragmentReadGroups) {
+    public void setIluminaFragmentReadGroups(List<ReadGroupIluminaFragment> iluminaFragmentReadGroups) {
         this.iluminaFragmentReadGroups = iluminaFragmentReadGroups;
     }
+
+    
     
     
 
