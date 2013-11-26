@@ -53,7 +53,7 @@ public class GATKBaseQualRecalJob extends Job {
         File logFile = new File(realignedBam.getParentFile(), baseName + "_bqsr.log");  
        // File tmpDir = new File("/tmp", baseName);          
         
-        File recalibrationReport = new File(FilenameUtils.removeExtension(realignedBam.getAbsolutePath()) + "_ recalibration_report.grp"); 
+        File recalibrationReport = new File(FilenameUtils.removeExtension(realignedBam.getAbsolutePath()) + "_recalibration_report.grp"); 
         
         String appendAlloutputToLog = " >> "+ logFile.getAbsolutePath() + " 2>&1";
                
