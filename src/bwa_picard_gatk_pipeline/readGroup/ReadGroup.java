@@ -135,6 +135,10 @@ public abstract class ReadGroup {
             return;
         } //return if there are no bamchunks 
 
+         if (bamChunks.size()==1 ) {
+            readGroupBam = bamChunks.get(0);
+        } //return if there are no bamchunks 
+        
 
         File mergedBamDir = new File(readGroupOutputDir, "MergedBam");
         mergedBamDir.mkdir();
