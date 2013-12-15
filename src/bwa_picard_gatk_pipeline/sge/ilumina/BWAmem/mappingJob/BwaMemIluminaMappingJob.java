@@ -21,10 +21,11 @@ public class BwaMemIluminaMappingJob extends Job{
     private File firstReadsFastqFile;
     private File secondReadsFastqFile;
     private File bamFile;
+    private Boolean pairsInterleaved;
     
     private ReadGroupIlumina readGroup;
 
-    public BwaMemIluminaMappingJob(File firstReadsFastqFile, File secondReadsFastqFile,  File bamFile,  ReadGroupIlumina readGroup) throws IOException {
+    public BwaMemIluminaMappingJob(File firstReadsFastqFile, File secondReadsFastqFile,  File bamFile,  ReadGroupIlumina readGroup, Boolean pairsInterleaved) throws IOException {
 
         super(FilenameUtils.removeExtension(bamFile.getAbsolutePath()) + ".sh");
           
@@ -32,15 +33,11 @@ public class BwaMemIluminaMappingJob extends Job{
         this.secondReadsFastqFile = secondReadsFastqFile;
         this.readGroup = readGroup;
         this.bamFile = bamFile;
+        this.pairsInterleaved = pairsInterleaved;
         
-        sgeThreads = 8;
-        
+        sgeThreads = 8;        
        
         addCommands();
-        
-      
-
-        
 
         sgeName = "BWA-mem_" + firstReadsFastqFile.getName();
         close();
@@ -61,6 +58,11 @@ public class BwaMemIluminaMappingJob extends Job{
         
         File bwaFile = readGroup.getGlobalConfiguration().getBWA();      
         String bwaOptions = "mem -M -t 8";
+        if(pairsInterleaved)
+        {
+            bwaOptions = bwaOptions + " -p ";
+        }
+        
         String readGroupOption = " -R \"@RG\\tID:" + readGroup.getId()+ "\\tPL:ILLUMINA\\tLB:"+  readGroup.getLibrary() + "\\tSM:" + readGroup.getSample() + "\\tDS:" + readGroup.getDescription()+ "\" ";
         bwaOptions = bwaOptions + readGroupOption;
          

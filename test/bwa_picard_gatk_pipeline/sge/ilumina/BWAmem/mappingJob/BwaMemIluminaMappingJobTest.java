@@ -108,7 +108,7 @@ public class BwaMemIluminaMappingJobTest {
         
         File foundBam = new File(outputDir, "foundFragmentBam.bam");
         
-        BwaMemIluminaMappingJob bwaMemIluminaMappingJob = new BwaMemIluminaMappingJob(tmpFirstReadsFile, tmpSecondReadsFile, foundBam, rg);
+        BwaMemIluminaMappingJob bwaMemIluminaMappingJob = new BwaMemIluminaMappingJob(tmpFirstReadsFile, tmpSecondReadsFile, foundBam, rg, false);
         bwaMemIluminaMappingJob.executeOffline();
     }
 }

@@ -28,6 +28,7 @@ public class ReadGroupIluminaFragment extends ReadGroupIlumina {
     private File fastqChunkDir;
     private String fastqChunkDirFileNameToMatch;
     private String forward_identifier;    
+    private Boolean pairsInterleaved = false;
     
     
     private List<FastQChunk> firstReadsChunks;
@@ -89,7 +90,7 @@ public class ReadGroupIluminaFragment extends ReadGroupIlumina {
             bamChunks.add(bamFile);
             Job bwaIluminaMappingJob = null;
             if (gc.getUseBWAMEM()) {
-                bwaIluminaMappingJob = new BwaMemIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), null, bamFile, this);
+                bwaIluminaMappingJob = new BwaMemIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), null, bamFile, this, pairsInterleaved);
             } else {
                 bwaIluminaMappingJob = new BwaIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), null, bamFile, this);
             }
@@ -148,6 +149,16 @@ public class ReadGroupIluminaFragment extends ReadGroupIlumina {
     public void setForward_identifier(String forward_identifier) {
         this.forward_identifier = forward_identifier;
     }
+
+    public Boolean isPairsInterleaved() {
+        return pairsInterleaved;
+    }
+
+    public void setPairsInterleaved(Boolean pairsInterleaved) {
+        this.pairsInterleaved = pairsInterleaved;
+    }
+    
+    
   
     
 }

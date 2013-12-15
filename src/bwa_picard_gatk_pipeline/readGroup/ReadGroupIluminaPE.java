@@ -100,7 +100,7 @@ public class ReadGroupIluminaPE extends ReadGroupIlumina {
             bamChunks.add(bamFile);
             Job bwaIluminaMappingJob = null;
             if (gc.getUseBWAMEM()) {
-                bwaIluminaMappingJob = new BwaMemIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this);
+                bwaIluminaMappingJob = new BwaMemIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this, false);
             } else {
                 bwaIluminaMappingJob = new BwaIluminaMappingJob(firstReadsChunks.get(x).getFastqFile(), secondReadsChunks.get(x).getFastqFile(), bamFile, this);
             }
