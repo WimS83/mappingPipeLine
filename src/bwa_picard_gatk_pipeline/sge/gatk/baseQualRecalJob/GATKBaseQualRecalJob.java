@@ -89,6 +89,7 @@ public class GATKBaseQualRecalJob extends Job {
                     " -R "+gc.getReferenceFile().getAbsolutePath()+                  
                     " -I "+realignedBam.getAbsolutePath()+ 
                     " -o "+recalibrationReport.getAbsolutePath()+   
+                    " -nct "+ gc.getGatkSGEThreads()+
                     knownVariants+        
                     appendAlloutputToLog);        
         
@@ -106,6 +107,7 @@ public class GATKBaseQualRecalJob extends Job {
                     " -I "+realignedBam.getAbsolutePath()+ 
                     " -BQSR "+recalibrationReport.getAbsolutePath()+
                     " -o "+bqsrBam.getAbsolutePath()+
+                    " -nct "+ gc.getGatkSGEThreads()+
                     appendAlloutputToLog);        
         
     

@@ -86,6 +86,7 @@ public class GATKRealignIndelsJob extends Job {
                     " -R "+gc.getReferenceFile().getAbsolutePath()+
                     " -I "+dedupBam.getAbsolutePath()+ 
                     " -o "+realignTargets.getAbsolutePath()+
+                    " -nt "+ gc.getGatkSGEThreads()+
                     knownIndels +
                     appendAlloutputToLog);
         
